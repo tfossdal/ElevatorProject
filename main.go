@@ -63,3 +63,16 @@ func main() {
 		}
 	}
 }
+
+// Here I'm trying to test the backup and primary alive functions, but it is not working
+/* import (
+	module "ElevatorProject/ElevatorModules"
+	"fmt"
+)
+
+func main() {
+	go module.PrimaryAlive()
+	go module.PrimaryAliveListener()
+	fmt.Println("nothing happens")
+}
+*/
