@@ -1,4 +1,8 @@
-package elevio
+package ElevatorModules
+
+import (
+	io "ElevatorProject/elevio"
+)
 
 type State int
 
@@ -22,8 +26,8 @@ type Config struct {
 
 type Elevator struct {
 	floor    int
-	dirn     MotorDirection
-	requests [_numFloors][_numButtons]int
+	dirn     io.MotorDirection
+	requests [io.NumFloors][io.NumButtons]int
 	state    State
 
 	config Config

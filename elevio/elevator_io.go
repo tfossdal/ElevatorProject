@@ -11,12 +11,12 @@ const _pollRate = 20 * time.Millisecond
 
 var _initialized bool = false
 
-const _numFloors = 4
+const NumFloors = 4
 
 var _mtx sync.Mutex
 var _conn net.Conn
 
-const _numButtons = 3
+const NumButtons = 3
 
 type MotorDirection int
 
@@ -75,10 +75,10 @@ func SetStopLamp(value bool) {
 }
 
 func PollButtons(receiver chan<- ButtonEvent) {
-	prev := make([][3]bool, _numFloors)
+	prev := make([][3]bool, NumFloors)
 	for {
 		time.Sleep(_pollRate)
-		for f := 0; f < _numFloors; f++ {
+		for f := 0; f < NumFloors; f++ {
 			for b := ButtonType(0); b < 3; b++ {
 				v := GetButton(b, f)
 				if v != prev[f][b] && v != false {

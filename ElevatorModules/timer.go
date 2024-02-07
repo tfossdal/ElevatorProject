@@ -1,4 +1,4 @@
-package elevio
+package ElevatorModules
 
 import (
 	"fmt"
