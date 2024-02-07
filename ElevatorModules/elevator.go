@@ -4,6 +4,13 @@ import (
 	io "ElevatorProject/elevio"
 )
 
+type ElevatorType int
+
+const (
+	Primary ElevatorType = 0
+	Backup  ElevatorType = 1
+)
+
 type State int
 
 const (

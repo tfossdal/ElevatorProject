@@ -41,6 +41,11 @@ func Fsm_OnRequestButtonPress(btn_Floor int, btn_type io.ButtonType) {
 		if Requests_ShouldClearImmediately(elevator, btn_Floor, btn_type) != 0 {
 			Timer_start(elevator.config.doorOpenDuration_s)
 		} else {
+			if btn_type == 2 {
+				//Btn_type += elevatornumber
+			} else {
+				//Update master matrix
+			}
 			elevator.requests[btn_Floor][btn_type] = 1
 		}
 	case Moving:
