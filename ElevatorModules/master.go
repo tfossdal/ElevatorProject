@@ -22,13 +22,13 @@ func InitMaster() {
 
 func OrderListener() {
 	//29503
-	addr, err := net.ResolveUDPAddr("udp4", "1.1.1.1:29503")
+	addr, err := net.ResolveUDPAddr("udp4", ":29503")
 	if err != nil {
-		fmt.Println("Could net connect")
+		fmt.Println("Could not connect")
 	}
 	conn, err := net.ListenUDP("udp4", addr)
 	if err != nil {
-		fmt.Println("Could net listen")
+		fmt.Println("Could not listen")
 	}
 	defer conn.Close()
 
