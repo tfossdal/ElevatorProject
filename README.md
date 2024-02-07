@@ -6,3 +6,7 @@
 - 01 - Master alive
 - 02 - Slave alive
 - 03 - Add order
+
+## Order Format (UDP)
+- a,b
+    - a is floor, b is buttontype
