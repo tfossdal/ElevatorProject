@@ -11,7 +11,7 @@ import (
 
 var requests = make([][]int, io.NumFloors)
 
-func InitMaster() {
+func InitPrimary() {
 
 	for i := 0; i < io.NumFloors; i++ {
 		requests[i] = make([]int, io.NumButtons)
