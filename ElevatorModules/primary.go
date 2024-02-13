@@ -27,7 +27,7 @@ func InitPrimary() {
 
 func BecomePrimary() {
 	//29501
-	addr, err := net.ResolveUDPAddr("udp4", "localhost:29501")
+	addr, err := net.ResolveUDPAddr("udp4", ":29501")
 	if err != nil {
 		fmt.Println("Failed to resolve")
 	}
@@ -53,7 +53,7 @@ func BecomePrimary() {
 }
 
 func PrimaryAlive() {
-	addr, err := net.ResolveUDPAddr("udp4", "localhost:29501")
+	addr, err := net.ResolveUDPAddr("udp4", ":29501")
 	if err != nil {
 		fmt.Println("Failed to resolve, primary alive")
 	}
@@ -64,6 +64,7 @@ func PrimaryAlive() {
 	defer conn.Close()
 	for {
 		conn.Write([]byte("Primary alive"))
+		//fmt.Println("Message sent: Primary alive")
 		time.Sleep(10 * time.Millisecond)
 	}
 }

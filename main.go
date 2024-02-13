@@ -4,6 +4,7 @@ import (
 	module "ElevatorProject/ElevatorModules"
 	io "ElevatorProject/elevio"
 	"fmt"
+	"time"
 )
 
 func elev_init() {
@@ -66,6 +67,9 @@ func elev_init() {
 func main() {
 	//elev_init()
 	module.BecomePrimary()
+	for {
+		time.Sleep((1 * time.Second))
+	}
 }
 
 // Here I'm trying to test the backup and primary alive functions, but it is not working
