@@ -15,7 +15,7 @@ func InitPrimary() {
 
 	for i := 0; i < io.NumFloors; i++ {
 		requests[i] = make([]int, io.NumButtons)
-		for j := 0; j < io.NumButtons; j++  {
+		for j := 0; j < io.NumButtons; j++ {
 			requests[i][j] = 0
 		}
 	}
@@ -36,8 +36,6 @@ func PrimaryAlive() {
 		time.Sleep(100 * time.Millisecond)
 	}
 }
-
-
 
 func OrderListener() {
 	//29503
