@@ -19,11 +19,11 @@ func serverAccept() {
 	}
 	defer listener.Close()
 	fmt.Println("Server is running...")
-	_, err = listener.AcceptTCP()
+	conn, err := listener.AcceptTCP()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Connected")
+	fmt.Println("Connected %d", conn.RemoteAddr())
 	//_, err = s2c_conn.Write(append([]byte("Accepted from group 12"), 0))
 }
 

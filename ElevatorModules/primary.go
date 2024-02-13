@@ -3,6 +3,7 @@ package ElevatorModules
 import (
 	io "ElevatorProject/elevio"
 	"fmt"
+	"math/rand"
 	"net"
 	"strconv"
 	"strings"
@@ -12,12 +13,39 @@ import (
 var requests = make([][]int, io.NumFloors)
 
 func InitPrimary() {
-
+	//Initialize order matrix
 	for i := 0; i < io.NumFloors; i++ {
 		requests[i] = make([]int, io.NumButtons)
 		for j := 0; j < io.NumButtons; j++ {
 			requests[i][j] = 0
 		}
+	}
+
+	//Start GoRoutines
+	go PrimaryAlive()
+}
+
+func BecomePrimary() {
+	//29501
+	addr, err := net.ResolveUDPAddr("udp4", "localhost:29501")
+	if err != nil {
+		fmt.Println("Failed to resolve")
+	}
+	conn, err := net.ListenUDP("udp4", addr)
+	if err != nil {
+		fmt.Println("Failed to listen")
+	}
+	defer conn.Close()
+	rand.Seed(time.Now().UnixNano())
+	deadlineTime := rand.Intn(100)
+	conn.SetReadDeadline(time.Now().Add(time.Duration(time.Duration(deadlineTime) * time.Millisecond)))
+	buf := make([]byte, 1024)
+	_, _, err = conn.ReadFromUDP(buf)
+	if err != nil {
+		//BECOME PRIMARY
+		elevator.elevatorType = Primary
+		InitPrimary()
+		conn.Close()
 	}
 }
 
@@ -33,7 +61,7 @@ func PrimaryAlive() {
 	defer conn.Close()
 	for {
 		conn.Write([]byte("Primary alive"))
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 

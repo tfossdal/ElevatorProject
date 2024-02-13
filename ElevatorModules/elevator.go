@@ -9,6 +9,7 @@ type ElevatorType int
 const (
 	Primary ElevatorType = 0
 	Backup  ElevatorType = 1
+	None ElevatorType = 2
 )
 
 type State int
@@ -36,6 +37,7 @@ type Elevator struct {
 	dirn     io.MotorDirection
 	requests [io.NumFloors][io.NumButtons]int
 	state    State
+	elevatorType ElevatorType
 
 	config Config
 }

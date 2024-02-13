@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-var elevator Elevator = Elevator{-1, io.MD_Stop, [io.NumFloors][io.NumButtons]int{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, Idle, Config{CV_ALL, 3.0}}
+var elevator Elevator = Elevator{-1, io.MD_Stop, [io.NumFloors][io.NumButtons]int{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, Idle, None, Config{CV_ALL, 3.0}}
 
 func PrintState() {
 	fmt.Println(StateToString(elevator.state))
