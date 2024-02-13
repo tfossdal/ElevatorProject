@@ -6,7 +6,7 @@ import (
 )
 
 func TCPtest() {
-	addr, err := net.ResolveTCPAddr("tcp", "localhost:33546")
+	addr, err := net.ResolveTCPAddr("tcp", ":33546")
 	if err != nil {
 		panic(err)
 	}
