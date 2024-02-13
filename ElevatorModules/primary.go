@@ -37,7 +37,7 @@ func BecomePrimary() {
 	}
 	defer conn.Close()
 	rand.Seed(time.Now().UnixNano())
-	deadlineTime := rand.Intn(100)
+	deadlineTime := rand.Intn(1000)
 	conn.SetReadDeadline(time.Now().Add(time.Duration(time.Duration(deadlineTime) * time.Millisecond)))
 	buf := make([]byte, 1024)
 	_, _, err = conn.ReadFromUDP(buf)
@@ -47,6 +47,7 @@ func BecomePrimary() {
 		elevator.elevatorType = Primary
 		InitPrimary()
 		conn.Close()
+		return
 	}
 	fmt.Printf("Recieved message: %s\n", buf[:])
 }
@@ -93,4 +94,3 @@ func OrderListener() {
 	}
 
 }
-
