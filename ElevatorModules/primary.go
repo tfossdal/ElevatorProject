@@ -11,6 +11,7 @@ import (
 )
 
 var requests = make([][]int, io.NumFloors)
+var elevatorAddresses = []string{"localhost"}
 
 func InitPrimary() {
 	//Initialize order matrix
@@ -23,6 +24,29 @@ func InitPrimary() {
 
 	//Start GoRoutines
 	go PrimaryAlive()
+	DialBackup() //PROBLEM This will happen before we know any addresses
+}
+
+func DialBackup() (*net.TCPConn, *net.TCPAddr) {
+	addr, err := net.ResolveTCPAddr("tcp", elevatorAddresses[0]+":29506")
+	if err != nil {
+		panic(err)
+	}
+	conn, err := net.DialTCP("tcp", nil, addr)
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+	fmt.Println("Connected to backup")
+	go PrimaryAliveTCP(addr, conn)
+	return conn, addr
+}
+
+func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
+	for {
+		conn.Write(append([]byte("Primary alive"), 0))
+		time.Sleep(10 * time.Millisecond)
+	}
 }
 
 func BecomePrimary() {

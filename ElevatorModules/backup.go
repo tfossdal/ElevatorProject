@@ -23,6 +23,32 @@ func BackupAlive() {
 	}
 }
 
+func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr) {
+	addr, err := net.ResolveTCPAddr("tcp", ":33546")
+	if err != nil {
+		panic(err)
+	}
+	listener, err := net.ListenTCP("tcp", addr)
+	if err != nil {
+		panic(err)
+	}
+	defer listener.Close()
+	fmt.Println("Backup server established")
+	conn, err := listener.AcceptTCP()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Connected %d", conn.RemoteAddr())
+	return conn, addr //DONT KNOW IF ADDR IS CORRECT
+}
+
+func BackupAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
+	for {
+		conn.Write(append([]byte("Backup alive"), 0))
+		time.Sleep(10 * time.Millisecond)
+	}
+}
+
 func PrimaryAliveListener() {
 	fmt.Println("Primary alive listener maybe started")
 	rand.Seed(time.Now().UnixNano())
