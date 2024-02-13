@@ -6,8 +6,7 @@ import (
 	"fmt"
 )
 
-func main() {
-
+func elev_init() {
 	numFloors := 4
 
 	io.Init("localhost:15657", numFloors)
@@ -62,6 +61,11 @@ func main() {
 			// }
 		}
 	}
+}
+
+func main() {
+
+	
 }
 
 // Here I'm trying to test the backup and primary alive functions, but it is not working
