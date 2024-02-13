@@ -23,10 +23,10 @@ func serverAccept() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Connected %d", conn.RemoteAddr())
+	fmt.Printf("Connected %d", conn.RemoteAddr())
 	//_, err = s2c_conn.Write(append([]byte("Accepted from group 12"), 0))
 }
 
-func main() {
-	serverAccept()
-}
+// func main() {
+// 	serverAccept()
+// }

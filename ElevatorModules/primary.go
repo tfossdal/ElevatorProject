@@ -43,10 +43,12 @@ func BecomePrimary() {
 	_, _, err = conn.ReadFromUDP(buf)
 	if err != nil {
 		//BECOME PRIMARY
+		fmt.Println("No Primary alive message recieved, Becoming primary")
 		elevator.elevatorType = Primary
 		InitPrimary()
 		conn.Close()
 	}
+	fmt.Printf("Recieved message: %s\n", buf[:])
 }
 
 func PrimaryAlive() {

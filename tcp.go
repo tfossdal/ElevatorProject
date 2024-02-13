@@ -18,6 +18,6 @@ func TCPtest() {
 	fmt.Println("Connected?")
 }
 
-func main() {
-	TCPtest()
-}
+// func main() {
+// 	TCPtest()
+// }
