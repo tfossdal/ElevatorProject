@@ -3,9 +3,10 @@
 
 
 ## Port list (starts with 295##)
-- 01 - Master alive
-- 02 - Slave alive
-- 03 - Add order
+- 01 - Primary alive
+- 02 - Backup alive
+- 03 - Elevator alive
+- 05 - Add order
 
 ## Order Format (UDP)
 - a,b
