@@ -6,7 +6,7 @@ import (
 )
 
 func TCPtest() {
-	addr, err := net.ResolveTCPAddr("tcp", ":33546")
+	addr, err := net.ResolveTCPAddr("tcp", "10.100.23.28:33546")
 	if err != nil {
 		panic(err)
 	}
@@ -18,6 +18,6 @@ func TCPtest() {
 	fmt.Println("Connected?")
 }
 
-// func main() {
-// 	TCPtest()
-// }
+func main() {
+	TCPtest()
+}

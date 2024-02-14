@@ -27,3 +27,6 @@ func serverAccept() {
 	//_, err = s2c_conn.Write(append([]byte("Accepted from group 12"), 0))
 }
 
+func main(){
+	serverAccept();
+}

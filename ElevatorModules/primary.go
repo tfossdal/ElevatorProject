@@ -24,6 +24,7 @@ func InitPrimary() {
 
 	//Start GoRoutines
 	go PrimaryAlive()
+	time.Sleep(10 * time.Second)
 	DialBackup() //PROBLEM This will happen before we know any addresses
 }
 
@@ -61,7 +62,7 @@ func BecomePrimary() {
 	}
 	defer conn.Close()
 	rand.Seed(time.Now().UnixNano())
-	deadlineTime := rand.Intn(1000)
+	deadlineTime := rand.Intn(10000)
 	conn.SetReadDeadline(time.Now().Add(time.Duration(time.Duration(deadlineTime) * time.Millisecond)))
 	buf := make([]byte, 1024)
 	_, _, err = conn.ReadFromUDP(buf)
@@ -77,7 +78,7 @@ func BecomePrimary() {
 }
 
 func PrimaryAlive() {
-	addr, err := net.ResolveUDPAddr("udp4", ":29501")
+	addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29501")
 	if err != nil {
 		fmt.Println("Failed to resolve, primary alive")
 	}
@@ -87,6 +88,7 @@ func PrimaryAlive() {
 	}
 	defer conn.Close()
 	for {
+		fmt.Println("Sending alive message")
 		conn.Write([]byte("Primary alive"))
 		//fmt.Println("Message sent: Primary alive")
 		time.Sleep(10 * time.Millisecond)
