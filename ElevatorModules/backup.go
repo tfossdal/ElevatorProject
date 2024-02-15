@@ -24,7 +24,7 @@ func BackupAlive() {
 }
 
 func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr) {
-	addr, err := net.ResolveTCPAddr("tcp", ":33546")
+	addr, err := net.ResolveTCPAddr("tcp", ":29506")
 	if err != nil {
 		panic(err)
 	}

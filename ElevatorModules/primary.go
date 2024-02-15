@@ -11,7 +11,7 @@ import (
 )
 
 var requests = make([][]int, io.NumFloors)
-var elevatorAddresses = []string{"localhost"}
+var elevatorAddresses = []string{"10.100.23.28", "localhost"}
 
 func InitPrimary() {
 	//Initialize order matrix
@@ -75,6 +75,7 @@ func BecomePrimary() {
 		return
 	}
 	fmt.Printf("Recieved message: %s\n", buf[:])
+	AcceptPrimaryDial()
 }
 
 func PrimaryAlive() {
