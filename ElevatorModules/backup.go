@@ -45,6 +45,7 @@ func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr) {
 
 func BackupAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 	for {
+		fmt.Println("Sending Backup Alive")
 		conn.Write(append([]byte("Backup alive"), 0))
 		time.Sleep(10 * time.Millisecond)
 	}
