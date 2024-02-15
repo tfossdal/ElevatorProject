@@ -53,7 +53,7 @@ func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 
 func BackupAliveListener(addr *net.TCPAddr, conn *net.TCPConn) {
 	for {
-		conn.SetDeadline(time.Now().Add(5 * time.Second))
+		conn.SetReadDeadline(time.Now().Add(1 * time.Second))
 		buf := make([]byte, 1024)
 		_, err := conn.Read(buf)
 		if err != nil {
