@@ -40,7 +40,7 @@ func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr) {
 	fmt.Printf("Connected %d", conn.RemoteAddr())
 	go BackupAliveTCP(addr, conn)
 	go PrimaryAliveListener(conn)
-	return conn, addr //DONT KNOW IF ADDR IS CORRECT
+	return conn, addr
 }
 
 func PrimaryAliveListener(conn *net.TCPConn) {
@@ -51,6 +51,7 @@ func PrimaryAliveListener(conn *net.TCPConn) {
 		fmt.Println(string(buf[:n]))
 		if err != nil {
 			fmt.Println("Primary died, taking over")
+			conn.Close()
 			BackupTakeover()
 			return
 		}
@@ -65,7 +66,10 @@ func BackupTakeover() {
 func BackupAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 	for {
 		//fmt.Println("Sending Backup Alive")
-		conn.Write(append([]byte("Backup alive"), 0))
+		_, err := conn.Write(append([]byte("Backup alive"), 0))
+		if err != nil {
+			return
+		}
 		time.Sleep(10 * time.Millisecond)
 	}
 }

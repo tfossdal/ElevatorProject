@@ -13,6 +13,7 @@ import (
 var i = 0
 var requests = make([][]int, io.NumFloors)
 var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
+var backupTimeoutTime = 5
 
 func InitPrimary() {
 	//Initialize order matrix
@@ -57,7 +58,7 @@ func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 
 func BackupAliveListener(conn *net.TCPConn) {
 	for {
-		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+		conn.SetReadDeadline(time.Now().Add(time.Duration(backupTimeoutTime) * time.Second))
 		buf := make([]byte, 1024)
 		n, err := conn.Read(buf)
 		fmt.Println(string(buf[:n]))
