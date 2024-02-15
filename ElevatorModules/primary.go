@@ -37,7 +37,7 @@ func DialBackup() (*net.TCPConn, *net.TCPAddr) {
 	if err != nil {
 		panic(err)
 	}
-	defer conn.Close()
+	//defer conn.Close()
 	fmt.Println("Connected to backup")
 	go PrimaryAliveTCP(addr, conn)
 	go BackupAliveListener(addr, conn)
@@ -53,11 +53,14 @@ func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 
 func BackupAliveListener(addr *net.TCPAddr, conn *net.TCPConn) {
 	for {
-		conn.SetReadDeadline(time.Now().Add(1 * time.Second))
-		buf := make([]byte, 1024)
-		_, err := conn.Read(buf)
+		err := conn.SetReadDeadline(time.Now().Add(10 * time.Second))
 		if err != nil {
-			fmt.Println("Backup dead")
+			panic(err)
+		}
+		buf := make([]byte, 1024)
+		_, err = conn.Read(buf)
+		if err != nil {
+			panic(err)
 		}
 	}
 }
