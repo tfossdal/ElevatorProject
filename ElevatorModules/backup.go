@@ -33,12 +33,13 @@ func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr) {
 		panic(err)
 	}
 	defer listener.Close()
-	fmt.Println("Backup server established")
 	conn, err := listener.AcceptTCP()
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("Backup server established")
 	fmt.Printf("Connected %d", conn.RemoteAddr())
+	go BackupAliveTCP(addr, conn)
 	return conn, addr //DONT KNOW IF ADDR IS CORRECT
 }
 
