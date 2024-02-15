@@ -10,8 +10,9 @@ import (
 	"time"
 )
 
+var i = 0
 var requests = make([][]int, io.NumFloors)
-var elevatorAddresses = []string{"10.100.23.28", "localhost"}
+var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
 
 func InitPrimary() {
 	//Initialize order matrix
@@ -46,21 +47,23 @@ func DialBackup() (*net.TCPConn, *net.TCPAddr) {
 
 func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 	for {
-		conn.Write(append([]byte("Primary alive"), 0))
+		_, err := conn.Write(append([]byte("Primary alive"), 0))
+		if err != nil {
+			//return
+		}
 		time.Sleep(10 * time.Millisecond)
 	}
 }
 
 func BackupAliveListener(addr *net.TCPAddr, conn *net.TCPConn) {
 	for {
-		err := conn.SetReadDeadline(time.Now().Add(10 * time.Second))
-		if err != nil {
-			panic(err)
-		}
+		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 		buf := make([]byte, 1024)
-		_, err = conn.Read(buf)
+		n, err := conn.Read(buf)
+		fmt.Println(buf[:n])
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
+			fmt.Println("Backup Died")
 		}
 	}
 }
@@ -104,7 +107,7 @@ func PrimaryAlive() {
 	}
 	defer conn.Close()
 	for {
-		fmt.Println("Sending alive message")
+		//fmt.Println("Sending alive message")
 		conn.Write([]byte("Primary alive"))
 		//fmt.Println("Message sent: Primary alive")
 		time.Sleep(10 * time.Millisecond)
