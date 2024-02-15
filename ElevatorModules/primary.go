@@ -60,7 +60,7 @@ func BackupAliveListener(conn *net.TCPConn) {
 		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 		buf := make([]byte, 1024)
 		n, err := conn.Read(buf)
-		fmt.Println(buf[:n])
+		fmt.Println(string(buf[:n]))
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("Backup Died")
