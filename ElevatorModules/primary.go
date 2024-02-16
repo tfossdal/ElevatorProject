@@ -10,8 +10,10 @@ import (
 	"time"
 )
 
+var i = 0
 var requests = make([][]int, io.NumFloors)
-var elevatorAddresses = []string{"10.100.23.28", "localhost"}
+var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
+var backupTimeoutTime = 5
 
 func InitPrimary() {
 	//Initialize order matrix
@@ -29,7 +31,7 @@ func InitPrimary() {
 }
 
 func DialBackup() (*net.TCPConn, *net.TCPAddr) {
-	addr, err := net.ResolveTCPAddr("tcp", elevatorAddresses[0]+":29506")
+	addr, err := net.ResolveTCPAddr("tcp", elevatorAddresses[i]+":29506")
 	if err != nil {
 		panic(err)
 	}
@@ -37,27 +39,35 @@ func DialBackup() (*net.TCPConn, *net.TCPAddr) {
 	if err != nil {
 		panic(err)
 	}
-	defer conn.Close()
+	//defer conn.Close()
 	fmt.Println("Connected to backup")
 	go PrimaryAliveTCP(addr, conn)
-	go BackupAliveListener(addr, conn)
+	go BackupAliveListener(conn)
 	return conn, addr
 }
 
 func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 	for {
-		conn.Write(append([]byte("Primary alive"), 0))
+		_, err := conn.Write(append([]byte("Primary alive"), 0))
+		if err != nil {
+			return
+		}
 		time.Sleep(10 * time.Millisecond)
 	}
 }
 
-func BackupAliveListener(addr *net.TCPAddr, conn *net.TCPConn) {
+func BackupAliveListener(conn *net.TCPConn) {
 	for {
-		conn.SetReadDeadline(time.Now().Add(1 * time.Second))
+		conn.SetReadDeadline(time.Now().Add(time.Duration(backupTimeoutTime) * time.Second))
 		buf := make([]byte, 1024)
-		_, err := conn.Read(buf)
+		n, err := conn.Read(buf)
+		fmt.Println(string(buf[:n]))
 		if err != nil {
-			fmt.Println("Backup dead")
+			fmt.Println(err)
+			fmt.Println("Backup Died")
+			i++
+			go DialBackup()
+			return
 		}
 	}
 }
@@ -101,7 +111,7 @@ func PrimaryAlive() {
 	}
 	defer conn.Close()
 	for {
-		fmt.Println("Sending alive message")
+		//fmt.Println("Sending alive message")
 		conn.Write([]byte("Primary alive"))
 		//fmt.Println("Message sent: Primary alive")
 		time.Sleep(10 * time.Millisecond)
