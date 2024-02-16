@@ -24,7 +24,9 @@ func ListenUDP(port string) {
 			fmt.Println("Failed to listen")
 		}
 		fmt.Println(string(buf[:n]))
-		fmt.Println(senderIP)
+		SenderNumber := fmt.Sprintf("%d", senderIP[3])
+		fmt.Println(senderIP.String())
+		fmt.Println(SenderNumber)
 	}
 }
 
