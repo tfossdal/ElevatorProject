@@ -7,7 +7,7 @@ import (
 )
 
 func IAmAlive() {
-	addr, err := net.ResolveUDPAddr("udp4", ":29503")
+	addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29503")
 	if err != nil {
 		fmt.Println("Failed to resolve, send order")
 	}
