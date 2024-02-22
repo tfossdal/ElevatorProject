@@ -1,6 +1,7 @@
 package ElevatorModules
 
 import (
+	"ElevatorProject/ElevatorModules/PrimaryModules"
 	io "ElevatorProject/elevio"
 	"fmt"
 	"math/rand"
@@ -10,10 +11,15 @@ import (
 	"time"
 )
 
-var i = 0
 var requests = make([][]int, io.NumFloors)
 var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
 var backupTimeoutTime = 5
+
+var elevatorLives = make(chan int)
+var checkLiving = make(chan int)
+var requestId = make(chan int)
+var idOfLivingElev = make(chan int)
+var printList = make(chan int)
 
 func InitPrimary() {
 	//Initialize order matrix
@@ -25,25 +31,42 @@ func InitPrimary() {
 	}
 
 	//Start GoRoutines
-	go PrimaryAlive()
+	go PrimaryRoutine()
+
 	time.Sleep(10 * time.Second)
-	DialBackup() //PROBLEM This will happen before we know any addresses
 }
 
-func DialBackup() (*net.TCPConn, *net.TCPAddr) {
-	addr, err := net.ResolveTCPAddr("tcp", elevatorAddresses[i]+":29506")
-	if err != nil {
-		panic(err)
+func PrimaryRoutine() {
+	go PrimaryAlive()
+	go PrimaryModules.ListenUDP("29505", elevatorLives)
+	go PrimaryModules.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList)
+	requestId <- 1
+	DialBackup(ConvertIDtoIP(<-idOfLivingElev)) //PROBLEM This will happen before we know any addresses
+	for {
+
 	}
-	conn, err := net.DialTCP("tcp", nil, addr)
-	if err != nil {
-		panic(err)
+}
+
+func ConvertIDtoIP(id int) string {
+	return "10.100.23." + fmt.Sprint(id)
+}
+
+func DialBackup(newBackupIP string) {
+	for i := 1; i <= 2; i++ {
+		addr, err := net.ResolveTCPAddr("tcp", newBackupIP+":29506")
+		if err != nil {
+			continue
+		}
+		conn, err := net.DialTCP("tcp", nil, addr)
+		if err != nil {
+			continue
+		}
+		fmt.Println("Connected to backup")
+		go PrimaryAliveTCP(addr, conn)
+		go BackupAliveListener(conn)
+		break
 	}
 	//defer conn.Close()
-	fmt.Println("Connected to backup")
-	go PrimaryAliveTCP(addr, conn)
-	go BackupAliveListener(conn)
-	return conn, addr
 }
 
 func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
@@ -65,8 +88,9 @@ func BackupAliveListener(conn *net.TCPConn) {
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("Backup Died")
-			i++
-			go DialBackup()
+			requestId <- 1
+			DialBackup(ConvertIDtoIP(<-idOfLivingElev))
+			//go DialBackup()
 			return
 		}
 	}
