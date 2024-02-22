@@ -62,6 +62,9 @@ func DialBackup() {
 	time.Sleep(1500 * time.Millisecond) //WAY TOO LONG
 	printList <- 1
 	num := <-numberOfElevators
+	if num < 2 {
+		num = 2
+	}
 	for i := 1; i <= num; i++ {
 		requestId <- i
 		addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(<-idOfLivingElev)+":29506")
