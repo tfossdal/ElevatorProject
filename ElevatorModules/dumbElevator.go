@@ -17,7 +17,7 @@ func IAmAlive() {
 	}
 	defer conn.Close()
 	for {
-		fmt.Println("Sending message")
+		//fmt.Println("Sending message")
 		conn.Write([]byte("4"))
 		//fmt.Println("Message sent: Elevator alive")
 		time.Sleep(10 * time.Millisecond)
