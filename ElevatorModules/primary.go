@@ -21,6 +21,7 @@ var checkLiving = make(chan int)
 var requestId = make(chan int, 5)
 var idOfLivingElev = make(chan int, 5)
 var printList = make(chan int)
+var numberOfElevators = make(chan int, 5)
 
 func InitPrimary() {
 	//Initialize order matrix
@@ -40,7 +41,7 @@ func InitPrimary() {
 func PrimaryRoutine() {
 	go PrimaryAlive()
 	go PrimaryModules.ListenUDP("29503", elevatorLives)
-	go PrimaryModules.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList)
+	go PrimaryModules.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, numberOfElevators)
 
 	go DialBackup() //PROBLEM This will happen before we know any addresses
 	for {
@@ -59,7 +60,8 @@ func ConvertIDtoIP(id int) string {
 
 func DialBackup() {
 	time.Sleep(1500 * time.Millisecond) //WAY TOO LONG
-	for i := 1; i <= 2; i++ {
+	printList <- 1
+	for i := 1; i <= <-numberOfElevators; i++ {
 		requestId <- i
 		addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(<-idOfLivingElev)+":29506")
 		if err != nil {

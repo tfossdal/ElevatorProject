@@ -11,7 +11,7 @@ type Node struct {
 	lastSeen time.Time
 }
 
-func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList chan int) {
+func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList, numberOfElevators chan int) {
 	living := list.New()
 	timeout := 1 * time.Second
 	for {
@@ -75,10 +75,14 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 			}
 		case <-printList:
 			fmt.Println("Printing list:")
+			θ := 0
 			for e := living.Front(); e != nil; e = e.Next() {
 				node := e.Value.(*Node)
 				fmt.Println(node.id)
+				θ++
 			}
+			numberOfElevators <- θ
+
 		}
 
 	}
