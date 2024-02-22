@@ -5,6 +5,7 @@ import (
 	module "ElevatorProject/ElevatorModules"
 	io "ElevatorProject/elevio"
 	"fmt"
+	"os/exec"
 )
 
 func elev_init() {
@@ -65,6 +66,8 @@ func elev_init() {
 }
 
 func main() {
+	cmd := exec.Command("gnome-terminal", "--", "elevatorserver")
+	cmd.Run()
 	numFloors := 4
 
 	io.Init("localhost:15657", numFloors)
