@@ -16,10 +16,10 @@ var requests = make([][]int, io.NumFloors)
 // var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
 var backupTimeoutTime = 5
 
-var elevatorLives = make(chan int)
+var elevatorLives = make(chan int,5)
 var checkLiving = make(chan int)
-var requestId = make(chan int)
-var idOfLivingElev = make(chan int)
+var requestId = make(chan int, 5)
+var idOfLivingElev = make(chan int, 5)
 var printList = make(chan int)
 
 func InitPrimary() {

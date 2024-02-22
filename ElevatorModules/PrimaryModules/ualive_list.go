@@ -57,6 +57,7 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 				e := living.Front() //Må finne løsning på ka som skjer
 				if e == nil {       //om e ikke finnes eller er seg selv
 					retrieveId <- 1
+					fmt.Println("No living elevators")
 					break
 				}
 				fmt.Println("Retrieving", e.Value.(*Node).id)
