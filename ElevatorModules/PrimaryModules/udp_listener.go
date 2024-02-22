@@ -3,8 +3,8 @@ package PrimaryModules
 import (
 	"fmt"
 	"net"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 func ListenUDP(port string, elevatorLives chan int, newOrderCh chan [3]int) {
@@ -25,8 +25,8 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh chan [3]int) {
 		recieved_message := strings.Split(string(buf[:n]), ",")
 		//fmt.Println("Read something")
 		if recieved_message[0] == "n" {
-			floor, _ := strconv.Atoi(recieved_message[2])
-			btnType, _ := strconv.Atoi(recieved_message[3])
+			floor, _ := strconv.Atoi(recieved_message[1])
+			btnType, _ := strconv.Atoi(recieved_message[2])
 			order := [3]int{int(senderIP[3]), floor, btnType}
 			newOrderCh <- order
 		}
