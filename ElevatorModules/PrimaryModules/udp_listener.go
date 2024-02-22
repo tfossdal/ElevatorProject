@@ -3,9 +3,12 @@ package PrimaryModules
 import (
 	"fmt"
 	"net"
+	"strings"
+	"strconv"
 )
 
-func ListenUDP(port string, elevatorLives chan int) {
+func ListenUDP(port string, elevatorLives chan int, newOrderCh chan [3]int) {
+
 	addr, err := net.ResolveUDPAddr("udp4", ":"+port)
 	if err != nil {
 		fmt.Println("Failed to resolve")
@@ -17,9 +20,16 @@ func ListenUDP(port string, elevatorLives chan int) {
 	defer conn.Close()
 	buf := make([]byte, 1024)
 	for {
-		_, recievedAddr, err := conn.ReadFromUDP(buf)
+		n, recievedAddr, err := conn.ReadFromUDP(buf)
 		senderIP := recievedAddr.IP
+		recieved_message := strings.Split(string(buf[:n]), ",")
 		//fmt.Println("Read something")
+		if recieved_message[0] == "n" {
+			floor, _ := strconv.Atoi(recieved_message[2])
+			btnType, _ := strconv.Atoi(recieved_message[3])
+			order := [3]int{int(senderIP[3]), floor, btnType}
+			newOrderCh <- order
+		}
 		if err != nil {
 			fmt.Println("Failed to listen")
 		}

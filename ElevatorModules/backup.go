@@ -3,6 +3,7 @@ package ElevatorModules
 import (
 	"fmt"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -50,13 +51,18 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) {
 		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 		buf := make([]byte, 1024)
 		n, err := conn.Read(buf)
-		fmt.Println("Message recieved: " + string(buf[:n]))
 		if err != nil {
 			fmt.Println("Primary died, taking over")
 			conn.Close()
 			listener.Close()
 			BackupTakeover(conn)
 			return
+		}
+		recieved_message := strings.Split(string(buf[:n]), ",")
+		//fmt.Println("Message recieved: " + string(buf[:n]))
+		if recieved_message[0] == "n" {
+			fmt.Println("Message recieved: " + string(buf[:n]))
+			continue
 		}
 	}
 }

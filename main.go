@@ -1,10 +1,10 @@
 package main
 
 import (
+	"ElevatorProject/ElevatorModules"
 	module "ElevatorProject/ElevatorModules"
 	io "ElevatorProject/elevio"
 	"fmt"
-	"time"
 )
 
 func elev_init() {
@@ -65,11 +65,31 @@ func elev_init() {
 }
 
 func main() {
+	numFloors := 4
+
+	io.Init("localhost:15657", numFloors)
+
+	//var d elevio.MotorDirection = elevio.MD_Up
+	//elevio.SetMotorDirection(d)
+
+	drv_buttons := make(chan io.ButtonEvent)
+	drv_floors := make(chan int)
+	drv_obstr := make(chan bool)
+	drv_stop := make(chan bool)
+
+	go io.PollButtons(drv_buttons)
+	go io.PollFloorSensor(drv_floors)
+	go io.PollObstructionSwitch(drv_obstr)
+	go io.PollStopButton(drv_stop)
+
 	//elev_init()
 	go module.IAmAlive()
 	module.BecomePrimary()
 	for {
-		time.Sleep((1 * time.Second))
+		select {
+		case a := <-drv_buttons:
+			ElevatorModules.SendButtonPressUDP(a)
+		}
 	}
 
 }

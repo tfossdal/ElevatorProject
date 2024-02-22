@@ -22,6 +22,7 @@ var requestId = make(chan int, 5)
 var idOfLivingElev = make(chan int, 5)
 var printList = make(chan int)
 var numberOfElevators = make(chan int, 5)
+var newOrderCh = make(chan [3]int, 10)
 
 func InitPrimary() {
 	//Initialize order matrix
@@ -40,13 +41,12 @@ func InitPrimary() {
 
 func PrimaryRoutine() {
 	go PrimaryAlive()
-	go PrimaryModules.ListenUDP("29503", elevatorLives)
+	go PrimaryModules.ListenUDP("29503", elevatorLives, newOrderCh)
 	go PrimaryModules.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, numberOfElevators)
+	go DialBackup()
 
-	go DialBackup() //PROBLEM This will happen before we know any addresses
 	for {
 		UpdateLivingElevators()
-		//printList <- 1
 	}
 }
 
@@ -77,6 +77,7 @@ func DialBackup() {
 		fmt.Println("Connected to backup")
 		go PrimaryAliveTCP(addr, conn)
 		go BackupAliveListener(conn)
+		go SendOrderToBackup(conn)
 		break
 	}
 	//defer conn.Close()
@@ -152,6 +153,17 @@ func PrimaryAlive() {
 		//fmt.Println("Message sent: Primary alive")
 		time.Sleep(10 * time.Millisecond)
 	}
+}
+
+func SendOrderToBackup(conn *net.TCPConn) {
+	for {
+		order := <-newOrderCh
+		_, err := conn.Write(append([]byte("n,"+string(order[0])+","+string(order[1])+","+string(order[2])), 0))
+		if err != nil {
+			return
+		}
+	}
+
 }
 
 func OrderListener() {

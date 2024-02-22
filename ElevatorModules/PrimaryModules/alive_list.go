@@ -29,7 +29,6 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 			if !duplicate {
 				living.PushBack((&Node{id: elevId, lastSeen: time.Now()}))
 			}
-			break
 		case <-checkLiving:
 
 			for e := living.Front(); e != nil; e = e.Next() {
@@ -40,7 +39,6 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 					living.Remove(e)
 				}
 			}
-			break
 		case whatToRetrieve := <-retrieveId:
 			//check for living before extracting
 			for e := living.Front(); e != nil; e = e.Next() {
@@ -62,7 +60,6 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 				}
 				fmt.Println("Retrieving", e.Value.(*Node).id)
 				idOfLivingElev <- e.Value.(*Node).id
-				break
 			} else {
 				fmt.Println("Retrieving next")
 				e := living.Front().Next() //Må finne løsning på ka som skjer
@@ -71,7 +68,6 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 					break
 				}
 				idOfLivingElev <- e.Value.(*Node).id
-				break
 			}
 		case <-printList:
 			fmt.Println("Printing list:")
