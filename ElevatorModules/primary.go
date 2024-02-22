@@ -58,7 +58,7 @@ func ConvertIDtoIP(id int) string {
 }
 
 func DialBackup() {
-	time.Sleep(6 * time.Second) //WAY TOO LONG
+	time.Sleep(1500 * time.Millisecond) //WAY TOO LONG
 	for i := 1; i <= 3; i++ {
 		requestId <- i
 		addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(<-idOfLivingElev)+":29506")
@@ -66,7 +66,6 @@ func DialBackup() {
 			fmt.Println(err)
 			continue
 		}
-		fmt.Println("God to dial")
 		conn, err := net.DialTCP("tcp", nil, addr)
 		if err != nil {
 			fmt.Println(err)
@@ -95,7 +94,7 @@ func BackupAliveListener(conn *net.TCPConn) {
 		conn.SetReadDeadline(time.Now().Add(time.Duration(backupTimeoutTime) * time.Second))
 		buf := make([]byte, 1024)
 		n, err := conn.Read(buf)
-		fmt.Println(string(buf[:n]))
+		fmt.Println("Message recieved: " + string(buf[:n]))
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("Backup Died")

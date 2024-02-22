@@ -19,7 +19,7 @@ func BackupAlive() {
 	}
 	defer conn.Close()
 	for {
-		conn.Write([]byte("Backup alive"))
+		conn.Write([]byte("Recieved message: Backup alive"))
 		time.Sleep(100 * time.Millisecond)
 	}
 }

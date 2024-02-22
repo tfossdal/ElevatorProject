@@ -13,7 +13,7 @@ type Node struct {
 
 func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList chan int) {
 	living := list.New()
-	timeout := 5 * time.Second
+	timeout := 1 * time.Second
 	for {
 		select {
 		case elevId := <-elevatorLives:
