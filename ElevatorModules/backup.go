@@ -54,6 +54,7 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) {
 		if err != nil {
 			fmt.Println("Primary died, taking over")
 			conn.Close()
+			listener.Close()
 			BackupTakeover(conn)
 			return
 		}
