@@ -66,11 +66,12 @@ func elev_init() {
 
 func main() {
 	//elev_init()
+	go module.IAmAlive()
 	module.BecomePrimary()
 	for {
 		time.Sleep((1 * time.Second))
 	}
-	
+
 }
 
 // Here I'm trying to test the backup and primary alive functions, but it is not working

@@ -12,7 +12,8 @@ import (
 )
 
 var requests = make([][]int, io.NumFloors)
-var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
+
+// var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
 var backupTimeoutTime = 5
 
 var elevatorLives = make(chan int)
@@ -40,10 +41,11 @@ func PrimaryRoutine() {
 	go PrimaryAlive()
 	go PrimaryModules.ListenUDP("29505", elevatorLives)
 	go PrimaryModules.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList)
+	
 	requestId <- 1
-	DialBackup() //PROBLEM This will happen before we know any addresses
+	go DialBackup() //PROBLEM This will happen before we know any addresses
 	for {
-		continue
+		printList <- 1
 	}
 }
 
@@ -89,7 +91,7 @@ func BackupAliveListener(conn *net.TCPConn) {
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("Backup Died")
-			DialBackup()
+			go DialBackup()
 			//go DialBackup()
 			return
 		}
