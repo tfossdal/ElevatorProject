@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+var quitJobAsBackup = make(chan bool)
+
 func BackupAlive() {
 	addr, err := net.ResolveUDPAddr("udp4", "localhost:29502")
 	if err != nil {
@@ -52,13 +54,15 @@ func PrimaryAliveListener(conn *net.TCPConn) {
 		if err != nil {
 			fmt.Println("Primary died, taking over")
 			conn.Close()
-			BackupTakeover()
+			BackupTakeover(conn)
 			return
 		}
 	}
 }
 
-func BackupTakeover() {
+func BackupTakeover(conn *net.TCPConn) {
+	quitJobAsBackup <- true
+	conn.Close()
 	elevator.elevatorType = Primary
 	InitPrimary()
 }
@@ -66,11 +70,16 @@ func BackupTakeover() {
 func BackupAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 	for {
 		//fmt.Println("Sending Backup Alive")
-		_, err := conn.Write(append([]byte("Backup alive"), 0))
-		if err != nil {
+		select {
+		case <-quitJobAsBackup:
 			return
+		default:
+			_, err := conn.Write(append([]byte("Backup alive"), 0))
+			if err != nil {
+				return
+			}
+			time.Sleep(10 * time.Millisecond)
 		}
-		time.Sleep(10 * time.Millisecond)
 	}
 }
 
