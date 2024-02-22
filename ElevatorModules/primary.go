@@ -158,7 +158,7 @@ func PrimaryAlive() {
 func SendOrderToBackup(conn *net.TCPConn) {
 	for {
 		order := <-newOrderCh
-		_, err := conn.Write(append([]byte("n,"+string(order[0])+","+string(order[1])+","+string(order[2])), 0))
+		_, err := conn.Write(append([]byte("n,"+fmt.Sprint(order[0])+","+fmt.Sprint(order[1])+","+fmt.Sprint(order[2])), 0))
 		if err != nil {
 			return
 		}
