@@ -39,7 +39,7 @@ func InitPrimary() {
 
 func PrimaryRoutine() {
 	go PrimaryAlive()
-	go PrimaryModules.ListenUDP("29505", elevatorLives)
+	go PrimaryModules.ListenUDP("29503", elevatorLives)
 	go PrimaryModules.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList)
 	
 	requestId <- 1
