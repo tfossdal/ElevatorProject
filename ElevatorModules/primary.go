@@ -44,9 +44,8 @@ func PrimaryRoutine() {
 
 	go DialBackup() //PROBLEM This will happen before we know any addresses
 	for {
-		//printList <- 1
 		UpdateLivingElevators()
-		printList <- 1
+		//printList <- 1
 	}
 }
 
