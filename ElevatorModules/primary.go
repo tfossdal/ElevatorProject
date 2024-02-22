@@ -44,8 +44,13 @@ func PrimaryRoutine() {
 
 	go DialBackup() //PROBLEM This will happen before we know any addresses
 	for {
+		UpdateLivingElevators()
 		continue
 	}
+}
+
+func UpdateLivingElevators() {
+	checkLiving <- 1
 }
 
 func ConvertIDtoIP(id int) string {
