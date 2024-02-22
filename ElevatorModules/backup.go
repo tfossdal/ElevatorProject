@@ -19,7 +19,7 @@ func BackupAlive() {
 	}
 	defer conn.Close()
 	for {
-		conn.Write([]byte("Recieved message: Backup alive"))
+		conn.Write([]byte("Backup alive"))
 		time.Sleep(100 * time.Millisecond)
 	}
 }
@@ -50,7 +50,7 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) {
 		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 		buf := make([]byte, 1024)
 		n, err := conn.Read(buf)
-		fmt.Println(string(buf[:n]))
+		fmt.Println("Message recieved: " + string(buf[:n]))
 		if err != nil {
 			fmt.Println("Primary died, taking over")
 			conn.Close()
