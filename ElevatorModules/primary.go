@@ -41,9 +41,9 @@ func PrimaryRoutine() {
 	go PrimaryModules.ListenUDP("29505", elevatorLives)
 	go PrimaryModules.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList)
 	requestId <- 1
-	DialBackup(ConvertIDtoIP(<-idOfLivingElev)) //PROBLEM This will happen before we know any addresses
+	DialBackup() //PROBLEM This will happen before we know any addresses
 	for {
-
+		continue
 	}
 }
 
@@ -51,9 +51,10 @@ func ConvertIDtoIP(id int) string {
 	return "10.100.23." + fmt.Sprint(id)
 }
 
-func DialBackup(newBackupIP string) {
+func DialBackup() {
 	for i := 1; i <= 2; i++ {
-		addr, err := net.ResolveTCPAddr("tcp", newBackupIP+":29506")
+		requestId <- i
+		addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(<-idOfLivingElev)+":29506")
 		if err != nil {
 			continue
 		}
@@ -88,8 +89,7 @@ func BackupAliveListener(conn *net.TCPConn) {
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("Backup Died")
-			requestId <- 1
-			DialBackup(ConvertIDtoIP(<-idOfLivingElev))
+			DialBackup()
 			//go DialBackup()
 			return
 		}
