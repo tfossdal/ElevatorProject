@@ -58,9 +58,8 @@ func ConvertIDtoIP(id int) string {
 }
 
 func DialBackup() {
+	time.Sleep(6 * time.Second)
 	for i := 1; i <= 3; i++ {
-		requestId <- i
-		fmt.Println(ConvertIDtoIP(<-idOfLivingElev) + ":29506")
 		requestId <- i
 		addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(<-idOfLivingElev)+":29506")
 		if err != nil {
