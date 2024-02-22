@@ -46,6 +46,7 @@ func PrimaryRoutine() {
 	for {
 		//printList <- 1
 		UpdateLivingElevators()
+		printList <- 1
 	}
 }
 
@@ -58,7 +59,7 @@ func ConvertIDtoIP(id int) string {
 }
 
 func DialBackup() {
-	time.Sleep(6 * time.Second)
+	time.Sleep(6 * time.Second) //WAY TOO LONG
 	for i := 1; i <= 3; i++ {
 		requestId <- i
 		addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(<-idOfLivingElev)+":29506")
