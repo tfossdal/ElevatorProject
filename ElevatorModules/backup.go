@@ -35,6 +35,7 @@ func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr) {
 	}
 	//defer listener.Close()
 	conn, err := listener.AcceptTCP()
+	defer conn.Close()
 	if err != nil {
 		panic(err)
 	}
@@ -62,7 +63,6 @@ func PrimaryAliveListener(conn *net.TCPConn) {
 
 func BackupTakeover(conn *net.TCPConn) {
 	quitJobAsBackup <- true
-	conn.Close()
 	elevator.elevatorType = Primary
 	InitPrimary()
 }
