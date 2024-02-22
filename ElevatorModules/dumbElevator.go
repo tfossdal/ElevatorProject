@@ -1,8 +1,10 @@
 package ElevatorModules
 
-import ("fmt"
-"net"
-"time")
+import (
+	"fmt"
+	"net"
+	"time"
+)
 
 func IAmAlive() {
 	addr, err := net.ResolveUDPAddr("udp4", ":29503")
@@ -14,9 +16,10 @@ func IAmAlive() {
 		fmt.Println("Failed to dial, send order")
 	}
 	defer conn.Close()
-	for{
-	fmt.Println("Sending message")
-	conn.Write([]byte("4"))
-	//fmt.Println("Message sent: Elevator alive")
-	time.Sleep(10 * time.Millisecond)}
+	for {
+		//fmt.Println("Sending message")
+		conn.Write([]byte("4"))
+		//fmt.Println("Message sent: Elevator alive")
+		time.Sleep(10 * time.Millisecond)
+	}
 }
