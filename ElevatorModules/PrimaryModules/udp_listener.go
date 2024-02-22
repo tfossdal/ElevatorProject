@@ -17,16 +17,16 @@ func ListenUDP(port string, elevatorLives chan int) {
 	defer conn.Close()
 	buf := make([]byte, 1024)
 	for {
-		n, recievedAddr, err := conn.ReadFromUDP(buf)
+		_, recievedAddr, err := conn.ReadFromUDP(buf)
 		senderIP := recievedAddr.IP
-		fmt.Println("Read something")
+		//fmt.Println("Read something")
 		if err != nil {
 			fmt.Println("Failed to listen")
 		}
-		fmt.Println(string(buf[:n])) //testing
-		SenderNumber := fmt.Sprintf("%d", senderIP[3])
-		fmt.Println(senderIP.String()) //testing
-		fmt.Println(SenderNumber) //testing
+		//fmt.Println(string(buf[:n])) 						//testing
+		//SenderNumber := fmt.Sprintf("%d", senderIP[3])	//testing
+		//fmt.Println(senderIP.String()) 					//testing
+		//fmt.Println(SenderNumber) 						//testing
 		elevatorLives <- int(senderIP[3])
 	}
 }

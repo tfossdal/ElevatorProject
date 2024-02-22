@@ -53,15 +53,20 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 			}
 
 			if whatToRetrieve == 1 {
+				fmt.Println("Retrieving firster")
 				e := living.Front() //Må finne løsning på ka som skjer
 				if e == nil {       //om e ikke finnes eller er seg selv
+					retrieveId <- 1
 					break
 				}
+				fmt.Println("Retrieving", e.Value.(*Node).id)
 				idOfLivingElev <- e.Value.(*Node).id
 				break
 			} else {
+				fmt.Println("Retrieving next")
 				e := living.Front().Next() //Må finne løsning på ka som skjer
 				if e == nil {              //om e ikke finnes eller er seg selv
+					retrieveId <- 2
 					break
 				}
 				idOfLivingElev <- e.Value.(*Node).id

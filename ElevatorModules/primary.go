@@ -41,11 +41,10 @@ func PrimaryRoutine() {
 	go PrimaryAlive()
 	go PrimaryModules.ListenUDP("29503", elevatorLives)
 	go PrimaryModules.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList)
-	
-	requestId <- 1
+
 	go DialBackup() //PROBLEM This will happen before we know any addresses
 	for {
-		printList <- 1
+		continue
 	}
 }
 
@@ -56,12 +55,17 @@ func ConvertIDtoIP(id int) string {
 func DialBackup() {
 	for i := 1; i <= 2; i++ {
 		requestId <- i
+		fmt.Println(ConvertIDtoIP(<-idOfLivingElev) + ":29506")
+		requestId <- i
 		addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(<-idOfLivingElev)+":29506")
 		if err != nil {
+			fmt.Println(err)
 			continue
 		}
+		fmt.Println("God to dial")
 		conn, err := net.DialTCP("tcp", nil, addr)
 		if err != nil {
+			fmt.Println(err)
 			continue
 		}
 		fmt.Println("Connected to backup")
