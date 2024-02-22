@@ -72,6 +72,7 @@ func DialBackup() {
 			fmt.Println(err)
 			continue
 		}
+		time.Sleep(1500 * time.Millisecond)
 		conn, err := net.DialTCP("tcp", nil, addr)
 		if err != nil {
 			fmt.Println(err)
