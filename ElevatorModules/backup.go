@@ -24,7 +24,7 @@ func BackupAlive() {
 	}
 }
 
-func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr) {
+func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr, *net.TCPListener) {
 	addr, err := net.ResolveTCPAddr("tcp", ":29506")
 	if err != nil {
 		panic(err)
@@ -35,18 +35,17 @@ func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr) {
 	}
 	//defer listener.Close()
 	conn, err := listener.AcceptTCP()
-	defer conn.Close()
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Backup server established")
 	fmt.Printf("Connected %d", conn.RemoteAddr())
 	go BackupAliveTCP(addr, conn)
-	go PrimaryAliveListener(conn)
-	return conn, addr
+	go PrimaryAliveListener(conn, listener)
+	return conn, addr, listener
 }
 
-func PrimaryAliveListener(conn *net.TCPConn) {
+func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) {
 	for {
 		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 		buf := make([]byte, 1024)
