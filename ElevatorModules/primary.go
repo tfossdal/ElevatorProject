@@ -184,6 +184,7 @@ func OrderListener() {
 	defer conn.Close()
 
 	for {
+		fmt.Print("Primary reading UDP ...")
 		buf := make([]byte, 1024)
 		n, _, err := conn.ReadFromUDP(buf)
 		if err != nil {
@@ -209,7 +210,7 @@ func SendTurnOnLight(order [3]int) {
 	}
 	defer conn.Close()
 	for {
-		conn.Write([]byte(strconv.Itoa(order[0])+","+strconv.Itoa(order[1])+","+strconv.Itoa(order[2])))
+		conn.Write([]byte(strconv.Itoa(order[0]) + "," + strconv.Itoa(order[1]) + "," + strconv.Itoa(order[2])))
 		//fmt.Println("Message sent: Elevator alive")
 		time.Sleep(10 * time.Millisecond)
 	}
