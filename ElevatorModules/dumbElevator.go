@@ -4,9 +4,9 @@ import (
 	io "ElevatorProject/elevio"
 	"fmt"
 	"net"
-	"time"
-	"strings"
 	"strconv"
+	"strings"
+	"time"
 )
 
 func IAmAlive() {
@@ -57,11 +57,18 @@ func RecieveTurnOnLight() {
 			fmt.Println("Failed to read, recieve turn on light")
 		}
 		recievedMessage := string(buf[:n])
+		fmt.Printf("Read " + recievedMessage)
 		messageList := strings.Split(recievedMessage, ",")
 		btnInt, err := strconv.Atoi(messageList[2])
+		if err != nil {
+			fmt.Println("Failed to convert to btn, recieve turn on light")
+		}
 		btn := io.ButtonType(btnInt)
 		floor, err := strconv.Atoi(messageList[1])
 		io.SetButtonLamp(btn, floor, true)
+		if err != nil {
+			fmt.Println("Failed to convert to floor, recieve turn on light")
+		}
 	}
 
 }
