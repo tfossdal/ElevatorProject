@@ -88,6 +88,8 @@ func main() {
 	//elev_init()
 	go module.IAmAlive()
 	module.BecomePrimary()
+	go module.RecieveTurnOnLight()
+
 	for {
 		select {
 		case a := <-drv_buttons:
