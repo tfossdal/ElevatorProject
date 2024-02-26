@@ -6,12 +6,12 @@
 - 01 - Primary alive
 - 02 - Backup alive
 - 03 - Dumb elevator alive
-- xx 05 - Add order
+- 05 - Light light
 - 06 - Primary/Backup communication
 
 ## Order Format (UDP)
 - n,a,b
-    - no - new order
+    - n - new order/ID
     - a is floor, b is button type
 
 - Must kill backup when connection to it is lost

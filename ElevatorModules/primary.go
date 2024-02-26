@@ -166,6 +166,7 @@ func SendOrderToBackup(conn *net.TCPConn) {
 		if err != nil {
 			return
 		}
+		SendTurnOnLight(order)
 	}
 
 }
@@ -195,4 +196,21 @@ func OrderListener() {
 		requests[floorIndex][buttonIndex] = 1
 	}
 
+}
+
+func SendTurnOnLight(order [3]int) {
+	addr, err := net.ResolveUDPAddr("udp4", ConvertIDtoIP(order[0])+":29505")
+	if err != nil {
+		fmt.Println("Failed to resolve, light light")
+	}
+	conn, err := net.DialUDP("udp4", nil, addr)
+	if err != nil {
+		fmt.Println("Failed to dial, light light")
+	}
+	defer conn.Close()
+	for {
+		conn.Write([]byte(strconv.Itoa(order[0])+","+strconv.Itoa(order[1])+","+strconv.Itoa(order[2])))
+		//fmt.Println("Message sent: Elevator alive")
+		time.Sleep(10 * time.Millisecond)
+	}
 }

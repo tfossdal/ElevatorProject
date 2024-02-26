@@ -26,7 +26,7 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh chan [3]int) {
 		//fmt.Println("Read something")
 		if recieved_message[0] == "n" {
 			floor, _ := strconv.Atoi(recieved_message[1])
-			btnType, _ := strconv.Atoi(recieved_message[2])
+			btnType, _ = strconv.Atoi(recieved_message[2])
 			order := [3]int{int(senderIP[3]), floor, btnType}
 			newOrderCh <- order
 		}

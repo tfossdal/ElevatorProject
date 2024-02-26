@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net"
 	"time"
+	"strings"
+	"strconv"
 )
 
 func IAmAlive() {
@@ -36,4 +38,30 @@ func SendButtonPressUDP(btn io.ButtonEvent) {
 	}
 	defer conn.Close()
 	conn.Write([]byte("n," + fmt.Sprint(btn.Floor) + "," + fmt.Sprint(btn.Button)))
+}
+
+func RecieveTurnOnLight() {
+	addr, err := net.ResolveUDPAddr("udp4", ":29505")
+	if err != nil {
+		fmt.Println("Failed to resolve, recieve turn on light")
+	}
+	conn, err := net.ListenUDP("udp4", addr)
+	if err != nil {
+		fmt.Println("Failed to listen, recieve turn on light")
+	}
+	defer conn.Close()
+	buf := make([]byte, 1024)
+	for {
+		n, _, err := conn.ReadFromUDP(buf)
+		if err != nil {
+			fmt.Println("Failed to read, recieve turn on light")
+		}
+		recievedMessage := string(buf[:n])
+		messageList := strings.Split(recievedMessage, ",")
+		btnInt, err := strconv.Atoi(messageList[2])
+		btn := io.ButtonType(btnInt)
+		floor, err := strconv.Atoi(messageList[1])
+		io.SetButtonLamp(btn, floor, true)
+	}
+
 }

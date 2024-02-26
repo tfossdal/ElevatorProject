@@ -46,7 +46,7 @@ func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr, *net.TCPListener) {
 	return conn, addr, listener
 }
 
-func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) {
+func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt navn på denne nå?
 	for {
 		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 		buf := make([]byte, 1024)
