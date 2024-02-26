@@ -211,9 +211,5 @@ func SendTurnOnLight(order [3]int) {
 		fmt.Println("Failed to dial, light light")
 	}
 	defer conn.Close()
-	for {
-		conn.Write([]byte(strconv.Itoa(order[0]) + "," + strconv.Itoa(order[1]) + "," + strconv.Itoa(order[2])))
-		//fmt.Println("Message sent: Elevator alive")
-		time.Sleep(10 * time.Millisecond)
-	}
+	conn.Write([]byte(strconv.Itoa(order[0]) + "," + strconv.Itoa(order[1]) + "," + strconv.Itoa(order[2])))
 }
