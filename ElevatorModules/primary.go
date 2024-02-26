@@ -168,7 +168,7 @@ func SendOrderToBackup(conn *net.TCPConn) {
 			return
 		}
 		fmt.Print("Sending light light")
-		SendTurnOnLight(order)
+		go SendTurnOnLight(order)
 	}
 
 }
