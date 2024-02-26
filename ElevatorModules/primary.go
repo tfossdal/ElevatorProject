@@ -101,8 +101,9 @@ func BackupAliveListener(conn *net.TCPConn) {
 	for {
 		conn.SetReadDeadline(time.Now().Add(time.Duration(backupTimeoutTime) * time.Second))
 		buf := make([]byte, 1024)
-		n, err := conn.Read(buf)
-		fmt.Println("Message recieved: " + string(buf[:n]))
+		_, err := conn.Read(buf)
+		//n, err := conn.Read(buf)
+		//fmt.Println("Message recieved: " + string(buf[:n]))
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("Backup Died")
@@ -166,6 +167,7 @@ func SendOrderToBackup(conn *net.TCPConn) {
 		if err != nil {
 			return
 		}
+		fmt.Print("Sending light light")
 		SendTurnOnLight(order)
 	}
 
