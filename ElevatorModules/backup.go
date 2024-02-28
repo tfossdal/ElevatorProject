@@ -36,7 +36,17 @@ func BackupAlive() {
 	}
 }
 
+func InitBackup() {
+	for i := 0; i < io.NumFloors; i++ {
+		backupHallRequests[i] = make([]int, io.NumButtons-1)
+		for j := 0; j < io.NumButtons-1; j++ {
+			backupHallRequests[i][j] = 0
+		}
+	}
+}
+
 func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr, *net.TCPListener) {
+	InitBackup()
 	addr, err := net.ResolveTCPAddr("tcp", ":29506")
 	if err != nil {
 		panic(err)
