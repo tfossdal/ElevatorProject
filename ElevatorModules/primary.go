@@ -12,8 +12,8 @@ import (
 )
 
 var hallRequests = make([][]int, io.NumFloors)
-var cabRequestMap = make(map[int][io.NumFloors]int) //Må fjerne heiser fra map når de dør, Format: {ID: {floor 0, ..., floor N-1}}
-var elevatorStatesMap = make(map[int][3]int)        //Må fjerne heiser fra map når de dør, Format: {ID: {state, direction, floor}}
+var cabRequestMap = make(map[int][io.NumFloors]int) //Format: {ID: {floor 0, ..., floor N-1}}
+var elevatorStatesMap = make(map[int][3]int)        //Format: {ID: {state, direction, floor}}
 
 // var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
 var backupTimeoutTime = 5
@@ -107,11 +107,6 @@ func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
-}
-
-func ElevatorStatesToBackup(conn *net.TCPConn) {
-	retrieveElevatorStates <- 1
-	tempElevatorStatesMap := <- elevatorStates
 }
 
 func BackupAliveListener(conn *net.TCPConn) {

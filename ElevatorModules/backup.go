@@ -1,14 +1,24 @@
 package ElevatorModules
 
 import (
+	el "ElevatorProject/Elevator"
+	io "ElevatorProject/elevio"
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 	"time"
-	el "ElevatorProject/Elevator"
 )
 
+var backupHallRequests = make([][]int, io.NumFloors)
+var backupCabRequestMap = make(map[int][io.NumFloors]int)
 var quitJobAsBackup = make(chan bool)
+
+func DebugBackupMaps() {
+	for key, value := range backupCabRequestMap {
+		fmt.Println(fmt.Sprint(key) + ":" + fmt.Sprint(value[0]) + "," + fmt.Sprint(value[1]) + "," + fmt.Sprint(value[2]) + "," + fmt.Sprint(value[3]))
+	}
+}
 
 func BackupAlive() {
 	addr, err := net.ResolveUDPAddr("udp4", "localhost:29502")
@@ -47,8 +57,6 @@ func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr, *net.TCPListener) {
 	return conn, addr, listener
 }
 
-
-
 func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt navn på denne nå?
 	for {
 		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
@@ -64,12 +72,42 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 		recieved_message := strings.Split(string(buf[:n]), ",")
 		//fmt.Println("Message recieved: " + string(buf[:n]))
 		if recieved_message[0] == "n" {
-			
+			btn, _ := strconv.Atoi(recieved_message[3])
+			flr, _ := strconv.Atoi(recieved_message[2])
+			elevatorID, _ := strconv.Atoi(recieved_message[1])
+			if btn == 2 {
+				UpdateBackupCabRequests(elevatorID, flr)
+			} else {
+				UpdateBackupHallRequests(btn, flr)
+			}
 			fmt.Println("Message recieved: " + string(buf[:n]))
 			continue
 		}
-		if recieved_message[0] == "Primary alive" {
 	}
+}
+
+func UpdateBackupHallRequests(btnType int, flr int) {
+	backupHallRequests[flr][btnType] = 1
+}
+
+func UpdateBackupCabRequests(elevatorID int, flr int) {
+	_, hasKey := backupCabRequestMap[elevatorID]
+	if hasKey {
+		backupCabRequests := backupCabRequestMap[elevatorID]
+		backupCabRequests[flr] = 1
+		backupCabRequestMap[elevatorID] = backupCabRequests
+	} else {
+		backupCabRequests := [io.NumFloors]int{}
+		for i := 0; i < io.NumFloors; i++ {
+			if i == flr {
+				backupCabRequests[i] = 1
+			} else {
+				backupCabRequests[i] = 0
+			}
+		}
+		backupCabRequestMap[elevatorID] = backupCabRequests
+	}
+	DebugBackupMaps()
 }
 
 func BackupTakeover(conn *net.TCPConn) {
