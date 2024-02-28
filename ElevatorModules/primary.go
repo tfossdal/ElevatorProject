@@ -12,8 +12,8 @@ import (
 )
 
 var hallRequests = make([][]int, io.NumFloors)
-var cabRequestMap = make(map[int][io.NumFloors]int) //Må fjerne heiser fra map når de dør
-var elevatorStatesMap = make(map[int][3]int)        //Må fjerne heiser fra map når de dør
+var cabRequestMap = make(map[int][io.NumFloors]int) //Må fjerne heiser fra map når de dør, Format: {ID: {floor 0, ..., floor N-1}}
+var elevatorStatesMap = make(map[int][3]int)        //Må fjerne heiser fra map når de dør, Format: {ID: {state, direction, floor}}
 
 // var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
 var backupTimeoutTime = 5
@@ -26,6 +26,14 @@ var printList = make(chan int)
 var numberOfElevators = make(chan int, 5)
 var newOrderCh = make(chan [3]int, 10)
 var newStatesCh = make(chan [4]int, 10)
+var retrieveElevatorStates = make(chan int)
+var elevatorStates = make(chan map[int][3]int)
+
+func DebugMaps() {
+	for key, value := range cabRequestMap {
+		fmt.Println(fmt.Sprint(key) + ":" + fmt.Sprint(value[0]) + "," + fmt.Sprint(value[1]) + "," + fmt.Sprint(value[2]) + "," + fmt.Sprint(value[3]))
+	}
+}
 
 func InitPrimary() {
 	//Initialize order matrix
@@ -201,17 +209,23 @@ func UpdateCabRequests(elevatorID int, flr int) {
 				cabRequests[i] = 0
 			}
 		}
+		cabRequestMap[elevatorID] = cabRequests
+		DebugMaps()
 	}
 }
 
 func UpdateElevatorStates() {
 	for {
-		newMessage := <-newStatesCh
-		elevatorID := newMessage[0]
-		states := [3]int{newMessage[1], newMessage[2], newMessage[3]}
+		select {
+		case newMessage := <-newStatesCh:
+			elevatorID := newMessage[0]
+			states := [3]int{newMessage[1], newMessage[2], newMessage[3]}
 
-		elevatorStatesMap[elevatorID] = states //Tror det går, altså at den lager en ny key hvis det ikke finnes
-		//MÅ SENDE VIDERE TIL BACKUP
+			elevatorStatesMap[elevatorID] = states //Tror det går, altså at den lager en ny key hvis det ikke finnes
+			//MÅ SENDE VIDERE TIL BACKUP
+		case <-retrieveElevatorStates:
+
+		}
 	}
 }
 
