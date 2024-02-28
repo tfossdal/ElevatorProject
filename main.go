@@ -87,13 +87,14 @@ func main() {
 
 	//elev_init()
 	module.InitLights()
-	go module.IAmAlive()
 	module.BecomePrimary()
+	go module.IAmAlive()
 	go module.RecieveTurnOnLight()
 
 	for {
 		select {
 		case a := <-drv_buttons:
+			fmt.Println("sending button press")
 			ElevatorModules.SendButtonPressUDP(a)
 		}
 	}
