@@ -47,6 +47,8 @@ func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr, *net.TCPListener) {
 	return conn, addr, listener
 }
 
+
+
 func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt navn på denne nå?
 	for {
 		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
@@ -62,9 +64,11 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 		recieved_message := strings.Split(string(buf[:n]), ",")
 		//fmt.Println("Message recieved: " + string(buf[:n]))
 		if recieved_message[0] == "n" {
+			
 			fmt.Println("Message recieved: " + string(buf[:n]))
 			continue
 		}
+		if recieved_message[0] == "Primary alive" {
 	}
 }
 

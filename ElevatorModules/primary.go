@@ -109,6 +109,11 @@ func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 	}
 }
 
+func ElevatorStatesToBackup(conn *net.TCPConn) {
+	retrieveElevatorStates <- 1
+	tempElevatorStatesMap := <- elevatorStates
+}
+
 func BackupAliveListener(conn *net.TCPConn) {
 	for {
 		conn.SetReadDeadline(time.Now().Add(time.Duration(backupTimeoutTime) * time.Second))
@@ -224,7 +229,7 @@ func UpdateElevatorStates() {
 			elevatorStatesMap[elevatorID] = states //Tror det går, altså at den lager en ny key hvis det ikke finnes
 			//MÅ SENDE VIDERE TIL BACKUP
 		case <-retrieveElevatorStates:
-
+			elevatorStates <- elevatorStatesMap
 		}
 	}
 }
