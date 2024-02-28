@@ -1,15 +1,18 @@
 package ElevatorModules
 
 import (
-	io "ElevatorProject/elevio"
 	"fmt"
 	"net"
 	"strconv"
 	"strings"
 	"time"
+	io "ElevatorProject/elevio"
 )
 
 func IAmAlive() {
+	state := strconv.Itoa(int(elevator.State))
+	direction := strconv.Itoa(int(elevator.Dirn))
+	floor := strconv.Itoa(int(elevator.Floor))
 	addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29503")
 	if err != nil {
 		fmt.Println("Failed to resolve, send order")
@@ -21,7 +24,7 @@ func IAmAlive() {
 	defer conn.Close()
 	for {
 		//fmt.Println("Sending message")
-		conn.Write([]byte("4"))
+		conn.Write([]byte("s," + state + "," + direction + "," + floor))
 		//fmt.Println("Message sent: Elevator alive")
 		time.Sleep(10 * time.Millisecond)
 	}

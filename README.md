@@ -14,5 +14,13 @@
     - n - new order/ID
     - a is floor, b is button type
 
+## I'm Alive Format (UDP)
+- s,s,d,f
+    - state of elevator
+    - state (0=idle, 1=moving, 2=doorOpen)
+    - direction (1=up, -1=down, 0=stop)
+    - floor (0 - m-1)
+
+## TODO
 - Must kill backup when connection to it is lost
 https://prod.liveshare.vsengsaas.visualstudio.com/join?E31D4F821FA5898896C2C422D6031A6580E8

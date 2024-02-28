@@ -5,6 +5,7 @@ import (
 	"net"
 	"strings"
 	"time"
+	el "ElevatorProject/Elevator"
 )
 
 var quitJobAsBackup = make(chan bool)
@@ -69,7 +70,7 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 
 func BackupTakeover(conn *net.TCPConn) {
 	quitJobAsBackup <- true
-	elevator.elevatorType = Primary
+	elevator.ElevatorType = el.Primary
 	InitPrimary()
 }
 

@@ -1,17 +1,19 @@
 package ElevatorModules
 
 import (
-	"ElevatorProject/ElevatorModules/PrimaryModules"
+	el "ElevatorProject/Elevator"
+	pm "ElevatorProject/PrimaryModules"
 	io "ElevatorProject/elevio"
 	"fmt"
 	"math/rand"
 	"net"
 	"strconv"
-	"strings"
 	"time"
 )
 
-var requests = make([][]int, io.NumFloors)
+var hallRequests = make([][]int, io.NumFloors)
+var cabRequestMap = make(map[int][io.NumFloors]int) //Må fjerne heiser fra map når de dør
+var elevatorStatesMap = make(map[int][3]int)        //Må fjerne heiser fra map når de dør
 
 // var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
 var backupTimeoutTime = 5
@@ -23,13 +25,14 @@ var idOfLivingElev = make(chan int, 5)
 var printList = make(chan int)
 var numberOfElevators = make(chan int, 5)
 var newOrderCh = make(chan [3]int, 10)
+var newStatesCh = make(chan [4]int, 10)
 
 func InitPrimary() {
 	//Initialize order matrix
 	for i := 0; i < io.NumFloors; i++ {
-		requests[i] = make([]int, io.NumButtons)
-		for j := 0; j < io.NumButtons; j++ {
-			requests[i][j] = 0
+		hallRequests[i] = make([]int, io.NumButtons-1)
+		for j := 0; j < io.NumButtons-1; j++ {
+			hallRequests[i][j] = 0
 		}
 	}
 
@@ -41,8 +44,9 @@ func InitPrimary() {
 
 func PrimaryRoutine() {
 	go PrimaryAlive()
-	go PrimaryModules.ListenUDP("29503", elevatorLives, newOrderCh)
-	go PrimaryModules.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, numberOfElevators)
+	go pm.ListenUDP("29503", elevatorLives, newOrderCh, newStatesCh)
+	go pm.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, numberOfElevators)
+	go UpdateElevatorStates()
 	go DialBackup()
 
 	for {
@@ -133,7 +137,7 @@ func BecomePrimary() {
 	if err != nil {
 		//BECOME PRIMARY
 		fmt.Println("No Primary alive message recieved, Becoming primary")
-		elevator.elevatorType = Primary
+		elevator.ElevatorType = el.Primary
 		InitPrimary()
 		conn.Close()
 		return
@@ -167,39 +171,77 @@ func SendOrderToBackup(conn *net.TCPConn) {
 		if err != nil {
 			return
 		}
+		if order[2] == 2 {
+			UpdateCabRequests(order[0], order[1])
+		} else {
+			UpdateHallRequests(order[2], order[1])
+		}
 		fmt.Print("Sending light light")
 		go SendTurnOnLight(order)
 	}
 
 }
 
-func OrderListener() {
-	//29503
-	addr, err := net.ResolveUDPAddr("udp4", ":29503")
-	if err != nil {
-		fmt.Println("Could not connect")
-	}
-	conn, err := net.ListenUDP("udp4", addr)
-	if err != nil {
-		fmt.Println("Could not listen")
-	}
-	defer conn.Close()
-
-	for {
-		fmt.Print("Primary reading UDP ...")
-		buf := make([]byte, 1024)
-		n, _, err := conn.ReadFromUDP(buf)
-		if err != nil {
-			fmt.Println("Could not read")
-		}
-		orderStr := string(buf[:n])
-		orderLst := strings.Split(orderStr, ",")
-		floorIndex, _ := strconv.Atoi(orderLst[0])
-		buttonIndex, _ := strconv.Atoi(orderLst[1])
-		requests[floorIndex][buttonIndex] = 1
-	}
-
+func UpdateHallRequests(btnType int, flr int) {
+	hallRequests[flr][btnType] = 1
 }
+
+func UpdateCabRequests(elevatorID int, flr int) {
+	_, hasKey := cabRequestMap[elevatorID]
+	if hasKey {
+		cabRequests := cabRequestMap[elevatorID]
+		cabRequests[flr] = 1
+		cabRequestMap[elevatorID] = cabRequests
+	} else {
+		cabRequests := [io.NumFloors]int{}
+		for i := 0; i < io.NumFloors; i++ {
+			if i == flr {
+				cabRequests[i] = 1
+			} else {
+				cabRequests[i] = 0
+			}
+		}
+	}
+}
+
+func UpdateElevatorStates() {
+	for {
+		newMessage := <-newStatesCh
+		elevatorID := newMessage[0]
+		states := [3]int{newMessage[1], newMessage[2], newMessage[3]}
+
+		elevatorStatesMap[elevatorID] = states //Tror det går, altså at den lager en ny key hvis det ikke finnes
+		//MÅ SENDE VIDERE TIL BACKUP
+	}
+}
+
+// func OrderListener() {
+// 	//29503
+// 	addr, err := net.ResolveUDPAddr("udp4", ":29503")
+// 	if err != nil {
+// 		fmt.Println("Could not connect")
+// 	}
+// 	conn, err := net.ListenUDP("udp4", addr)
+// 	if err != nil {
+// 		fmt.Println("Could not listen")
+// 	}
+// 	defer conn.Close()
+
+// 	for {
+// 		fmt.Print("Primary reading UDP ...")
+// 		buf := make([]byte, 1024)
+// 		n, _, err := conn.ReadFromUDP(buf)
+// 		if err != nil {
+// 			fmt.Println("Could not read")
+// 		}
+// 		orderStr := string(buf[:n])
+// 		orderLst := strings.Split(orderStr, ",")
+// 		floorIndex, _ := strconv.Atoi(orderLst[0])
+// 		buttonIndex, _ := strconv.Atoi(orderLst[1])
+// 		requests[floorIndex][buttonIndex] = 1
+// 	}
+
+// }
 
 func SendTurnOnLight(order [3]int) {
 	addr, err := net.ResolveUDPAddr("udp4", ConvertIDtoIP(order[0])+":29505")
