@@ -21,6 +21,13 @@
     - direction (1=up, -1=down, 0=stop)
     - floor (0 - m-1)
 
+## OrderToBackup (TCP)
+- n,ID,f,b
+    - new order
+    - ID (num as string)
+    - floor (0 - m-1)
+    - button (0=up, 1=down, 2=cab)
+
 ## TODO
 - Must kill backup when connection to it is lost
-https://prod.liveshare.vsengsaas.visualstudio.com/join?E31D4F821FA5898896C2C422D6031A6580E8
+https://prod.liveshare.vsengsaas.visualstudio.com/join?236EB79E1FD3C17F58BA537C058F1AB346CA
