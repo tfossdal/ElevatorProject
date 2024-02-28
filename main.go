@@ -86,6 +86,7 @@ func main() {
 	go io.PollStopButton(drv_stop)
 
 	//elev_init()
+	module.InitLights()
 	go module.IAmAlive()
 	module.BecomePrimary()
 	go module.RecieveTurnOnLight()
