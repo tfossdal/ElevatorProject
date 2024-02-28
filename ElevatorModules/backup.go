@@ -86,11 +86,12 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 			flr, _ := strconv.Atoi(recieved_message[2])
 			elevatorID, _ := strconv.Atoi(recieved_message[1])
 			if btn == 2 {
+				fmt.Println("hei")
 				UpdateBackupCabRequests(elevatorID, flr)
 			} else {
 				UpdateBackupHallRequests(btn, flr)
 			}
-			fmt.Println("Message recieved: " + string(buf[:n]))
+			//fmt.Println("Message recieved: " + string(buf[:n]))
 			continue
 		}
 	}
