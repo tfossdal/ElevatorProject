@@ -184,7 +184,7 @@ func SendOrderToBackup(conn *net.TCPConn) {
 		} else {
 			UpdateHallRequests(order[2], order[1])
 		}
-		fmt.Print("Sending light light")
+		fmt.Print("Sending light light\n")
 		go SendTurnOnLight(order)
 	}
 
@@ -210,8 +210,8 @@ func UpdateCabRequests(elevatorID int, flr int) {
 			}
 		}
 		cabRequestMap[elevatorID] = cabRequests
-		DebugMaps()
 	}
+	DebugMaps()
 }
 
 func UpdateElevatorStates() {
