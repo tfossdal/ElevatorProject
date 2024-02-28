@@ -80,12 +80,17 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 			return
 		}
 		recieved_message := strings.Split(string(buf[:n]), ",")
-		//fmt.Println("Message recieved: " + string(buf[:n]))
 		if recieved_message[0] == "n" {
-			btn, _ := strconv.Atoi(recieved_message[3])
+			fmt.Println("Message recieved: " + string(buf[:n]))
+			btn, err := strconv.Atoi(recieved_message[3])
+			if err != nil {
+				panic(err)
+			}
 			flr, _ := strconv.Atoi(recieved_message[2])
 			elevatorID, _ := strconv.Atoi(recieved_message[1])
-			if btn == 2 {
+			fmt.Println(recieved_message[3])
+			fmt.Println(btn)
+			if recieved_message[3] == "2" {
 				fmt.Println("hei")
 				UpdateBackupCabRequests(elevatorID, flr)
 			} else {
