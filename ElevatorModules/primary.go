@@ -128,7 +128,7 @@ func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 		if err != nil {
 			return
 		}
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 	}
 }
 
@@ -190,7 +190,7 @@ func PrimaryAlive() {
 		//fmt.Println("Sending alive message")
 		conn.Write([]byte("Primary alive"))
 		//fmt.Println("Message sent: Primary alive")
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 
