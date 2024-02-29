@@ -35,7 +35,7 @@ var orderTransferCh = make(chan [3]int)
 var terminateBackupConnection = make(chan int)
 var newlyAliveID = make(chan int)
 var listOfLivingCh = make(chan int)
-var reassignCh = make(chan int)
+var reassignCh = make(chan int, 5)
 
 type HRAElevState struct {
 	Behavior    string `json:"behaviour"`
@@ -379,12 +379,17 @@ func SendTurnOnLight(order [3]int) {
 func ReassignRequests() {
 	for {
 		<-reassignCh
+		fmt.Println("3")
 		requestId <- 3
+		fmt.Println("4")
 		θ := <-numberOfElevators
+		fmt.Println("5")
 		LivingElevators := make([]int, θ)
 		for i := 1; i <= θ; i++ {
+			fmt.Println("6")
 			LivingElevators[i-1] = <-idOfLivingElev
 		}
+		fmt.Println("7")
 		hraExecutable := ""
 		switch runtime.GOOS {
 		case "linux":
