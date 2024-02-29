@@ -85,9 +85,6 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 				continue
 			}
 			recieved_message := strings.Split(raw_recieved_message[i], ",")
-			if recieved_message[0] != "Primary alive" {
-				fmt.Println("First element in order: " + recieved_message[0])
-			}
 
 			if recieved_message[0] == "n" {
 				//fmt.Println("Message recieved: " + string(buf[:n]))
