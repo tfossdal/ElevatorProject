@@ -441,8 +441,8 @@ func ReassignRequests() {
 			}
 			f := elevatorStatesMap[id][2]
 			boolCabRequests := []bool{}
-			for i := range elevatorStatesMap[id] {
-				if elevatorStatesMap[id][i] == 1 {
+			for i := range cabRequestMap[id] {
+				if cabRequestMap[id][i] == 1 {
 					boolCabRequests[i] = true
 				} else {
 					boolCabRequests[i] = false
