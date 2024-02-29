@@ -94,9 +94,14 @@ func DialBackup() {
 		go PrimaryAliveTCP(addr, conn)
 		go BackupAliveListener(conn)
 		go SendOrderToBackup(conn)
+		sendDataToNewBackup()
 		break
 	}
 	//defer conn.Close()
+}
+
+func sendDataToNewBackup() {
+
 }
 
 func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
