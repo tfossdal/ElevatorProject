@@ -60,7 +60,7 @@ func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr, *net.TCPListener) {
 		panic(err)
 	}
 	InitBackup()
-	fmt.Println("Became bacup")
+	fmt.Println("Became backup")
 	//fmt.Printf("Connected %d", conn.RemoteAddr())
 	go BackupAliveTCP(addr, conn)
 	go PrimaryAliveListener(conn, listener)
