@@ -148,7 +148,7 @@ func BackupTakeover(conn *net.TCPConn) {
 	}
 	fmt.Println("Got here")
 	for i := range backupHallRequests {
-		for j := range backupHallRequests {
+		for j := range backupHallRequests[i] {
 			fmt.Println("Test")
 			hallRequests[i][j] = backupHallRequests[i][j]
 		}
