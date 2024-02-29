@@ -16,7 +16,7 @@ var cabRequestMap = make(map[int][io.NumFloors]int) //Format: {ID: {floor 0, ...
 var elevatorStatesMap = make(map[int][3]int)        //Format: {ID: {state, direction, floor}}
 
 // var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
-var backupTimeoutTime = 0.2
+var backupTimeoutTime = 3
 
 var elevatorLives = make(chan int, 5)
 var checkLiving = make(chan int)
