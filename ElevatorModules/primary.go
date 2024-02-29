@@ -115,8 +115,7 @@ func sendDataToNewBackup() {
 	for k, v := range cabRequestMap {
 		for i := range v {
 			if v[i] == 1 {
-				fmt.Print("Sending orders: ")
-				fmt.Println([3]int{k, i, 2})
+				fmt.Println("Sending orders: " + fmt.Sprint([3]int{k, i, 2}))
 				orderTransferCh <- [3]int{k, i, 2}
 			}
 		}
@@ -215,11 +214,9 @@ func SendOrderToBackup(conn *net.TCPConn) {
 func TransferOrdersToBackup(conn *net.TCPConn) {
 	for {
 		order := <-orderTransferCh
-		fmt.Print("Writing orders to backup: ")
-		fmt.Println(order)
+		fmt.Println("Writing orders to backup" + fmt.Sprint(order))
 		_, err := conn.Write(append([]byte("n,"+fmt.Sprint(order[0])+","+fmt.Sprint(order[1])+","+fmt.Sprint(order[2])+","), 0))
-		fmt.Print("This is what i wrote: ")
-		fmt.Println("n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",")
+		fmt.Println("This is what i wrote: n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",")
 		if err != nil {
 			fmt.Println("ERROR")
 			return
