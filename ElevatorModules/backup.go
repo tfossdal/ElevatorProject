@@ -46,7 +46,6 @@ func InitBackup() {
 }
 
 func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr, *net.TCPListener) {
-	InitBackup()
 	addr, err := net.ResolveTCPAddr("tcp", ":29506")
 	if err != nil {
 		panic(err)
@@ -60,6 +59,7 @@ func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr, *net.TCPListener) {
 	if err != nil {
 		panic(err)
 	}
+	InitBackup()
 	fmt.Println("Backup server established")
 	fmt.Printf("Connected %d", conn.RemoteAddr())
 	go BackupAliveTCP(addr, conn)

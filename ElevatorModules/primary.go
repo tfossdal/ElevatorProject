@@ -120,7 +120,7 @@ func sendDataToNewBackup() {
 
 func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 	for {
-		_, err := conn.Write(append([]byte("Primary alive"), 0))
+		_, err := conn.Write(append([]byte("Primary alive,"), 0))
 		if err != nil {
 			return
 		}
@@ -139,7 +139,6 @@ func BackupAliveListener(conn *net.TCPConn) {
 			fmt.Println(err)
 			fmt.Println("Backup Died")
 			go DialBackup()
-			//go DialBackup()
 			return
 		}
 	}
