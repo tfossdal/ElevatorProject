@@ -218,7 +218,7 @@ func TransferOrdersToBackup(conn *net.TCPConn) {
 		_, err := conn.Write(append([]byte("n,"+fmt.Sprint(order[0])+","+fmt.Sprint(order[1])+","+fmt.Sprint(order[2])+","), 0))
 		fmt.Println("This is what i wrote: n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",")
 		if err != nil {
-			fmt.Println("ERROR")
+			fmt.Println(err)
 			return
 		}
 	}
