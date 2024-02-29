@@ -96,7 +96,7 @@ func DialBackup() {
 		go BackupAliveListener(conn)
 		go SendOrderToBackup(conn)
 		go TransferOrdersToBackup(conn)
-		time.Sleep(1 * time.Second)
+		time.Sleep(15 * time.Second)
 		sendDataToNewBackup()
 		break
 	}
@@ -128,7 +128,7 @@ func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 		if err != nil {
 			return
 		}
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 
