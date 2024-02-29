@@ -190,7 +190,7 @@ func PrimaryAlive() {
 		//fmt.Println("Sending alive message")
 		conn.Write([]byte("Primary alive"))
 		//fmt.Println("Message sent: Primary alive")
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 	}
 }
 
