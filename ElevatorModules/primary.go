@@ -101,7 +101,20 @@ func DialBackup() {
 }
 
 func sendDataToNewBackup() {
-
+	for i := range hallRequests {
+		for j := range hallRequests[i] {
+			if hallRequests[i][j] == 1 {
+				newOrderCh <- [3]int{-1, i, j}
+			}
+		}
+	}
+	for k, v := range cabRequestMap {
+		for i := range v {
+			if v[i] == 1 {
+				newOrderCh <- [3]int{k, i, 2}
+			}
+		}
+	}
 }
 
 func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
