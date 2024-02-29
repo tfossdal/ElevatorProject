@@ -28,6 +28,7 @@ var newOrderCh = make(chan [3]int, 30)
 var newStatesCh = make(chan [4]int, 30)
 var retrieveElevatorStates = make(chan int)
 var elevatorStates = make(chan map[int][3]int)
+var orderTransferCh = make(chan [3]int)
 
 func DebugMaps() {
 	for key, value := range cabRequestMap {
@@ -94,7 +95,8 @@ func DialBackup() {
 		go PrimaryAliveTCP(addr, conn)
 		go BackupAliveListener(conn)
 		go SendOrderToBackup(conn)
-		go sendDataToNewBackup()
+		go TransferOrdersToBackup(conn)
+		sendDataToNewBackup()
 		break
 	}
 	//defer conn.Close()
@@ -105,7 +107,7 @@ func sendDataToNewBackup() {
 	for i := range hallRequests {
 		for j := range hallRequests[i] {
 			if hallRequests[i][j] == 1 {
-				newOrderCh <- [3]int{-1, i, j}
+				orderTransferCh <- [3]int{0, i, j}
 			}
 		}
 	}
@@ -114,7 +116,7 @@ func sendDataToNewBackup() {
 			if v[i] == 1 {
 				fmt.Print("Sending orders: ")
 				fmt.Println([3]int{k, i, 2})
-				newOrderCh <- [3]int{k, i, 2}
+				orderTransferCh <- [3]int{k, i, 2}
 			}
 		}
 	}
@@ -195,8 +197,6 @@ func PrimaryAlive() {
 func SendOrderToBackup(conn *net.TCPConn) {
 	for {
 		order := <-newOrderCh
-		fmt.Print("Writing orders to backup: ")
-		fmt.Println(order)
 		_, err := conn.Write(append([]byte("n,"+fmt.Sprint(order[0])+","+fmt.Sprint(order[1])+","+fmt.Sprint(order[2])+","), 0))
 		if err != nil {
 			return
@@ -208,7 +208,18 @@ func SendOrderToBackup(conn *net.TCPConn) {
 		}
 		go SendTurnOnLight(order)
 	}
+}
 
+func TransferOrdersToBackup(conn *net.TCPConn) {
+	for {
+		order := <-orderTransferCh
+		fmt.Print("Writing orders to backup: ")
+		fmt.Println(order)
+		_, err := conn.Write(append([]byte("n,"+fmt.Sprint(order[0])+","+fmt.Sprint(order[1])+","+fmt.Sprint(order[2])+","), 0))
+		if err != nil {
+			return
+		}
+	}
 }
 
 func UpdateHallRequests(btnType int, flr int) {
