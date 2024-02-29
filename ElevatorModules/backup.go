@@ -131,6 +131,12 @@ func BackupTakeover(conn *net.TCPConn) {
 	elevator.ElevatorType = el.Primary
 	hallRequests = backupHallRequests
 	cabRequestMap = backupCabRequestMap
+	for k, v := range backupCabRequestMap {
+		cabRequestMap[k] = v
+	}
+	for i := range backupHallRequests {
+		_ = copy(hallRequests[i], backupHallRequests[i])
+	}
 	InitPrimary()
 }
 
