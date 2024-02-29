@@ -16,7 +16,7 @@ var cabRequestMap = make(map[int][io.NumFloors]int) //Format: {ID: {floor 0, ...
 var elevatorStatesMap = make(map[int][3]int)        //Format: {ID: {state, direction, floor}}
 
 // var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
-var backupTimeoutTime = 5
+var backupTimeoutTime = 0.2
 
 var elevatorLives = make(chan int, 5)
 var checkLiving = make(chan int)
@@ -29,6 +29,7 @@ var newStatesCh = make(chan [4]int, 30)
 var retrieveElevatorStates = make(chan int)
 var elevatorStates = make(chan map[int][3]int)
 var orderTransferCh = make(chan [3]int)
+var terminateBackupConnection = make(chan int)
 
 func DebugMaps() {
 	for key, value := range cabRequestMap {
@@ -91,12 +92,12 @@ func DialBackup() {
 			fmt.Println(err)
 			continue
 		}
+		time.Sleep(1 * time.Second)
 		fmt.Println("Connected to backup")
 		go PrimaryAliveTCP(addr, conn)
 		go BackupAliveListener(conn)
 		go SendOrderToBackup(conn)
 		//go TransferOrdersToBackup(conn)
-		time.Sleep(1 * time.Second)
 		sendDataToNewBackup(conn)
 		break
 	}
@@ -156,6 +157,7 @@ func BackupAliveListener(conn *net.TCPConn) {
 			fmt.Println(err)
 			fmt.Println("Backup Died")
 			conn.Close()
+			terminateBackupConnection <- 1
 			go DialBackup()
 			return
 		}
@@ -210,18 +212,23 @@ func PrimaryAlive() {
 
 func SendOrderToBackup(conn *net.TCPConn) {
 	for {
-		order := <-newOrderCh
-		_, err := conn.Write([]byte("n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
-		if err != nil {
-			fmt.Print(err)
+		select {
+		case order := <-newOrderCh:
+			_, err := conn.Write([]byte("n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
+			if err != nil {
+				fmt.Print(err)
+				return
+			}
+			if order[2] == 2 {
+				UpdateCabRequests(order[0], order[1])
+			} else {
+				UpdateHallRequests(order[2], order[1])
+			}
+			go SendTurnOnLight(order)
+
+		case <-terminateBackupConnection:
 			return
 		}
-		if order[2] == 2 {
-			UpdateCabRequests(order[0], order[1])
-		} else {
-			UpdateHallRequests(order[2], order[1])
-		}
-		go SendTurnOnLight(order)
 	}
 }
 
