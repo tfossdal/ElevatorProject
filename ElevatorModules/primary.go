@@ -30,6 +30,7 @@ var retrieveElevatorStates = make(chan int)
 var elevatorStates = make(chan map[int][3]int)
 var orderTransferCh = make(chan [3]int)
 var terminateBackupConnection = make(chan int)
+var newlyAliveID = make(chan int)
 
 func DebugMaps() {
 	for key, value := range cabRequestMap {
@@ -55,11 +56,13 @@ func InitPrimary() {
 func PrimaryRoutine() {
 	go PrimaryAlive()
 	go pm.ListenUDP("29503", elevatorLives, newOrderCh, newStatesCh)
-	go pm.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, numberOfElevators)
+	go pm.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, numberOfElevators, newlyAliveID)
+	go FixNewElevatorLights()
 	go UpdateElevatorStates()
 	go DialBackup()
 
 	for {
+		time.Sleep(500 * time.Millisecond)
 		UpdateLivingElevators()
 	}
 }
@@ -311,6 +314,25 @@ func UpdateElevatorStates() {
 // 	}
 
 // }
+
+func FixNewElevatorLights() {
+	for {
+		id := <-newlyAliveID
+		for i := range hallRequests {
+			for j := range hallRequests[i] {
+				if hallRequests[i][j] == 1 {
+					order := [3]int{id, i, j}
+					SendTurnOnLight(order)
+				}
+			}
+		}
+		for i := range cabRequestMap[id] {
+			if cabRequestMap[id][i] == 1 {
+				SendTurnOnLight([3]int{id, i, 2})
+			}
+		}
+	}
+}
 
 func SendTurnOnLight(order [3]int) {
 	addr, err := net.ResolveUDPAddr("udp4", ConvertIDtoIP(order[0])+":29505")

@@ -11,7 +11,7 @@ type Node struct {
 	lastSeen time.Time
 }
 
-func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList, numberOfElevators chan int) {
+func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList, numberOfElevators, newlyAliveID chan int) {
 	living := list.New()
 	timeout := 1 * time.Second
 	for {
@@ -28,6 +28,7 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 			}
 			if !duplicate {
 				living.PushBack((&Node{id: elevId, lastSeen: time.Now()}))
+				newlyAliveID <- elevId
 			}
 		case <-checkLiving:
 
