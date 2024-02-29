@@ -21,14 +21,20 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh chan [3]int, newS
 	buf := make([]byte, 1024)
 	for {
 		n, recievedAddr, err := conn.ReadFromUDP(buf)
+		if err != nil {
+			fmt.Println(err)
+		}
 		senderIP := recievedAddr.IP
 		recieved_message := strings.Split(string(buf[:n]), ",")
-		//fmt.Println("Read something")
+		fmt.Println(string(buf[:n]) + "yo")
 		if recieved_message[0] == "n" {
+			fmt.Println("test")
 			floor, _ := strconv.Atoi(recieved_message[1])
 			btn, _ := strconv.Atoi(recieved_message[2])
 			order := [3]int{int(senderIP[3]), floor, btn}
+			fmt.Println("1")
 			newOrderCh <- order
+			fmt.Println("2")
 		}
 		if recieved_message[0] == "s" {
 			stateInt, _ := strconv.Atoi(recieved_message[1])
