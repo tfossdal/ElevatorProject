@@ -110,8 +110,8 @@ func sendDataToNewBackup(conn *net.TCPConn) {
 			if hallRequests[i][j] == 1 {
 				order := [3]int{0, i, j}
 				fmt.Println("Writing orders to backup" + fmt.Sprint(order))
-				_, err := conn.Write(append([]byte("n,"+fmt.Sprint(order[0])+","+fmt.Sprint(order[1])+","+fmt.Sprint(order[2])+","), 0))
-				fmt.Println("This is what i wrote: n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",")
+				_, err := conn.Write([]byte("n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
+				fmt.Println("This is what i wrote: n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:")
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -124,8 +124,8 @@ func sendDataToNewBackup(conn *net.TCPConn) {
 			if v[i] == 1 {
 				order := [3]int{k, i, 2}
 				fmt.Println("Writing orders to backup" + fmt.Sprint(order))
-				_, err := conn.Write(append([]byte("n,"+fmt.Sprint(order[0])+","+fmt.Sprint(order[1])+","+fmt.Sprint(order[2])+","), 0))
-				fmt.Println("This is what i wrote: n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",")
+				_, err := conn.Write([]byte("n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
+				fmt.Println("This is what i wrote: n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:")
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -137,7 +137,7 @@ func sendDataToNewBackup(conn *net.TCPConn) {
 
 func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 	for {
-		_, err := conn.Write(append([]byte("Primary alive,"), 0))
+		_, err := conn.Write(append([]byte("Primary alive,:"), 0))
 		if err != nil {
 			return
 		}
@@ -211,7 +211,7 @@ func PrimaryAlive() {
 func SendOrderToBackup(conn *net.TCPConn) {
 	for {
 		order := <-newOrderCh
-		_, err := conn.Write(append([]byte("n,"+fmt.Sprint(order[0])+","+fmt.Sprint(order[1])+","+fmt.Sprint(order[2])+","), 0))
+		_, err := conn.Write([]byte("n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
 		if err != nil {
 			fmt.Print(err)
 			return

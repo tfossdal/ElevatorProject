@@ -79,28 +79,34 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 			BackupTakeover(conn)
 			return
 		}
-		recieved_message := strings.Split(string(buf[:n]), ",")
-		if recieved_message[0] != "Primary alive" {
-			fmt.Println("First element in order: " + recieved_message[0])
-		}
+		raw_recieved_message := strings.Split(string(buf[:n]), ":")
+		for i := range raw_recieved_message {
+			if raw_recieved_message[i] == "" {
+				continue
+			}
+			recieved_message := strings.Split(raw_recieved_message[i], ",")
+			if recieved_message[0] != "Primary alive" {
+				fmt.Println("First element in order: " + recieved_message[0])
+			}
 
-		if recieved_message[0] == "n" {
-			//fmt.Println("Message recieved: " + string(buf[:n]))
-			btn, err := strconv.Atoi(recieved_message[3])
-			if err != nil {
-				panic(err)
+			if recieved_message[0] == "n" {
+				//fmt.Println("Message recieved: " + string(buf[:n]))
+				btn, err := strconv.Atoi(recieved_message[3])
+				if err != nil {
+					panic(err)
+				}
+				flr, _ := strconv.Atoi(recieved_message[2])
+				elevatorID, _ := strconv.Atoi(recieved_message[1])
+				if recieved_message[3] == "2" {
+					fmt.Println("Message recieved cab request: " + raw_recieved_message[i])
+					UpdateBackupCabRequests(elevatorID, flr)
+				} else {
+					fmt.Println("Message recieved hall request: " + raw_recieved_message[i])
+					UpdateBackupHallRequests(btn, flr)
+				}
+				//fmt.Println("Message recieved: " + string(buf[:n]))
+				continue
 			}
-			flr, _ := strconv.Atoi(recieved_message[2])
-			elevatorID, _ := strconv.Atoi(recieved_message[1])
-			if recieved_message[3] == "2" {
-				fmt.Println("Message recieved cab request: " + string(buf[:n]))
-				UpdateBackupCabRequests(elevatorID, flr)
-			} else {
-				fmt.Println("Message recieved hall request: " + string(buf[:n]))
-				UpdateBackupHallRequests(btn, flr)
-			}
-			//fmt.Println("Message recieved: " + string(buf[:n]))
-			continue
 		}
 	}
 }
