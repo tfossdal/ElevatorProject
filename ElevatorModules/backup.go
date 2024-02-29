@@ -60,8 +60,8 @@ func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr, *net.TCPListener) {
 		panic(err)
 	}
 	InitBackup()
-	fmt.Println("Backup server established")
-	fmt.Printf("Connected %d", conn.RemoteAddr())
+	fmt.Println("Became bacup")
+	//fmt.Printf("Connected %d", conn.RemoteAddr())
 	go BackupAliveTCP(addr, conn)
 	go PrimaryAliveListener(conn, listener)
 	return conn, addr, listener
@@ -80,7 +80,7 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 			return
 		}
 		recieved_message := strings.Split(string(buf[:n]), ",")
-		if recieved_message[0] != "Primary alive"{
+		if recieved_message[0] != "Primary alive" {
 			fmt.Println("First element in order: " + recieved_message[0])
 		}
 
@@ -92,8 +92,6 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 			}
 			flr, _ := strconv.Atoi(recieved_message[2])
 			elevatorID, _ := strconv.Atoi(recieved_message[1])
-			fmt.Println(recieved_message[3])
-			fmt.Println(btn)
 			if recieved_message[3] == "2" {
 				fmt.Println("Message recieved cab request: " + string(buf[:n]))
 				UpdateBackupCabRequests(elevatorID, flr)
