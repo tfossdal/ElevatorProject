@@ -354,3 +354,10 @@ func SendTurnOnLight(order [3]int) {
 	defer conn.Close()
 	conn.Write([]byte(strconv.Itoa(order[0]) + "," + strconv.Itoa(order[1]) + "," + strconv.Itoa(order[2])))
 }
+
+func ReassignRequests(reassignCh chan int) {
+	for {
+		<-reassignCh
+		
+	}
+}

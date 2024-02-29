@@ -1,12 +1,12 @@
 package ElevatorModules
 
 import (
+	el "ElevatorProject/Elevator"
 	io "ElevatorProject/elevio"
 	"fmt"
-	el "ElevatorProject/Elevator"
 )
 
-var elevator el.Elevator = el.Elevator{Floor: -1,Dirn: io.MD_Stop,Requests: [io.NumFloors][io.NumButtons]int{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, State: el.Idle, ElevatorType: el.None,Config: el.Config{ClearRequestVariant: el.CV_ALL,DoorOpenDuration_s: 3.0}}
+var elevator el.Elevator = el.Elevator{Floor: -1, Dirn: io.MD_Stop, Requests: [io.NumFloors][io.NumButtons]int{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, State: el.Idle, ElevatorType: el.None, Config: el.Config{ClearRequestVariant: el.CV_ALL, DoorOpenDuration_s: 3.0}}
 
 func PrintState() {
 	fmt.Println(el.StateToString(elevator.State))
@@ -36,6 +36,7 @@ func Fsm_onInitBetweenFloors() {
 	elevator.State = el.Moving
 }
 
+// func Fsm_OnNewOrder(btn_floor int, btn_type io.ButtonType) {
 func Fsm_OnRequestButtonPress(btn_Floor int, btn_type io.ButtonType) {
 	switch elevator.State {
 	case el.DoorOpen:
