@@ -79,7 +79,7 @@ func PrimaryRoutine() {
 	go FixNewElevatorLights()
 	go UpdateElevatorStates()
 	go DialBackup()
-	go ReassignRequests(reassignCh)
+	go ReassignRequests()
 
 	for {
 		time.Sleep(500 * time.Millisecond)
@@ -238,7 +238,9 @@ func SendOrderToBackup(conn *net.TCPConn) {
 	for {
 		select {
 		case order := <-newOrderCh:
+			fmt.Println("1")
 			reassignCh <- 1
+			fmt.Println("2")
 			_, err := conn.Write([]byte("n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
 			if err != nil {
 				fmt.Print(err)
@@ -374,7 +376,7 @@ func SendTurnOnLight(order [3]int) {
 	conn.Write([]byte(strconv.Itoa(order[0]) + "," + strconv.Itoa(order[1]) + "," + strconv.Itoa(order[2])))
 }
 
-func ReassignRequests(reassignCh chan int) {
+func ReassignRequests() {
 	for {
 		<-reassignCh
 		requestId <- 3
