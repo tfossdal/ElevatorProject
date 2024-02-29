@@ -96,7 +96,7 @@ func DialBackup() {
 		go BackupAliveListener(conn)
 		go SendOrderToBackup(conn)
 		go TransferOrdersToBackup(conn)
-		time.Sleep(15 * time.Second)
+		time.Sleep(1 * time.Second)
 		sendDataToNewBackup()
 		break
 	}
