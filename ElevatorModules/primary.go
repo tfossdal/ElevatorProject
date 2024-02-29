@@ -4,9 +4,12 @@ import (
 	el "ElevatorProject/Elevator"
 	pm "ElevatorProject/PrimaryModules"
 	io "ElevatorProject/elevio"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net"
+	"os/exec"
+	"runtime"
 	"strconv"
 	"time"
 )
@@ -31,6 +34,20 @@ var elevatorStates = make(chan map[int][3]int)
 var orderTransferCh = make(chan [3]int)
 var terminateBackupConnection = make(chan int)
 var newlyAliveID = make(chan int)
+var listOfLivingCh = make(chan int)
+var reassignCh = make(chan int)
+
+type HRAElevState struct {
+	Behavior    string `json:"behaviour"`
+	Floor       int    `json:"floor"`
+	Direction   string `json:"direction"`
+	CabRequests []bool `json:"cabRequests"`
+}
+
+type HRAInput struct {
+	HallRequests [][2]bool               `json:"hallRequests"`
+	States       map[string]HRAElevState `json:"states"`
+}
 
 func DebugMaps() {
 	for key, value := range cabRequestMap {
@@ -58,10 +75,11 @@ func InitPrimary() {
 func PrimaryRoutine() {
 	go PrimaryAlive()
 	go pm.ListenUDP("29503", elevatorLives, newOrderCh, newStatesCh)
-	go pm.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, numberOfElevators, newlyAliveID)
+	go pm.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, numberOfElevators, newlyAliveID, listOfLivingCh)
 	go FixNewElevatorLights()
 	go UpdateElevatorStates()
 	go DialBackup()
+	go ReassignRequests(reassignCh)
 
 	for {
 		time.Sleep(500 * time.Millisecond)
@@ -220,6 +238,7 @@ func SendOrderToBackup(conn *net.TCPConn) {
 	for {
 		select {
 		case order := <-newOrderCh:
+			reassignCh <- 1
 			_, err := conn.Write([]byte("n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
 			if err != nil {
 				fmt.Print(err)
@@ -358,6 +377,105 @@ func SendTurnOnLight(order [3]int) {
 func ReassignRequests(reassignCh chan int) {
 	for {
 		<-reassignCh
-		
+		requestId <- 3
+		θ := <-numberOfElevators
+		LivingElevators := make([]int, θ)
+		for i := 1; i <= θ; i++ {
+			LivingElevators[i-1] = <-idOfLivingElev
+		}
+		hraExecutable := ""
+		switch runtime.GOOS {
+		case "linux":
+			hraExecutable = "hall_request_assigner"
+		case "windows":
+			hraExecutable = "hall_request_assigner.exe"
+		default:
+			panic("OS not supported")
+		}
+
+		input := HRAInput{
+			HallRequests: [][2]bool{{false}, {false, false}, {false, false}, {false, false}},
+			States:       map[string]HRAElevState{
+				// "one": HRAElevState{
+				// 	Behavior:    "moving",
+				// 	Floor:       2,
+				// 	Direction:   "up",
+				// 	CabRequests: []bool{false, false, true, true},
+				// },
+				// "two": HRAElevState{
+				// 	Behavior:    "idle",
+				// 	Floor:       0,
+				// 	Direction:   "stop",
+				// 	CabRequests: []bool{false, false, false, false},
+				// },
+			},
+		}
+		for i := range LivingElevators {
+			id := LivingElevators[i]
+			s := ""
+			if elevatorStatesMap[id][0] == 0 {
+				s = "idle"
+			}
+			if elevatorStatesMap[id][0] == 1 {
+				s = "moving"
+			}
+			if elevatorStatesMap[id][0] == 2 {
+				s = "doorOpen"
+			}
+			d := ""
+			if elevatorStatesMap[id][1] == -1 {
+				s = "down"
+			}
+			if elevatorStatesMap[id][1] == 0 {
+				s = "stop"
+			}
+			if elevatorStatesMap[id][1] == 1 {
+				s = "up"
+			}
+			f := elevatorStatesMap[id][2]
+			boolCabRequests := []bool{}
+			for i := range elevatorStatesMap[id] {
+				if elevatorStatesMap[id][i] == 1 {
+					boolCabRequests[i] = true
+				} else {
+					boolCabRequests[i] = false
+				}
+			}
+			input.States[fmt.Sprint(id)] = HRAElevState{s, f, d, boolCabRequests}
+		}
+		for i := range hallRequests {
+			for j := range hallRequests[i] {
+				if hallRequests[i][j] == 1 {
+					input.HallRequests[i][j] = true
+				} else {
+					input.HallRequests[i][j] = false
+				}
+			}
+		}
+
+		jsonBytes, err := json.Marshal(input)
+		if err != nil {
+			fmt.Println("json.Marshal error: ", err)
+			return
+		}
+
+		ret, err := exec.Command("../hall_request_assigner/"+hraExecutable, "-i", string(jsonBytes)).CombinedOutput()
+		if err != nil {
+			fmt.Println("exec.Command error: ", err)
+			fmt.Println(string(ret))
+			return
+		}
+
+		output := new(map[string][][2]bool)
+		err = json.Unmarshal(ret, &output)
+		if err != nil {
+			fmt.Println("json.Unmarshal error: ", err)
+			return
+		}
+
+		fmt.Printf("output: \n")
+		for k, v := range *output {
+			fmt.Printf("%6v :  %+v\n", k, v)
+		}
 	}
 }

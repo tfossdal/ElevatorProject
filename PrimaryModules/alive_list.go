@@ -11,7 +11,8 @@ type Node struct {
 	lastSeen time.Time
 }
 
-func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList, numberOfElevators, newlyAliveID chan int) {
+
+func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList, numberOfElevators, newlyAliveID, listOfLivingCh chan int) {
 	living := list.New()
 	timeout := 1 * time.Second
 	for {
@@ -50,6 +51,17 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 					living.Remove(e)
 				}
 			}
+			if whatToRetrieve == 3 {
+			θ := 0
+			for e := living.Front(); e != nil; e = e.Next() {
+				node := e.Value.(*Node)
+				fmt.Println(node.id)
+				θ++
+			}
+			numberOfElevators <- θ
+			for e := living.Front(); e != nil; e = e.Next() {
+				listOfLivingCh <- e.Value.(*Node).id
+			}}
 
 			if whatToRetrieve == 1 {
 				fmt.Println("Retrieving firster")
