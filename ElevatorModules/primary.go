@@ -24,8 +24,8 @@ var requestId = make(chan int, 5)
 var idOfLivingElev = make(chan int, 5)
 var printList = make(chan int)
 var numberOfElevators = make(chan int, 5)
-var newOrderCh = make(chan [3]int, 10)
-var newStatesCh = make(chan [4]int, 10)
+var newOrderCh = make(chan [3]int, 30)
+var newStatesCh = make(chan [4]int, 30)
 var retrieveElevatorStates = make(chan int)
 var elevatorStates = make(chan map[int][3]int)
 
@@ -94,13 +94,14 @@ func DialBackup() {
 		go PrimaryAliveTCP(addr, conn)
 		go BackupAliveListener(conn)
 		go SendOrderToBackup(conn)
-		sendDataToNewBackup()
+		go sendDataToNewBackup()
 		break
 	}
 	//defer conn.Close()
 }
 
 func sendDataToNewBackup() {
+	fmt.Println("Sending data to new backup")
 	for i := range hallRequests {
 		for j := range hallRequests[i] {
 			if hallRequests[i][j] == 1 {

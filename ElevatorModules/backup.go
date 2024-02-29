@@ -80,8 +80,9 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 			return
 		}
 		recieved_message := strings.Split(string(buf[:n]), ",")
+		fmt.Println("First element in order: " + recieved_message[0])
 		if recieved_message[0] == "n" {
-			fmt.Println("Message recieved: " + string(buf[:n]))
+			//fmt.Println("Message recieved: " + string(buf[:n]))
 			btn, err := strconv.Atoi(recieved_message[3])
 			if err != nil {
 				panic(err)
@@ -91,10 +92,10 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 			fmt.Println(recieved_message[3])
 			fmt.Println(btn)
 			if recieved_message[3] == "2" {
-				fmt.Println("Message recieved: " + string(buf[:n]))
+				fmt.Println("Message recieved cab request: " + string(buf[:n]))
 				UpdateBackupCabRequests(elevatorID, flr)
 			} else {
-				fmt.Println("Message recieved: " + string(buf[:n]))
+				fmt.Println("Message recieved hall request: " + string(buf[:n]))
 				UpdateBackupHallRequests(btn, flr)
 			}
 			//fmt.Println("Message recieved: " + string(buf[:n]))
