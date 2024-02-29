@@ -151,7 +151,7 @@ func BecomePrimary() {
 		return
 	}
 	fmt.Printf("Recieved message: %s\n", buf[:])
-	AcceptPrimaryDial()
+	go AcceptPrimaryDial()
 }
 
 func PrimaryAlive() {
