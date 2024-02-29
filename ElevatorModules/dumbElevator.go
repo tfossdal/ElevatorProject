@@ -53,7 +53,7 @@ func RecieveTurnOnLight() {
 		fmt.Println("Failed to listen, recieve turn on light")
 	}
 	defer conn.Close()
-	buf := make([]byte, 1024)
+	buf := make([]byte, 2048)
 	for {
 		n, _, err := conn.ReadFromUDP(buf)
 		if err != nil {

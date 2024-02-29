@@ -129,11 +129,16 @@ func UpdateBackupCabRequests(elevatorID int, flr int) {
 		}
 		backupCabRequestMap[elevatorID] = backupCabRequests
 	}
-	DebugBackupMaps()
 }
 
 func BackupTakeover(conn *net.TCPConn) {
+	fmt.Println("Before init:")
+	DebugBackupMaps()
+	fmt.Println(backupHallRequests)
 	InitPrimary()
+	fmt.Println("After init:")
+	DebugBackupMaps()
+	fmt.Println(backupHallRequests)
 	quitJobAsBackup <- true
 	elevator.ElevatorType = el.Primary
 	for k, v := range backupCabRequestMap {
@@ -142,6 +147,9 @@ func BackupTakeover(conn *net.TCPConn) {
 	for i := range backupHallRequests {
 		_ = copy(hallRequests[i], backupHallRequests[i])
 	}
+	fmt.Println("After copying init:")
+	DebugMaps()
+	fmt.Println(hallRequests)
 }
 
 func BackupAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {

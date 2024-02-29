@@ -339,6 +339,7 @@ func SendTurnOnLight(order [3]int) {
 	if order[2] != 2 {
 		sendToIp = ConvertIDtoIP(255)
 	}
+	fmt.Println("Sending light to: " + sendToIp)
 	addr, err := net.ResolveUDPAddr("udp4", sendToIp+":29505")
 	if err != nil {
 		fmt.Println("Failed to resolve, light light")
