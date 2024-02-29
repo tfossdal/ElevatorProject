@@ -133,9 +133,9 @@ func UpdateBackupCabRequests(elevatorID int, flr int) {
 }
 
 func BackupTakeover(conn *net.TCPConn) {
+	InitPrimary()
 	quitJobAsBackup <- true
 	elevator.ElevatorType = el.Primary
-	InitPrimary()
 	for k, v := range backupCabRequestMap {
 		cabRequestMap[k] = v
 	}
