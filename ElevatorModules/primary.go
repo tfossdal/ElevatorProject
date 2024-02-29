@@ -431,15 +431,17 @@ func ReassignRequests() {
 			}
 			d := ""
 			if elevatorStatesMap[id][1] == -1 {
-				s = "down"
+				d = "down"
 			}
 			if elevatorStatesMap[id][1] == 0 {
-				s = "stop"
+				d = "stop"
 			}
 			if elevatorStatesMap[id][1] == 1 {
-				s = "up"
+				d = "up"
 			}
 			f := elevatorStatesMap[id][2]
+			fmt.Println("Floor: " + fmt.Sprint(f))
+			f = 1
 			boolCabRequests := [io.NumFloors]bool{}
 			for i := range cabRequestMap[id] {
 				if cabRequestMap[id][i] == 1 {
@@ -466,7 +468,7 @@ func ReassignRequests() {
 			return
 		}
 
-		ret, err := exec.Command("/hall_request_assigner/"+hraExecutable, "-i", string(jsonBytes)).CombinedOutput()
+		ret, err := exec.Command("hall_request_assigner/"+hraExecutable, "-i", string(jsonBytes)).CombinedOutput()
 		if err != nil {
 			fmt.Println("exec.Command error: ", err)
 			fmt.Println(string(ret))

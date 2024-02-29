@@ -40,7 +40,10 @@ func SendButtonPressUDP(btn io.ButtonEvent) {
 		fmt.Println("Failed to dial, send order")
 	}
 	defer conn.Close()
-	conn.Write([]byte("n," + fmt.Sprint(btn.Floor) + "," + fmt.Sprint(btn.Button)))
+	_, err = conn.Write([]byte("n," + fmt.Sprint(btn.Floor) + "," + fmt.Sprint(btn.Button)))
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func RecieveTurnOnLight() {
