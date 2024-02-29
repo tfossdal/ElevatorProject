@@ -199,8 +199,10 @@ func SendOrderToBackup(conn *net.TCPConn) {
 	for {
 		order := <-newOrderCh
 		_, err := conn.Write(append([]byte("n,"+fmt.Sprint(order[0])+","+fmt.Sprint(order[1])+","+fmt.Sprint(order[2])+","), 0))
+		fmt.Print("This is what i wrote: ")
 		fmt.Println("n,"+fmt.Sprint(order[0])+","+fmt.Sprint(order[1])+","+fmt.Sprint(order[2])+",")
 		if err != nil {
+			fmt.Print("An error occured in send order to backup")
 			return
 		}
 		if order[2] == 2 {
