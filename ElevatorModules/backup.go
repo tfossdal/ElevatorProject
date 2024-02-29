@@ -135,7 +135,7 @@ func BackupTakeover(conn *net.TCPConn) {
 	fmt.Println("Before init:")
 	DebugBackupMaps()
 	fmt.Println(backupHallRequests)
-	InitPrimary()
+	InitPrimaryMatrix()
 	fmt.Println("After init:")
 	DebugBackupMaps()
 	fmt.Println(backupHallRequests)
@@ -157,6 +157,7 @@ func BackupTakeover(conn *net.TCPConn) {
 	fmt.Println("After copying init:")
 	DebugMaps()
 	fmt.Println(hallRequests)
+	InitPrimary()
 }
 
 func BackupAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {

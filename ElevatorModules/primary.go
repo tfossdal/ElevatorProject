@@ -38,15 +38,17 @@ func DebugMaps() {
 	}
 }
 
-func InitPrimary() {
-	//Initialize order matrix
+func InitPrimaryMatrix() {
 	for i := 0; i < io.NumFloors; i++ {
 		hallRequests[i] = make([]int, io.NumButtons-1)
 		for j := 0; j < io.NumButtons-1; j++ {
 			hallRequests[i][j] = 0
 		}
 	}
+}
 
+func InitPrimary() {
+	//Initialize order matrix
 	//Start GoRoutines
 	go PrimaryRoutine()
 
@@ -187,6 +189,7 @@ func BecomePrimary() {
 		//BECOME PRIMARY
 		fmt.Println("No Primary alive message recieved, Becoming primary")
 		elevator.ElevatorType = el.Primary
+		InitPrimaryMatrix()
 		InitPrimary()
 		conn.Close()
 		return
