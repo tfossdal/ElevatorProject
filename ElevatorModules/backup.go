@@ -144,8 +144,13 @@ func BackupTakeover(conn *net.TCPConn) {
 	for k, v := range backupCabRequestMap {
 		cabRequestMap[k] = v
 	}
+	fmt.Println("Got here")
 	for i := range backupHallRequests {
-		_ = copy(hallRequests[i], backupHallRequests[i])
+		for j := range backupHallRequests {
+			fmt.Println("Test")
+			hallRequests[i][j] = backupHallRequests[i][j]
+		}
+		//_ = copy(hallRequests[i], backupHallRequests[i])
 	}
 	fmt.Println("After copying init:")
 	DebugMaps()
