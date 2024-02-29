@@ -43,12 +43,6 @@ func InitBackup() {
 			backupHallRequests[i][j] = 0
 		}
 	}
-	for i := 0; i < io.NumFloors; i++ {
-		hallRequests[i] = make([]int, io.NumButtons-1)
-		for j := 0; j < io.NumButtons-1; j++ {
-			hallRequests[i][j] = 0
-		}
-	}
 }
 
 func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr, *net.TCPListener) {
@@ -141,16 +135,13 @@ func UpdateBackupCabRequests(elevatorID int, flr int) {
 func BackupTakeover(conn *net.TCPConn) {
 	quitJobAsBackup <- true
 	elevator.ElevatorType = el.Primary
+	InitPrimary()
 	for k, v := range backupCabRequestMap {
 		cabRequestMap[k] = v
 	}
 	for i := range backupHallRequests {
-		for j := range backupHallRequests[i] {
-			hallRequests[i][j] = backupHallRequests[i][j]
-		}
-		//_ = copy(hallRequests[i], backupHallRequests[i])
+		_ = copy(hallRequests[i], backupHallRequests[i])
 	}
-	InitPrimary()
 }
 
 func BackupAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
