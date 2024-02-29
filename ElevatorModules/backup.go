@@ -141,7 +141,9 @@ func BackupTakeover(conn *net.TCPConn) {
 	fmt.Println(backupHallRequests)
 	quitJobAsBackup <- true
 	elevator.ElevatorType = el.Primary
+	fmt.Println("GOT HERERERER")
 	for k, v := range backupCabRequestMap {
+		fmt.Println("NO HERERER")
 		cabRequestMap[k] = v
 	}
 	fmt.Println("Got here")
