@@ -139,7 +139,10 @@ func BackupTakeover(conn *net.TCPConn) {
 		cabRequestMap[k] = v
 	}
 	for i := range backupHallRequests {
-		_ = copy(hallRequests[i], backupHallRequests[i])
+		for j := range backupHallRequests[i] {
+			hallRequests[i][j] = backupHallRequests[i][j]
+		}
+		//_ = copy(hallRequests[i], backupHallRequests[i])
 	}
 	InitPrimary()
 }

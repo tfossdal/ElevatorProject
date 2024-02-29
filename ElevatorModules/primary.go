@@ -335,7 +335,11 @@ func FixNewElevatorLights() {
 }
 
 func SendTurnOnLight(order [3]int) {
-	addr, err := net.ResolveUDPAddr("udp4", ConvertIDtoIP(order[0])+":29505")
+	sendToIp := ConvertIDtoIP(order[0])
+	if order[2] != 2 {
+		sendToIp = "255"
+	}
+	addr, err := net.ResolveUDPAddr("udp4", sendToIp+":29505")
 	if err != nil {
 		fmt.Println("Failed to resolve, light light")
 	}
