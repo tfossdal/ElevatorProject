@@ -387,7 +387,7 @@ func ReassignRequests() {
 		LivingElevators := make([]int, θ)
 		for i := 1; i <= θ; i++ {
 			fmt.Println("6")
-			LivingElevators[i-1] = <-idOfLivingElev
+			LivingElevators[i-1] = <-listOfLivingCh
 		}
 		fmt.Println("7")
 		hraExecutable := ""
