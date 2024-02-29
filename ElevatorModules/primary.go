@@ -171,6 +171,7 @@ func BackupAliveListener(conn *net.TCPConn) {
 
 func BecomePrimary() {
 	//29501
+	InitPrimaryMatrix()
 	addr, err := net.ResolveUDPAddr("udp4", ":29501")
 	if err != nil {
 		fmt.Println("Failed to resolve")
@@ -189,7 +190,6 @@ func BecomePrimary() {
 		//BECOME PRIMARY
 		fmt.Println("No Primary alive message recieved, Becoming primary")
 		elevator.ElevatorType = el.Primary
-		InitPrimaryMatrix()
 		InitPrimary()
 		conn.Close()
 		return

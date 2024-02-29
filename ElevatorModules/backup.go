@@ -10,12 +10,10 @@ import (
 	"time"
 )
 
-var backupHallRequests = make([][]int, io.NumFloors)
-var backupCabRequestMap = make(map[int][io.NumFloors]int)
-var quitJobAsBackup = make(chan bool)
+//var quitJobAsBackup = make(chan bool)
 
 func DebugBackupMaps() {
-	for key, value := range backupCabRequestMap {
+	for key, value := range cabRequestMap {
 		fmt.Println(fmt.Sprint(key) + ":" + fmt.Sprint(value[0]) + "," + fmt.Sprint(value[1]) + "," + fmt.Sprint(value[2]) + "," + fmt.Sprint(value[3]))
 	}
 }
@@ -38,9 +36,9 @@ func BackupAlive() {
 
 func InitBackup() {
 	for i := 0; i < io.NumFloors; i++ {
-		backupHallRequests[i] = make([]int, io.NumButtons-1)
+		hallRequests[i] = make([]int, io.NumButtons-1)
 		for j := 0; j < io.NumButtons-1; j++ {
-			backupHallRequests[i][j] = 0
+			hallRequests[i][j] = 0
 		}
 	}
 }
@@ -96,10 +94,10 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 				elevatorID, _ := strconv.Atoi(recieved_message[1])
 				if recieved_message[3] == "2" {
 					fmt.Println("Message recieved cab request: " + raw_recieved_message[i])
-					UpdateBackupCabRequests(elevatorID, flr)
+					UpdatecabRequests(elevatorID, flr)
 				} else {
 					fmt.Println("Message recieved hall request: " + raw_recieved_message[i])
-					UpdateBackupHallRequests(btn, flr)
+					UpdatehallRequests(btn, flr)
 				}
 				//fmt.Println("Message recieved: " + string(buf[:n]))
 				continue
@@ -108,52 +106,52 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 	}
 }
 
-func UpdateBackupHallRequests(btnType int, flr int) {
-	backupHallRequests[flr][btnType] = 1
+func UpdatehallRequests(btnType int, flr int) {
+	hallRequests[flr][btnType] = 1
 }
 
-func UpdateBackupCabRequests(elevatorID int, flr int) {
-	_, hasKey := backupCabRequestMap[elevatorID]
+func UpdatecabRequests(elevatorID int, flr int) {
+	_, hasKey := cabRequestMap[elevatorID]
 	if hasKey {
-		backupCabRequests := backupCabRequestMap[elevatorID]
-		backupCabRequests[flr] = 1
-		backupCabRequestMap[elevatorID] = backupCabRequests
+		cabRequests := cabRequestMap[elevatorID]
+		cabRequests[flr] = 1
+		cabRequestMap[elevatorID] = cabRequests
 	} else {
-		backupCabRequests := [io.NumFloors]int{}
+		cabRequests := [io.NumFloors]int{}
 		for i := 0; i < io.NumFloors; i++ {
 			if i == flr {
-				backupCabRequests[i] = 1
+				cabRequests[i] = 1
 			} else {
-				backupCabRequests[i] = 0
+				cabRequests[i] = 0
 			}
 		}
-		backupCabRequestMap[elevatorID] = backupCabRequests
+		cabRequestMap[elevatorID] = cabRequests
 	}
 }
 
 func BackupTakeover(conn *net.TCPConn) {
 	fmt.Println("Before init:")
 	DebugBackupMaps()
-	fmt.Println(backupHallRequests)
-	InitPrimaryMatrix()
+	fmt.Println(hallRequests)
+	//InitPrimaryMatrix()
 	fmt.Println("After init:")
 	DebugBackupMaps()
-	fmt.Println(backupHallRequests)
+	fmt.Println(hallRequests)
 	//quitJobAsBackup <- true
 	elevator.ElevatorType = el.Primary
 	fmt.Println("GOT HERERERER")
-	for k, v := range backupCabRequestMap {
-		fmt.Println("NO HERERER")
-		cabRequestMap[k] = v
-	}
+	// for k, v := range cabRequestMap {
+	// 	fmt.Println("NO HERERER")
+	// 	cabRequestMap[k] = v
+	// }
 	fmt.Println("Got here")
-	for i := range backupHallRequests {
-		for j := range backupHallRequests[i] {
-			fmt.Println("Test")
-			hallRequests[i][j] = backupHallRequests[i][j]
-		}
-		//_ = copy(hallRequests[i], backupHallRequests[i])
-	}
+	// for i := range hallRequests {
+	// 	for j := range hallRequests[i] {
+	// 		fmt.Println("Test")
+	// 		hallRequests[i][j] = hallRequests[i][j]
+	// 	}
+	// 	//_ = copy(hallRequests[i], hallRequests[i])
+	// }
 	fmt.Println("After copying init:")
 	DebugMaps()
 	fmt.Println(hallRequests)
