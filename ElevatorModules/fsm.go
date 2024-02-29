@@ -6,7 +6,7 @@ import (
 	el "ElevatorProject/Elevator"
 )
 
-var elevator el.Elevator = el.Elevator{-1, io.MD_Stop, [io.NumFloors][io.NumButtons]int{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, el.Idle, el.None, el.Config{el.CV_ALL, 3.0}}
+var elevator el.Elevator = el.Elevator{Floor: -1,Dirn: io.MD_Stop,Requests: [io.NumFloors][io.NumButtons]int{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, State: el.Idle, ElevatorType: el.None,Config: el.Config{ClearRequestVariant: el.CV_ALL,DoorOpenDuration_s: 3.0}}
 
 func PrintState() {
 	fmt.Println(el.StateToString(elevator.State))

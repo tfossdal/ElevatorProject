@@ -91,9 +91,10 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 			fmt.Println(recieved_message[3])
 			fmt.Println(btn)
 			if recieved_message[3] == "2" {
-				fmt.Println("hei")
+				fmt.Println("Message recieved: " + string(buf[:n]))
 				UpdateBackupCabRequests(elevatorID, flr)
 			} else {
+				fmt.Println("Message recieved: " + string(buf[:n]))
 				UpdateBackupHallRequests(btn, flr)
 			}
 			//fmt.Println("Message recieved: " + string(buf[:n]))
