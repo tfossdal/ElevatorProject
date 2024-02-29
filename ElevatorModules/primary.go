@@ -38,10 +38,10 @@ var listOfLivingCh = make(chan int)
 var reassignCh = make(chan int, 5)
 
 type HRAElevState struct {
-	Behavior    string `json:"behaviour"`
-	Floor       int    `json:"floor"`
-	Direction   string `json:"direction"`
-	CabRequests []bool `json:"cabRequests"`
+	Behavior    string             `json:"behaviour"`
+	Floor       int                `json:"floor"`
+	Direction   string             `json:"direction"`
+	CabRequests [io.NumFloors]bool `json:"cabRequests"`
 }
 
 type HRAInput struct {
@@ -440,7 +440,7 @@ func ReassignRequests() {
 				s = "up"
 			}
 			f := elevatorStatesMap[id][2]
-			boolCabRequests := []bool{}
+			boolCabRequests := [io.NumFloors]bool{}
 			for i := range cabRequestMap[id] {
 				if cabRequestMap[id][i] == 1 {
 					boolCabRequests[i] = true
