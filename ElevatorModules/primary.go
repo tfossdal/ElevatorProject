@@ -95,28 +95,41 @@ func DialBackup() {
 		go PrimaryAliveTCP(addr, conn)
 		go BackupAliveListener(conn)
 		go SendOrderToBackup(conn)
-		go TransferOrdersToBackup(conn)
+		//go TransferOrdersToBackup(conn)
 		time.Sleep(1 * time.Second)
-		sendDataToNewBackup()
+		sendDataToNewBackup(conn)
 		break
 	}
 	//defer conn.Close()
 }
 
-func sendDataToNewBackup() {
+func sendDataToNewBackup(conn *net.TCPConn) {
 	fmt.Println("Sending data to new backup")
 	for i := range hallRequests {
 		for j := range hallRequests[i] {
 			if hallRequests[i][j] == 1 {
-				orderTransferCh <- [3]int{0, i, j}
+				order := [3]int{0, i, j}
+				fmt.Println("Writing orders to backup" + fmt.Sprint(order))
+				_, err := conn.Write(append([]byte("n,"+fmt.Sprint(order[0])+","+fmt.Sprint(order[1])+","+fmt.Sprint(order[2])+","), 0))
+				fmt.Println("This is what i wrote: n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",")
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
 			}
 		}
 	}
 	for k, v := range cabRequestMap {
 		for i := range v {
 			if v[i] == 1 {
-				fmt.Println("Sending orders: " + fmt.Sprint([3]int{k, i, 2}))
-				orderTransferCh <- [3]int{k, i, 2}
+				order := [3]int{k, i, 2}
+				fmt.Println("Writing orders to backup" + fmt.Sprint(order))
+				_, err := conn.Write(append([]byte("n,"+fmt.Sprint(order[0])+","+fmt.Sprint(order[1])+","+fmt.Sprint(order[2])+","), 0))
+				fmt.Println("This is what i wrote: n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",")
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
 			}
 		}
 	}
