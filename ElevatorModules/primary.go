@@ -142,6 +142,7 @@ func BackupAliveListener(conn *net.TCPConn) {
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("Backup Died")
+			conn.Close()
 			go DialBackup()
 			return
 		}
@@ -199,7 +200,7 @@ func SendOrderToBackup(conn *net.TCPConn) {
 		order := <-newOrderCh
 		_, err := conn.Write(append([]byte("n,"+fmt.Sprint(order[0])+","+fmt.Sprint(order[1])+","+fmt.Sprint(order[2])+","), 0))
 		if err != nil {
-			fmt.Print("An error occured in send order to backup")
+			fmt.Print(err)
 			return
 		}
 		if order[2] == 2 {
