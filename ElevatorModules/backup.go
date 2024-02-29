@@ -166,6 +166,7 @@ func BackupAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 		case <-quitJobAsBackup:
 			return
 		default:
+			fmt.Println("HAHAHAHAHA")
 			_, err := conn.Write(append([]byte("Backup alive"), 0))
 			if err != nil {
 				return
