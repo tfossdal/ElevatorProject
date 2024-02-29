@@ -105,8 +105,6 @@ func sendDataToNewBackup() {
 	for i := range hallRequests {
 		for j := range hallRequests[i] {
 			if hallRequests[i][j] == 1 {
-				fmt.Print("Sending orders: ")
-				fmt.Println([3]int{-1, i, j})
 				newOrderCh <- [3]int{-1, i, j}
 			}
 		}
@@ -114,6 +112,8 @@ func sendDataToNewBackup() {
 	for k, v := range cabRequestMap {
 		for i := range v {
 			if v[i] == 1 {
+				fmt.Print("Sending orders: ")
+				fmt.Println([3]int{k, i, 2})
 				newOrderCh <- [3]int{k, i, 2}
 			}
 		}
