@@ -139,7 +139,7 @@ func BackupTakeover(conn *net.TCPConn) {
 	fmt.Println("After init:")
 	DebugBackupMaps()
 	fmt.Println(backupHallRequests)
-	quitJobAsBackup <- true
+	//quitJobAsBackup <- true
 	elevator.ElevatorType = el.Primary
 	fmt.Println("GOT HERERERER")
 	for k, v := range backupCabRequestMap {
@@ -163,10 +163,9 @@ func BackupAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 	for {
 		//fmt.Println("Sending Backup Alive")
 		select {
-		case <-quitJobAsBackup:
-			return
+		// case <-quitJobAsBackup:
+		// 	return
 		default:
-			fmt.Println("HAHAHAHAHA")
 			_, err := conn.Write(append([]byte("Backup alive"), 0))
 			if err != nil {
 				return
