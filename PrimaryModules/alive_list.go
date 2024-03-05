@@ -11,7 +11,6 @@ type Node struct {
 	lastSeen time.Time
 }
 
-
 func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList, numberOfElevators, newlyAliveID, listOfLivingCh chan int) {
 	living := list.New()
 	timeout := 1 * time.Second
@@ -32,7 +31,6 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 				newlyAliveID <- elevId
 			}
 		case <-checkLiving:
-
 			for e := living.Front(); e != nil; e = e.Next() {
 				node := e.Value.(*Node)
 				if node.lastSeen.Add(timeout).Before(time.Now()) {
@@ -43,6 +41,7 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 			}
 		case whatToRetrieve := <-retrieveId:
 			//check for living before extracting
+
 			for e := living.Front(); e != nil; e = e.Next() {
 				node := e.Value.(*Node)
 				if node.lastSeen.Add(timeout).Before(time.Now()) {
@@ -52,18 +51,17 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 				}
 			}
 			if whatToRetrieve == 3 {
-			θ := 0
-			for e := living.Front(); e != nil; e = e.Next() {
-				node := e.Value.(*Node)
-				fmt.Println(node.id)
-				θ++
-			}
-			numberOfElevators <- θ
-			for e := living.Front(); e != nil; e = e.Next() {
-				listOfLivingCh <- e.Value.(*Node).id
-			}}
-
-			if whatToRetrieve == 1 {
+				θ := 0
+				for e := living.Front(); e != nil; e = e.Next() {
+					node := e.Value.(*Node)
+					fmt.Println(node.id)
+					θ++
+				}
+				numberOfElevators <- θ
+				for e := living.Front(); e != nil; e = e.Next() {
+					listOfLivingCh <- e.Value.(*Node).id
+				}
+			} else if whatToRetrieve == 1 {
 				fmt.Println("Retrieving firster")
 				e := living.Front() //Må finne løsning på ka som skjer
 				if e == nil {       //om e ikke finnes eller er seg selv

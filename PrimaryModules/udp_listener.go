@@ -32,9 +32,7 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh chan [3]int, newS
 			floor, _ := strconv.Atoi(recieved_message[1])
 			btn, _ := strconv.Atoi(recieved_message[2])
 			order := [3]int{int(senderIP[3]), floor, btn}
-			fmt.Println("1")
 			newOrderCh <- order
-			fmt.Println("2")
 		}
 		if recieved_message[0] == "s" {
 			stateInt, _ := strconv.Atoi(recieved_message[1])
@@ -51,8 +49,10 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh chan [3]int, newS
 		//fmt.Println(string(buf[:n])) 						//testing
 		//SenderNumber := fmt.Sprintf("%d", senderIP[3])	//testing
 		//fmt.Println(senderIP.String()) 					//testing
-		//fmt.Println(SenderNumber) 						//testing
+		//fmt.Println(SenderNumber)
+		fmt.Println("If this is last, elevatorLives is causing trouble") //testing
 		elevatorLives <- int(senderIP[3])
+		fmt.Println("I even got down here")
 	}
 }
 

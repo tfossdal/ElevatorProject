@@ -21,7 +21,7 @@ var elevatorStatesMap = make(map[int][3]int)        //Format: {ID: {state, direc
 // var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
 var backupTimeoutTime = 3
 
-var elevatorLives = make(chan int, 5)
+var elevatorLives = make(chan int, 30)
 var checkLiving = make(chan int)
 var requestId = make(chan int, 5)
 var idOfLivingElev = make(chan int, 5)
@@ -230,7 +230,7 @@ func PrimaryAlive() {
 		//fmt.Println("Sending alive message")
 		conn.Write([]byte("Primary alive"))
 		//fmt.Println("Message sent: Primary alive")
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
