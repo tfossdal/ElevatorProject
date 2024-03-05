@@ -26,7 +26,7 @@ func IAmAlive() {
 		//fmt.Println("Sending message")
 		conn.Write([]byte("s," + state + "," + direction + "," + floor))
 		//fmt.Println("Message sent: Elevator alive")
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
