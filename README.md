@@ -29,5 +29,20 @@
     - button (0=up, 1=down, 2=cab)
 
 ## TODO
+- Update requests at elevators
+    - Send new requests to elevator (tcp/udp?)
+    - Fsm_OnRequestButtonPress (maybe rename this? I think it should be called when new orders are recieved?)
+    - Maybe modify this function to also update requests?
+    - Right now it only takes new buttonpresses, and does not remove wrong ones
+    - Bit mask?
+    - Maybe use bit mask first, then run the function without button
+    - Cost function does return the floor you are at
+- Cab calls should work even offline
+- Packet loss should only cause delay in all lights being synchronized
+- Kill oldest primary if two is present
+    - Store time of beoming primary
+    - Send it with primary alive
+    - Only needs to check for time in primary
+    - Should current queue be transfered? I think no?
 - Must kill backup when connection to it is lost
 https://prod.liveshare.vsengsaas.visualstudio.com/join?011E07BC0917B01434128A8E7F2A43E84A90

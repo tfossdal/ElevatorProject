@@ -41,7 +41,7 @@ func main() {
 				Behavior:    "moving",
 				Floor:       2,
 				Direction:   "up",
-				CabRequests: []bool{false, false, true, true},
+				CabRequests: []bool{false, false, false, false},
 			},
 			"two": HRAElevState{
 				Behavior:    "idle",

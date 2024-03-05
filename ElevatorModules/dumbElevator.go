@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+//var QueueHasBeenUpdated = make(chan int)
+
 func IAmAlive() {
 	state := strconv.Itoa(int(elevator.State))
 	direction := strconv.Itoa(int(elevator.Dirn))
