@@ -1,10 +1,11 @@
 package main
 
-// import (
-// 	"fmt"
+//import (
+//	"fmt"
+	// "github.com/go-ping/ping"
+//)
 
-// 	"github.com/go-ping/ping"
-// )
+
 
 // func SendOrder() {
 

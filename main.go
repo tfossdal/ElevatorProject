@@ -5,8 +5,8 @@ import (
 	module "ElevatorProject/ElevatorModules"
 	io "ElevatorProject/elevio"
 	"fmt"
+
 	"github.com/go-ping/ping"
-	"os/exec"
 )
 
 func elev_init() {
@@ -27,7 +27,7 @@ func elev_init() {
 	go io.PollObstructionSwitch(drv_obstr)
 	go io.PollStopButton(drv_stop)
 
-	go module.CheckForTimeout()
+	go module.CheckForDoorTimeout()
 
 	if io.GetFloor() == -1 {
 		module.Fsm_onInitBetweenFloors()
@@ -67,8 +67,7 @@ func elev_init() {
 }
 
 func main() {
-	cmd := exec.Command("gnome-terminal", "--", "elevatorserver")
-	cmd.Run()
+	
 	numFloors := 4
 
 	io.Init("localhost:15657", numFloors)
@@ -86,6 +85,12 @@ func main() {
 	go io.PollObstructionSwitch(drv_obstr)
 	go io.PollStopButton(drv_stop)
 
+	go module.CheckForDoorTimeout()
+
+	if io.GetFloor() == -1 {
+		module.Fsm_onInitBetweenFloors()
+	}
+
 	//elev_init()
 	module.InitLights()
 	module.BecomePrimary()
@@ -99,10 +104,17 @@ func main() {
 				_, err := ping.NewPinger("www.google.com")
 				if err != nil {
 					module.Fsm_OnRequestButtonPress(a.Floor, a.Button)
+				} else {
+					fmt.Println("sending button press")
+					ElevatorModules.SendButtonPressUDP(a)
 				}
+			} else {
+				fmt.Println("sending button press")
+				ElevatorModules.SendButtonPressUDP(a)
 			}
-			fmt.Println("sending button press")
-			ElevatorModules.SendButtonPressUDP(a)
+		case a := <-drv_floors:
+			fmt.Printf("%+v\n", a)
+			module.Fsm_OnFloorArrival(a)
 		}
 	}
 

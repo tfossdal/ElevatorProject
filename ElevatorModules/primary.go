@@ -217,6 +217,7 @@ func BecomePrimary() {
 }
 
 func PrimaryAlive() {
+	aliveTime := int64(time.Now().Unix())
 	addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29501")
 	if err != nil {
 		fmt.Println("Failed to resolve, primary alive")
@@ -228,7 +229,7 @@ func PrimaryAlive() {
 	defer conn.Close()
 	for {
 		//fmt.Println("Sending alive message")
-		conn.Write([]byte("Primary alive"))
+		conn.Write([]byte(fmt.Sprint(aliveTime)))
 		//fmt.Println("Message sent: Primary alive")
 		time.Sleep(100 * time.Millisecond)
 	}
@@ -376,7 +377,35 @@ func SendTurnOnLight(order [3]int) {
 	conn.Write([]byte(strconv.Itoa(order[0]) + "," + strconv.Itoa(order[1]) + "," + strconv.Itoa(order[2])))
 }
 
+func DistributeOrderMatrix(outputMatrix map[string][][2]bool, conn *net.UDPConn) {
+	for id, req := range outputMatrix {
+		idInt, _ := strconv.Atoi(id)
+		addr, err := net.ResolveUDPAddr("udp4", ConvertIDtoIP(idInt)+":29504")
+		if err != nil {
+			fmt.Println("Failed to resolve, distribute orders udp")
+		}
+		conn, err := net.DialUDP("udp4", nil, addr)
+		if err != nil {
+			fmt.Println("Failed to dial, distribute orders udp")
+		}
+		messageToSend := ""
+		for flr := range req {
+			messageToSend += fmt.Sprint(boolToInt(req[flr][io.BT_HallUp])) + "," + fmt.Sprint(boolToInt(req[flr][io.BT_HallDown])) + ","
+		}
+		conn.Write([]byte(messageToSend))
+		conn.Close()
+	}
+}
+
+func boolToInt(n bool) int {
+	if n {
+		return 1
+	}
+	return 0
+}
+
 func ReassignRequests() {
+
 	for {
 		<-reassignCh
 		fmt.Println("3")
@@ -481,6 +510,7 @@ func ReassignRequests() {
 			fmt.Println("json.Unmarshal error: ", err)
 			return
 		}
+		DistributeOrderMatrix(*output, conn)
 
 		fmt.Printf("output: \n")
 		for k, v := range *output {

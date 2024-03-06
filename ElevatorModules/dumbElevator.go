@@ -80,3 +80,28 @@ func RecieveTurnOnLight() {
 	}
 
 }
+
+func RecieveOrderMatrix() {
+	_, err := net.ResolveUDPAddr("udp4", ":29504")
+	if err != nil {
+		fmt.Println("Failed to resolve, recieve order matrix")
+	}
+	conn, err := net.ListenUDP("udp4", nil)
+	defer conn.Close()
+	buf := make([]byte, 1024)
+	for {
+		n, _, err := conn.ReadFromUDP(buf)
+		if err != nil {
+			fmt.Println(err)
+		}
+		recieved_message := strings.Split(string(buf[:n]), ",")
+		newMatrix := [io.NumFloors][2]int{}
+		for flr := range newMatrix {
+			upOrder, _ := strconv.Atoi(recieved_message[2*flr])
+			downOrder, _ := strconv.Atoi(recieved_message[2*flr+1])
+			newMatrix[flr][0] = upOrder
+			newMatrix[flr][1] = downOrder
+		}
+		UpdateLocalRequestMatrix(newMatrix)
+	}
+}

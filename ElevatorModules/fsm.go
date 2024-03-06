@@ -4,13 +4,29 @@ import (
 	el "ElevatorProject/Elevator"
 	io "ElevatorProject/elevio"
 	"fmt"
+	"sync"
 )
 
 var elevator el.Elevator = el.Elevator{Floor: -1, Dirn: io.MD_Stop, Requests: [io.NumFloors][io.NumButtons]int{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, State: el.Idle, ElevatorType: el.None, Config: el.Config{ClearRequestVariant: el.CV_ALL, DoorOpenDuration_s: 3.0}}
+var OrderMtx = sync.Mutex{}
 
 func PrintState() {
 	fmt.Println(el.StateToString(elevator.State))
 	fmt.Println("Direction: ", elevator.Dirn)
+}
+
+func debugRequestMatrix() {
+	fmt.Println(elevator.Requests)
+}
+
+func UpdateLocalRequestMatrix(newMatrix [io.NumFloors][2]int) {
+	OrderMtx.Lock()
+	defer OrderMtx.Unlock()
+	for flr := range newMatrix {
+		elevator.Requests[flr][0] = newMatrix[flr][0]
+		elevator.Requests[flr][1] = newMatrix[flr][1]
+	}
+	debugRequestMatrix()
 }
 
 func SetAllLights(es el.Elevator) {
@@ -38,6 +54,8 @@ func Fsm_onInitBetweenFloors() {
 
 // func Fsm_OnNewOrder(btn_floor int, btn_type io.ButtonType) {
 func Fsm_OnRequestButtonPress(btn_Floor int, btn_type io.ButtonType) {
+	OrderMtx.Lock()
+	defer OrderMtx.Unlock()
 	online := btn_Floor == -2
 	switch elevator.State {
 	case el.DoorOpen:

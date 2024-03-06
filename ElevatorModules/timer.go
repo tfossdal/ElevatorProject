@@ -26,13 +26,13 @@ func Timer_timedOut() int {
 	return 0
 }
 
-func CheckForTimeout() {
+func CheckForDoorTimeout() {
 	for {
 		if Timer_timedOut() != 0 {
-			fmt.Print("hei")
 			Timer_stop()
 			Fsm_OnDoorTimeout()
-			PrintState()
+			//PrintState()
 		}
+		time.Sleep(10 * time.Millisecond)
 	}
 }

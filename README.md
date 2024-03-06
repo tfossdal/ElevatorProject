@@ -6,6 +6,7 @@
 - 01 - Primary alive
 - 02 - Backup alive
 - 03 - Dumb elevator alive
+- 04 - Distribute orders
 - 05 - Light light
 - 06 - Primary/Backup communication
 

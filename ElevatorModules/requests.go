@@ -12,6 +12,8 @@ type DirnBehaviourPair struct {
 }
 
 func requests_above(e el.Elevator) int {
+	OrderMtx.Lock()
+	defer OrderMtx.Unlock()
 	for f := e.Floor + 1; f < io.NumFloors; f++ {
 		for btn := 0; btn < io.NumButtons; btn++ {
 			if e.Requests[f][btn] != 0 {
@@ -23,6 +25,8 @@ func requests_above(e el.Elevator) int {
 }
 
 func requests_below(e el.Elevator) int {
+	OrderMtx.Lock()
+	defer OrderMtx.Unlock()
 	for f := 0; f < e.Floor; f++ {
 		for btn := 0; btn < io.NumButtons; btn++ {
 			if e.Requests[f][btn] != 0 {
@@ -34,6 +38,8 @@ func requests_below(e el.Elevator) int {
 }
 
 func requests_here(e el.Elevator) int {
+	OrderMtx.Lock()
+	defer OrderMtx.Unlock()
 	for btn := 0; btn < io.NumButtons; btn++ {
 		if e.Requests[e.Floor][btn] != 0 {
 			return 1
@@ -84,6 +90,8 @@ func Requests_chooseDirection(e el.Elevator) DirnBehaviourPair {
 }
 
 func Requests_shouldStop(e el.Elevator) int {
+	OrderMtx.Lock()
+	defer OrderMtx.Unlock()
 	switch elevator.Dirn {
 	case io.MD_Down:
 		if e.Requests[e.Floor][io.BT_HallDown] != 0 {
@@ -135,19 +143,21 @@ func Requests_ShouldClearImmediately(e el.Elevator, btn_floor int, btn_type io.B
 }
 
 func Requests_ClearImmediately_Online(e el.Elevator) {
+	OrderMtx.Lock()
+	defer OrderMtx.Unlock()
 	cleared := false
 	for i := range e.Requests[e.Floor] {
 		if e.Requests[e.Floor][i] == 1 {
-			if i == 2 {
+			if i == int(io.BT_Cab) {
 				e.Requests[e.Floor][i] = 0
 				cleared = true
 			}
-			if e.Dirn == io.MD_Up && i == 0 {
+			if e.Dirn == io.MD_Up && i == int(io.BT_HallUp) {
 				e.Requests[e.Floor][i] = 0
 				cleared = true
 				break
 			}
-			if e.Dirn == io.MD_Down && i == 1 {
+			if e.Dirn == io.MD_Down && i == int(io.BT_HallDown) {
 				e.Requests[e.Floor][i] = 0
 				cleared = true
 				break
@@ -160,29 +170,23 @@ func Requests_ClearImmediately_Online(e el.Elevator) {
 }
 
 func Requests_clearAtCurrentFloor(e el.Elevator) el.Elevator {
-	switch e.Config.ClearRequestVariant {
-	case el.CV_ALL:
-		for btn := 0; btn < io.NumButtons; btn++ {
-			e.Requests[e.Floor][btn] = 0
-		}
-	case el.CV_InDirn:
-		e.Requests[e.Floor][io.BT_Cab] = 0
-		switch e.Dirn {
-		case io.MD_Up:
-			if (requests_above(e) == 0) && (e.Requests[e.Floor][io.BT_HallUp] == 0) {
-				e.Requests[e.Floor][io.BT_HallDown] = 0
-			}
-			e.Requests[e.Floor][io.BT_HallUp] = 0
-		case io.MD_Down:
-			if (requests_below(e) == 0) && (e.Requests[e.Floor][io.BT_HallDown] == 0) {
-				e.Requests[e.Floor][io.BT_HallUp] = 0
-			}
-			e.Requests[e.Floor][io.BT_HallDown] = 0
-		default:
-			e.Requests[e.Floor][io.BT_HallUp] = 0
+	OrderMtx.Lock()
+	defer OrderMtx.Unlock()
+	e.Requests[e.Floor][io.BT_Cab] = 0
+	switch e.Dirn {
+	case io.MD_Up:
+		if (requests_above(e) == 0) && (e.Requests[e.Floor][io.BT_HallUp] == 0) {
 			e.Requests[e.Floor][io.BT_HallDown] = 0
 		}
+		e.Requests[e.Floor][io.BT_HallUp] = 0
+	case io.MD_Down:
+		if (requests_below(e) == 0) && (e.Requests[e.Floor][io.BT_HallDown] == 0) {
+			e.Requests[e.Floor][io.BT_HallUp] = 0
+		}
+		e.Requests[e.Floor][io.BT_HallDown] = 0
 	default:
+		e.Requests[e.Floor][io.BT_HallUp] = 0
+		e.Requests[e.Floor][io.BT_HallDown] = 0
 	}
 	return e
 }
