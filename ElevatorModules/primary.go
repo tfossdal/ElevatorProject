@@ -389,6 +389,7 @@ func SendTurnOnOffLight(order [3]int, turnOn int) {
 	}
 	defer conn.Close()
 	conn.Write([]byte(strconv.Itoa(order[0]) + "," + strconv.Itoa(order[1]) + "," + strconv.Itoa(order[2]) + "," + strconv.Itoa(turnOn)))
+	fmt.Println("turnOn is " + strconv.Itoa(turnOn))
 }
 
 func DistributeOrderMatrix(outputMatrix map[string][][2]bool) {
