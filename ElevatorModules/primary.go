@@ -25,7 +25,7 @@ var elevatorLives = make(chan int, 30)
 var checkLiving = make(chan int)
 var requestId = make(chan int, 5)
 var idOfLivingElev = make(chan int, 5)
-var printList = make(chan int, 100)
+var printList = make(chan int)
 var numberOfElevators = make(chan int, 5)
 var newOrderCh = make(chan [3]int)
 var clearOrderCh = make(chan [3]int)
@@ -48,13 +48,6 @@ type HRAElevState struct {
 type HRAInput struct {
 	HallRequests [][2]bool               `json:"hallRequests"`
 	States       map[string]HRAElevState `json:"states"`
-}
-
-func TestStuff() {
-	for {
-		printList <- 1
-		time.Sleep(1 * time.Second)
-	}
 }
 
 func DebugMaps() {
