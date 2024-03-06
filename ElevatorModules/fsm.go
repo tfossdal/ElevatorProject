@@ -108,8 +108,11 @@ func Fsm_OnFloorArrival(newFloor int) {
 		if Requests_shouldStop(elevator) != 0 {
 			fmt.Println("test2")
 			io.SetMotorDirection(io.MD_Stop)
+			fmt.Println("HELLO1")
 			io.SetDoorOpenLamp(true)
+			fmt.Println("HELLO2")
 			elevator = Requests_clearAtCurrentFloor(elevator)
+			fmt.Println("HELLO3")
 			Timer_start(elevator.Config.DoorOpenDuration_s)
 			SetAllLights(elevator)
 			elevator.State = el.DoorOpen
