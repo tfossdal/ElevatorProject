@@ -95,7 +95,7 @@ func Fsm_OnRequestButtonPress(btn_Floor int, btn_type io.ButtonType) {
 			break
 		}
 	}
-	SetAllLights(elevator)
+	//SetAllLights(elevator)
 }
 
 func Fsm_OnFloorArrival(newFloor int) {
@@ -114,7 +114,7 @@ func Fsm_OnFloorArrival(newFloor int) {
 			elevator = Requests_clearAtCurrentFloor(elevator)
 			fmt.Println("HELLO3")
 			Timer_start(elevator.Config.DoorOpenDuration_s)
-			SetAllLights(elevator)
+			//SetAllLights(elevator)
 			elevator.State = el.DoorOpen
 		}
 	default:
@@ -143,7 +143,7 @@ func Fsm_OnDoorTimeout() {
 		case el.DoorOpen:
 			Timer_start(elevator.Config.DoorOpenDuration_s)
 			elevator = Requests_clearAtCurrentFloor(elevator)
-			SetAllLights(elevator)
+			//SetAllLights(elevator)
 		case el.Idle:
 			io.SetDoorOpenLamp(false)
 			io.SetMotorDirection(elevator.Dirn)
