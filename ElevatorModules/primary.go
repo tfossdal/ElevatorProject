@@ -361,13 +361,13 @@ func FixNewElevatorLights() {
 			for j := range hallRequests[i] {
 				if hallRequests[i][j] == 1 {
 					order := [3]int{id, i, j}
-					SendTurnOnLight(order)
+					SendTurnOnOffLight(order, 1)
 				}
 			}
 		}
 		for i := range cabRequestMap[id] {
 			if cabRequestMap[id][i] == 1 {
-				SendTurnOnLight([3]int{id, i, 2})
+				SendTurnOnOffLight([3]int{id, i, 2}, 1)
 			}
 		}
 	}
@@ -388,7 +388,7 @@ func SendTurnOnOffLight(order [3]int, turnOn int) {
 		fmt.Println("Failed to dial, light light")
 	}
 	defer conn.Close()
-	conn.Write([]byte(strconv.Itoa(order[0]) + "," + strconv.Itoa(order[1]) + "," + strconv.Itoa(order[2])+ "," + strconv.Itoa(turnOn)))
+	conn.Write([]byte(strconv.Itoa(order[0]) + "," + strconv.Itoa(order[1]) + "," + strconv.Itoa(order[2]) + "," + strconv.Itoa(turnOn)))
 }
 
 func DistributeOrderMatrix(outputMatrix map[string][][2]bool) {
