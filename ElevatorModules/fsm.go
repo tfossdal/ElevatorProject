@@ -16,7 +16,7 @@ func PrintState() {
 }
 
 func AddCabRequest(btn_floor int, btn_type io.ButtonType) {
-	if btn_floor != 2 {
+	if btn_type != io.BT_Cab {
 		return
 	}
 	OrderMtx.Lock()
