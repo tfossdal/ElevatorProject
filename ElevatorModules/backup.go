@@ -94,31 +94,31 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 				elevatorID, _ := strconv.Atoi(recieved_message[1])
 				if recieved_message[3] == "2" {
 					fmt.Println("Message recieved cab request: " + raw_recieved_message[i])
-					UpdatecabRequests(elevatorID, flr)
+					UpdateCabRequests(elevatorID, flr, 1)
 				} else {
 					fmt.Println("Message recieved hall request: " + raw_recieved_message[i])
-					UpdatehallRequests(btn, flr)
+					UpdateHallRequests(btn, flr, 1)
 				}
 				//fmt.Println("Message recieved: " + string(buf[:n]))
 				continue
 			}
-				if recieved_message[0] == "c" {
-					//fmt.Println("Message recieved: " + string(buf[:n]))
-					btn, err := strconv.Atoi(recieved_message[3])
-					if err != nil {
-						panic(err)
-					}
-					flr, _ := strconv.Atoi(recieved_message[2])
-					elevatorID, _ := strconv.Atoi(recieved_message[1])
-					if recieved_message[3] == "2" {
-						fmt.Println("Message recieved cab request: " + raw_recieved_message[i])
-						UpdatecabRequests(elevatorID, flr)
-					} else {
-						fmt.Println("Message recieved hall request: " + raw_recieved_message[i])
-						UpdatehallRequests(btn, flr)
-					}
-					//fmt.Println("Message recieved: " + string(buf[:n]))
-					continue
+			if recieved_message[0] == "c" {
+				//fmt.Println("Message recieved: " + string(buf[:n]))
+				btn, err := strconv.Atoi(recieved_message[3])
+				if err != nil {
+					panic(err)
+				}
+				flr, _ := strconv.Atoi(recieved_message[2])
+				elevatorID, _ := strconv.Atoi(recieved_message[1])
+				if recieved_message[3] == "2" {
+					fmt.Println("Message recieved cab request: " + raw_recieved_message[i])
+					UpdateCabRequests(elevatorID, flr, 0)
+				} else {
+					fmt.Println("Message recieved hall request: " + raw_recieved_message[i])
+					UpdateHallRequests(btn, flr, 0)
+				}
+				//fmt.Println("Message recieved: " + string(buf[:n]))
+				continue
 			}
 		}
 	}
