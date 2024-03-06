@@ -101,7 +101,7 @@ func main() {
 	for {
 		select {
 		case a := <-drv_buttons:
-			if a.Button == 2 {
+			if int(a.Button) == 2 {
 				_, err := ping.NewPinger("www.google.com")
 				if err != nil {
 					module.Fsm_OnRequestButtonPress(a.Floor, a.Button)
@@ -114,7 +114,6 @@ func main() {
 				ElevatorModules.SendButtonPressUDP(a)
 			}
 		case a := <-drv_floors:
-			fmt.Println("fsfdsfddsf")
 			fmt.Printf("%+v\n", a)
 			module.Fsm_OnFloorArrival(a)
 		}
