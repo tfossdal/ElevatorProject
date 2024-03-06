@@ -27,7 +27,7 @@ func UpdateLocalRequestMatrix(newMatrix [io.NumFloors][2]int) {
 	}
 	OrderMtx.Unlock()
 	debugRequestMatrix()
-	//Fsm_OnRequestButtonPress(-2, 0)
+	Fsm_OnRequestButtonPress(-2, 0)
 }
 
 func SetAllLights(es el.Elevator) {
