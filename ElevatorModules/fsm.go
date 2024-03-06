@@ -21,12 +21,13 @@ func debugRequestMatrix() {
 
 func UpdateLocalRequestMatrix(newMatrix [io.NumFloors][2]int) {
 	OrderMtx.Lock()
-	defer OrderMtx.Unlock()
 	for flr := range newMatrix {
 		elevator.Requests[flr][0] = newMatrix[flr][0]
 		elevator.Requests[flr][1] = newMatrix[flr][1]
 	}
+	OrderMtx.Unlock()
 	debugRequestMatrix()
+	//Fsm_OnRequestButtonPress(-2, 0)
 }
 
 func SetAllLights(es el.Elevator) {
