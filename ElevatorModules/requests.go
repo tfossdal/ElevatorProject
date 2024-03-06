@@ -145,8 +145,6 @@ func Requests_ShouldClearImmediately(e el.Elevator, btn_floor int, btn_type io.B
 }
 
 func Requests_ClearImmediately_Online(e el.Elevator) {
-	OrderMtx.Lock()
-	defer OrderMtx.Unlock()
 	cleared := false
 	for i := range e.Requests[e.Floor] {
 		if e.Requests[e.Floor][i] == 1 {

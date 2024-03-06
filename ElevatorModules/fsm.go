@@ -84,7 +84,9 @@ func Fsm_OnRequestButtonPress(btn_Floor int, btn_type io.ButtonType) {
 		case el.DoorOpen:
 			io.SetDoorOpenLamp(true)
 			Timer_start(elevator.Config.DoorOpenDuration_s)
+			OrderMtx.Unlock()
 			elevator = Requests_clearAtCurrentFloor(elevator)
+			OrderMtx.Lock()
 		case el.Moving:
 			io.SetMotorDirection(elevator.Dirn)
 		case el.Idle:
