@@ -77,7 +77,9 @@ func Fsm_OnRequestButtonPress(btn_Floor int, btn_type io.ButtonType) {
 		if !online {
 			elevator.Requests[btn_Floor][btn_type] = 1
 		}
+		OrderMtx.Unlock()
 		var pair DirnBehaviourPair = Requests_chooseDirection(elevator)
+		OrderMtx.Lock()
 		elevator.Dirn = pair.dirn
 		elevator.State = pair.state
 		switch pair.state {
