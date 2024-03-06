@@ -129,6 +129,7 @@ func Fsm_OnFloorArrival(newFloor int) {
 // }
 
 func Fsm_OnDoorTimeout() {
+	fmt.Println("Door timed out")
 	switch elevator.State {
 	case el.DoorOpen:
 		var pair DirnBehaviourPair = Requests_chooseDirection(elevator)

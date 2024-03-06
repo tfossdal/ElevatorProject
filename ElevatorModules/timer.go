@@ -28,10 +28,11 @@ func Timer_timedOut() int {
 
 func CheckForDoorTimeout() {
 	for {
+		fmt.Println("CHECKING")
 		if Timer_timedOut() != 0 {
 			Timer_stop()
 			Fsm_OnDoorTimeout()
-			//PrintState()
+			PrintState()
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
