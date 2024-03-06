@@ -67,7 +67,7 @@ func elev_init() {
 }
 
 func main() {
-	
+
 	numFloors := 4
 
 	io.Init("localhost:15657", numFloors)
@@ -85,6 +85,8 @@ func main() {
 	go io.PollObstructionSwitch(drv_obstr)
 	go io.PollStopButton(drv_stop)
 
+	module.BecomePrimary()
+
 	go module.CheckForDoorTimeout()
 
 	if io.GetFloor() == -1 {
@@ -93,7 +95,6 @@ func main() {
 
 	//elev_init()
 	module.InitLights()
-	module.BecomePrimary()
 	go module.IAmAlive()
 	go module.RecieveTurnOnLight()
 
@@ -113,6 +114,7 @@ func main() {
 				ElevatorModules.SendButtonPressUDP(a)
 			}
 		case a := <-drv_floors:
+			fmt.Println("fsfdsfddsf")
 			fmt.Printf("%+v\n", a)
 			module.Fsm_OnFloorArrival(a)
 		}

@@ -100,7 +100,9 @@ func Fsm_OnFloorArrival(newFloor int) {
 
 	switch elevator.State {
 	case el.Moving:
+		fmt.Println("test1")
 		if Requests_shouldStop(elevator) != 0 {
+			fmt.Println("test2")
 			io.SetMotorDirection(io.MD_Stop)
 			io.SetDoorOpenLamp(true)
 			elevator = Requests_clearAtCurrentFloor(elevator)

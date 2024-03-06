@@ -91,7 +91,6 @@ func Requests_chooseDirection(e el.Elevator) DirnBehaviourPair {
 
 func Requests_shouldStop(e el.Elevator) int {
 	OrderMtx.Lock()
-	defer OrderMtx.Unlock()
 	switch elevator.Dirn {
 	case io.MD_Down:
 		if e.Requests[e.Floor][io.BT_HallDown] != 0 {
@@ -100,6 +99,7 @@ func Requests_shouldStop(e el.Elevator) int {
 		if e.Requests[e.Floor][io.BT_Cab] != 0 {
 			return 1
 		}
+		OrderMtx.Unlock()
 		if requests_below(e) == 0 {
 			return 1
 		}
@@ -111,11 +111,13 @@ func Requests_shouldStop(e el.Elevator) int {
 		if e.Requests[e.Floor][io.BT_Cab] != 0 {
 			return 1
 		}
+		OrderMtx.Unlock()
 		if requests_above(e) == 0 {
 			return 1
 		}
 		return 0
 	default:
+		OrderMtx.Unlock()
 		return 1
 	}
 }

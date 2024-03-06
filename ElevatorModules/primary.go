@@ -69,7 +69,7 @@ func InitPrimary() {
 	//Start GoRoutines
 	go PrimaryRoutine()
 
-	time.Sleep(10 * time.Second)
+	//time.Sleep(10 * time.Second)
 }
 
 func PrimaryRoutine() {
