@@ -47,7 +47,6 @@ func CheckGoneOffline() {
 		if PingInternet() == 0 {
 			break
 		}
-		fmt.Println("Elevator is online")
 		time.Sleep(100 * time.Millisecond)
 	}
 	fmt.Println("Elevator is offline")
