@@ -5,8 +5,6 @@ import (
 	module "ElevatorProject/ElevatorModules"
 	io "ElevatorProject/elevio"
 	"fmt"
-
-	"github.com/go-ping/ping"
 )
 
 func elev_init() {
@@ -103,8 +101,7 @@ func main() {
 		select {
 		case a := <-drv_buttons:
 			if int(a.Button) == 2 {
-				_, err := ping.NewPinger("www.google.com")
-				if err != nil {
+				if module.PingInternet() == 0 {
 					module.Fsm_OnRequestButtonPress(a.Floor, a.Button)
 				} else {
 					fmt.Println("sending button press")

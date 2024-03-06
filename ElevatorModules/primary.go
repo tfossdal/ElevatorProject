@@ -75,6 +75,7 @@ func InitPrimary() {
 
 func PrimaryRoutine() {
 	go PrimaryAlive()
+	go CheckGoneOffline()
 	go pm.ListenUDP("29503", elevatorLives, newOrderCh, clearOrderCh, newStatesCh)
 	go pm.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, numberOfElevators, newlyAliveID, listOfLivingCh)
 	go FixNewElevatorLights()
@@ -217,8 +218,24 @@ func BecomePrimary() {
 	go AcceptPrimaryDial()
 }
 
+func ListenForOtherPrimary() {
+	addr, err := net.ResolveUDPAddr("udp4", ":29501")
+	if err != nil {
+		fmt.Println("Failed to resolve")
+	}
+	conn, err := net.ListenUDP("udp4", addr)
+	if err != nil {
+		fmt.Println("Failed to listen")
+	}
+	buf := make([]byte, 1024)
+	_, _, _ = conn.ReadFromUDP(buf)
+	//DIE AND LIVE
+}
+
 func PrimaryAlive() {
-	aliveTime := int64(time.Now().Unix())
+	if PingInternet() == 0 {
+		return
+	}
 	addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29501")
 	if err != nil {
 		fmt.Println("Failed to resolve, primary alive")
@@ -230,7 +247,7 @@ func PrimaryAlive() {
 	defer conn.Close()
 	for {
 		//fmt.Println("Sending alive message")
-		conn.Write([]byte(fmt.Sprint(aliveTime)))
+		conn.Write([]byte("Primary alive"))
 		//fmt.Println("Message sent: Primary alive")
 		time.Sleep(100 * time.Millisecond)
 	}

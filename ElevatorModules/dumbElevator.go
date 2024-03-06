@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-ping/ping"
 )
 
 //var QueueHasBeenUpdated = make(chan int)
@@ -30,6 +32,25 @@ func IAmAlive() {
 		//fmt.Println("Message sent: Elevator alive")
 		time.Sleep(100 * time.Millisecond)
 	}
+}
+
+func PingInternet() int {
+	_, err := ping.NewPinger("www.google.com")
+	if err != nil {
+		return 0
+	}
+	return 1
+}
+
+func CheckGoneOffline() {
+	for {
+		if PingInternet() == 0 {
+			break
+		}
+		fmt.Println("Elevator is offline")
+		time.Sleep(100 * time.Millisecond)
+	}
+	go ListenForOtherPrimary()
 }
 
 func SendButtonPressUDP(btn io.ButtonEvent) {
