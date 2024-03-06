@@ -101,6 +101,7 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 				}
 				//fmt.Println("Message recieved: " + string(buf[:n]))
 				continue
+			}
 				if recieved_message[0] == "c" {
 					//fmt.Println("Message recieved: " + string(buf[:n]))
 					btn, err := strconv.Atoi(recieved_message[3])
