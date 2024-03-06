@@ -38,22 +38,26 @@ func Fsm_onInitBetweenFloors() {
 
 // func Fsm_OnNewOrder(btn_floor int, btn_type io.ButtonType) {
 func Fsm_OnRequestButtonPress(btn_Floor int, btn_type io.ButtonType) {
+	online := btn_Floor == -2
 	switch elevator.State {
 	case el.DoorOpen:
-		if Requests_ShouldClearImmediately(elevator, btn_Floor, btn_type) != 0 {
-			Timer_start(elevator.Config.DoorOpenDuration_s)
+		if online {
+			Requests_ClearImmediately_Online(elevator)
 		} else {
-			if btn_type == 2 {
-				//Btn_type += elevatornumber
+			if Requests_ShouldClearImmediately(elevator, btn_Floor, btn_type) != 0 {
+				Timer_start(elevator.Config.DoorOpenDuration_s)
 			} else {
-				//Update master matrix
+				elevator.Requests[btn_Floor][btn_type] = 1
 			}
-			elevator.Requests[btn_Floor][btn_type] = 1
 		}
 	case el.Moving:
-		elevator.Requests[btn_Floor][btn_type] = 1
+		if !online {
+			elevator.Requests[btn_Floor][btn_type] = 1
+		}
 	case el.Idle:
-		elevator.Requests[btn_Floor][btn_type] = 1
+		if !online {
+			elevator.Requests[btn_Floor][btn_type] = 1
+		}
 		var pair DirnBehaviourPair = Requests_chooseDirection(elevator)
 		elevator.Dirn = pair.dirn
 		elevator.State = pair.state

@@ -1,9 +1,9 @@
-// package main
+package main
 
 // import (
 // 	"fmt"
-// 	"net"
-// 	"time"
+
+// 	"github.com/go-ping/ping"
 // )
 
 // func SendOrder() {
@@ -25,6 +25,11 @@
 
 // }
 
-// func main(){
-// 	SendOrder();
+// func main() {
+// 	//SendOrder();
+// 	_, err := ping.NewPinger("www.google.com")
+// 	if err != nil {
+// 		fmt.Println("test")
+// 	}
+// 	fmt.Println("testtastsata")
 // }

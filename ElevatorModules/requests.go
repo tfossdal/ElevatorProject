@@ -134,6 +134,31 @@ func Requests_ShouldClearImmediately(e el.Elevator, btn_floor int, btn_type io.B
 	}
 }
 
+func Requests_ClearImmediately_Online(e el.Elevator) {
+	cleared := false
+	for i := range e.Requests[e.Floor] {
+		if e.Requests[e.Floor][i] == 1 {
+			if i == 2 {
+				e.Requests[e.Floor][i] = 0
+				cleared = true
+			}
+			if e.Dirn == io.MD_Up && i == 0 {
+				e.Requests[e.Floor][i] = 0
+				cleared = true
+				break
+			}
+			if e.Dirn == io.MD_Down && i == 1 {
+				e.Requests[e.Floor][i] = 0
+				cleared = true
+				break
+			}
+		}
+	}
+	if cleared {
+		Timer_start(elevator.Config.DoorOpenDuration_s)
+	}
+}
+
 func Requests_clearAtCurrentFloor(e el.Elevator) el.Elevator {
 	switch e.Config.ClearRequestVariant {
 	case el.CV_ALL:
