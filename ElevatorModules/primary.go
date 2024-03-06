@@ -377,7 +377,7 @@ func SendTurnOnLight(order [3]int) {
 	conn.Write([]byte(strconv.Itoa(order[0]) + "," + strconv.Itoa(order[1]) + "," + strconv.Itoa(order[2])))
 }
 
-func DistributeOrderMatrix(outputMatrix map[string][][2]bool, conn *net.UDPConn) {
+func DistributeOrderMatrix(outputMatrix map[string][][2]bool) {
 	for id, req := range outputMatrix {
 		idInt, _ := strconv.Atoi(id)
 		addr, err := net.ResolveUDPAddr("udp4", ConvertIDtoIP(idInt)+":29504")
@@ -510,7 +510,7 @@ func ReassignRequests() {
 			fmt.Println("json.Unmarshal error: ", err)
 			return
 		}
-		DistributeOrderMatrix(*output, conn)
+		DistributeOrderMatrix(*output)
 
 		fmt.Printf("output: \n")
 		for k, v := range *output {
