@@ -175,12 +175,16 @@ func Requests_clearAtCurrentFloor(e el.Elevator) el.Elevator {
 	e.Requests[e.Floor][io.BT_Cab] = 0
 	switch e.Dirn {
 	case io.MD_Up:
+		OrderMtx.Unlock()
 		if (requests_above(e) == 0) && (e.Requests[e.Floor][io.BT_HallUp] == 0) {
+			OrderMtx.Lock()
 			e.Requests[e.Floor][io.BT_HallDown] = 0
 		}
 		e.Requests[e.Floor][io.BT_HallUp] = 0
 	case io.MD_Down:
+		OrderMtx.Unlock()
 		if (requests_below(e) == 0) && (e.Requests[e.Floor][io.BT_HallDown] == 0) {
+			OrderMtx.Lock()
 			e.Requests[e.Floor][io.BT_HallUp] = 0
 		}
 		e.Requests[e.Floor][io.BT_HallDown] = 0
