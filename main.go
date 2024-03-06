@@ -96,6 +96,7 @@ func main() {
 	go module.IAmAlive()
 	go module.RecieveTurnOnOffLight()
 	go ElevatorModules.RecieveOrderMatrix()
+	go module.TestStuff()
 
 	for {
 		select {

@@ -50,6 +50,13 @@ type HRAInput struct {
 	States       map[string]HRAElevState `json:"states"`
 }
 
+func TestStuff() {
+	for {
+		printList <- 1
+		time.Sleep(1 * time.Second)
+	}
+}
+
 func DebugMaps() {
 	for key, value := range cabRequestMap {
 		fmt.Println(fmt.Sprint(key) + ":" + fmt.Sprint(value[0]) + "," + fmt.Sprint(value[1]) + "," + fmt.Sprint(value[2]) + "," + fmt.Sprint(value[3]))
