@@ -28,6 +28,7 @@ var idOfLivingElev = make(chan int, 5)
 var printList = make(chan int)
 var numberOfElevators = make(chan int, 5)
 var newOrderCh = make(chan [3]int)
+var clearOrderCh = make(chan [3]int)
 var newStatesCh = make(chan [4]int, 30)
 var retrieveElevatorStates = make(chan int)
 var elevatorStates = make(chan map[int][3]int)
@@ -74,7 +75,7 @@ func InitPrimary() {
 
 func PrimaryRoutine() {
 	go PrimaryAlive()
-	go pm.ListenUDP("29503", elevatorLives, newOrderCh, newStatesCh)
+	go pm.ListenUDP("29503", elevatorLives, newOrderCh, clearOrderCh, newStatesCh)
 	go pm.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, numberOfElevators, newlyAliveID, listOfLivingCh)
 	go FixNewElevatorLights()
 	go UpdateElevatorStates()
@@ -248,12 +249,25 @@ func SendOrderToBackup(conn *net.TCPConn) {
 				return
 			}
 			if order[2] == 2 {
-				UpdateCabRequests(order[0], order[1])
+				UpdateCabRequests(order[0], order[1], 1)
 			} else {
-				UpdateHallRequests(order[2], order[1])
+				UpdateHallRequests(order[2], order[1], 1)
 			}
-			go SendTurnOnLight(order)
-
+			go SendTurnOnOffLight(order, 1)
+		case order := <-clearOrderCh:
+			fmt.Println("1")
+			fmt.Println("2")
+			_, err := conn.Write([]byte("c," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
+			if err != nil {
+				fmt.Print(err)
+				return
+			}
+			if order[2] == 2 {
+				UpdateCabRequests(order[0], order[1], 0)
+			} else {
+				UpdateHallRequests(order[2], order[1], 0)
+			}
+			go SendTurnOnOffLight(order, 0)
 		case <-terminateBackupConnection:
 			return
 		}
@@ -273,21 +287,21 @@ func TransferOrdersToBackup(conn *net.TCPConn) {
 	}
 }
 
-func UpdateHallRequests(btnType int, flr int) {
-	hallRequests[flr][btnType] = 1
+func UpdateHallRequests(btnType int, flr int, setType int) {
+	hallRequests[flr][btnType] = setType
 }
 
-func UpdateCabRequests(elevatorID int, flr int) {
+func UpdateCabRequests(elevatorID int, flr int, setType int) {
 	_, hasKey := cabRequestMap[elevatorID]
 	if hasKey {
 		cabRequests := cabRequestMap[elevatorID]
-		cabRequests[flr] = 1
+		cabRequests[flr] = setType
 		cabRequestMap[elevatorID] = cabRequests
 	} else {
 		cabRequests := [io.NumFloors]int{}
 		for i := 0; i < io.NumFloors; i++ {
 			if i == flr {
-				cabRequests[i] = 1
+				cabRequests[i] = setType
 			} else {
 				cabRequests[i] = 0
 			}
@@ -359,7 +373,7 @@ func FixNewElevatorLights() {
 	}
 }
 
-func SendTurnOnLight(order [3]int) {
+func SendTurnOnOffLight(order [3]int, turnOn int) {
 	sendToIp := ConvertIDtoIP(order[0])
 	if order[2] != 2 {
 		sendToIp = ConvertIDtoIP(255)
@@ -374,7 +388,7 @@ func SendTurnOnLight(order [3]int) {
 		fmt.Println("Failed to dial, light light")
 	}
 	defer conn.Close()
-	conn.Write([]byte(strconv.Itoa(order[0]) + "," + strconv.Itoa(order[1]) + "," + strconv.Itoa(order[2])))
+	conn.Write([]byte(strconv.Itoa(order[0]) + "," + strconv.Itoa(order[1]) + "," + strconv.Itoa(order[2])+ "," + strconv.Itoa(turnOn)))
 }
 
 func DistributeOrderMatrix(outputMatrix map[string][][2]bool) {

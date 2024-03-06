@@ -150,15 +150,18 @@ func Requests_ClearImmediately_Online(e el.Elevator) {
 		if e.Requests[e.Floor][i] == 1 {
 			if i == int(io.BT_Cab) {
 				e.Requests[e.Floor][i] = 0
+				ClearRequestUDP(io.ButtonEvent{Floor: e.Floor, Button: io.BT_Cab})
 				cleared = true
 			}
 			if e.Dirn == io.MD_Up && i == int(io.BT_HallUp) {
 				e.Requests[e.Floor][i] = 0
+				ClearRequestUDP(io.ButtonEvent{Floor: e.Floor, Button: io.BT_HallUp})
 				cleared = true
 				break
 			}
 			if e.Dirn == io.MD_Down && i == int(io.BT_HallDown) {
 				e.Requests[e.Floor][i] = 0
+				ClearRequestUDP(io.ButtonEvent{Floor: e.Floor, Button: io.BT_HallDown})
 				cleared = true
 				break
 			}
@@ -173,24 +176,31 @@ func Requests_clearAtCurrentFloor(e el.Elevator) el.Elevator {
 	OrderMtx.Lock()
 	defer OrderMtx.Unlock()
 	e.Requests[e.Floor][io.BT_Cab] = 0
+	ClearRequestUDP(io.ButtonEvent{Floor: e.Floor, Button: io.BT_Cab})
 	switch e.Dirn {
 	case io.MD_Up:
 		OrderMtx.Unlock()
 		if (requests_above(e) == 0) && (e.Requests[e.Floor][io.BT_HallUp] == 0) {
-			OrderMtx.Lock()
 			e.Requests[e.Floor][io.BT_HallDown] = 0
+			ClearRequestUDP(io.ButtonEvent{Floor: e.Floor, Button: io.BT_HallDown})
 		}
+		OrderMtx.Lock()
 		e.Requests[e.Floor][io.BT_HallUp] = 0
+		ClearRequestUDP(io.ButtonEvent{Floor: e.Floor, Button: io.BT_HallUp})
 	case io.MD_Down:
 		OrderMtx.Unlock()
 		if (requests_below(e) == 0) && (e.Requests[e.Floor][io.BT_HallDown] == 0) {
-			OrderMtx.Lock()
 			e.Requests[e.Floor][io.BT_HallUp] = 0
+			ClearRequestUDP(io.ButtonEvent{Floor: e.Floor, Button: io.BT_HallUp})
 		}
+		OrderMtx.Lock()
 		e.Requests[e.Floor][io.BT_HallDown] = 0
+		ClearRequestUDP(io.ButtonEvent{Floor: e.Floor, Button: io.BT_HallDown})
 	default:
 		e.Requests[e.Floor][io.BT_HallUp] = 0
+		ClearRequestUDP(io.ButtonEvent{Floor: e.Floor, Button: io.BT_HallUp})
 		e.Requests[e.Floor][io.BT_HallDown] = 0
+		ClearRequestUDP(io.ButtonEvent{Floor: e.Floor, Button: io.BT_HallDown})
 	}
 	return e
 }

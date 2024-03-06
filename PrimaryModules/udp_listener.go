@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ListenUDP(port string, elevatorLives chan int, newOrderCh chan [3]int, newStatesCh chan [4]int) {
+func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh chan [3]int, newStatesCh chan [4]int) {
 
 	addr, err := net.ResolveUDPAddr("udp4", ":"+port)
 	if err != nil {
@@ -42,6 +42,13 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh chan [3]int, newS
 			// direction := io.MotorDirection(directionInt)
 			newStates := [4]int{int(senderIP[3]), stateInt, directionInt, floorInt}
 			newStatesCh <- newStates
+		}
+		if recieved_message[0] == "c" {
+			fmt.Println("test")
+			floor, _ := strconv.Atoi(recieved_message[1])
+			btn, _ := strconv.Atoi(recieved_message[2])
+			order := [3]int{int(senderIP[3]), floor, btn}
+			clearOrderCh <- order
 		}
 		if err != nil {
 			fmt.Println("Failed to listen")

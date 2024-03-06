@@ -5,10 +5,11 @@
 ## Port list (starts with 295##)
 - 01 - Primary alive
 - 02 - Backup alive
-- 03 - Dumb elevator alive
+- 03 - Dumb/Primary communication
 - 04 - Distribute orders
 - 05 - Light light
 - 06 - Primary/Backup communication
+
 
 ## Order Format (UDP)
 - n,a,b
