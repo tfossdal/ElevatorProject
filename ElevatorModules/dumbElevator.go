@@ -82,11 +82,14 @@ func RecieveTurnOnLight() {
 }
 
 func RecieveOrderMatrix() {
-	_, err := net.ResolveUDPAddr("udp4", ":29504")
+	addr, err := net.ResolveUDPAddr("udp4", ":29504")
 	if err != nil {
 		fmt.Println("Failed to resolve, recieve order matrix")
 	}
-	conn, err := net.ListenUDP("udp4", nil)
+	conn, err := net.ListenUDP("udp4", addr)
+	if err != nil {
+		fmt.Println("Failed to resolve listen, recieve order matrix")
+	}
 	defer conn.Close()
 	buf := make([]byte, 1024)
 	for {

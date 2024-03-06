@@ -378,7 +378,6 @@ func SendTurnOnLight(order [3]int) {
 }
 
 func DistributeOrderMatrix(outputMatrix map[string][][2]bool) {
-	fmt.Println("HERERERERER")
 	for id, req := range outputMatrix {
 		idInt, _ := strconv.Atoi(id)
 		addr, err := net.ResolveUDPAddr("udp4", ConvertIDtoIP(idInt)+":29504")
@@ -393,7 +392,6 @@ func DistributeOrderMatrix(outputMatrix map[string][][2]bool) {
 		for flr := range req {
 			messageToSend += fmt.Sprint(boolToInt(req[flr][io.BT_HallUp])) + "," + fmt.Sprint(boolToInt(req[flr][io.BT_HallDown])) + ","
 		}
-		fmt.Println("IM HERE")
 		conn.Write([]byte(messageToSend))
 		conn.Close()
 	}
