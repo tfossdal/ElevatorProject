@@ -15,6 +15,16 @@ func PrintState() {
 	fmt.Println("Direction: ", elevator.Dirn)
 }
 
+func AddCabRequest(btn_floor int, btn_type io.ButtonType) {
+	if btn_floor != 2 {
+		return
+	}
+	OrderMtx.Lock()
+	elevator.Requests[btn_floor][io.BT_Cab] = 1
+	OrderMtx.Unlock()
+	Fsm_OnRequestButtonPress(-2, 0)
+}
+
 func debugRequestMatrix() {
 	fmt.Println(elevator.Requests)
 }

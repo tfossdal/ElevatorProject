@@ -109,6 +109,7 @@ func main() {
 				} else {
 					fmt.Println("sending button press")
 					ElevatorModules.SendButtonPressUDP(a)
+					ElevatorModules.AddCabRequest(a.Floor, a.Button)
 				}
 			} else {
 				fmt.Println("sending button press")
