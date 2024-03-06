@@ -94,9 +94,11 @@ func Requests_shouldStop(e el.Elevator) int {
 	switch elevator.Dirn {
 	case io.MD_Down:
 		if e.Requests[e.Floor][io.BT_HallDown] != 0 {
+			OrderMtx.Unlock()
 			return 1
 		}
 		if e.Requests[e.Floor][io.BT_Cab] != 0 {
+			OrderMtx.Unlock()
 			return 1
 		}
 		OrderMtx.Unlock()
@@ -106,9 +108,11 @@ func Requests_shouldStop(e el.Elevator) int {
 		return 0
 	case io.MD_Up:
 		if e.Requests[e.Floor][io.BT_HallUp] != 0 {
+			OrderMtx.Unlock()
 			return 1
 		}
 		if e.Requests[e.Floor][io.BT_Cab] != 0 {
+			OrderMtx.Unlock()
 			return 1
 		}
 		OrderMtx.Unlock()

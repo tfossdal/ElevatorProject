@@ -124,28 +124,6 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 	}
 }
 
-func UpdatehallRequests(btnType int, flr int) {
-	hallRequests[flr][btnType] = 1
-}
-
-func UpdatecabRequests(elevatorID int, flr int) {
-	_, hasKey := cabRequestMap[elevatorID]
-	if hasKey {
-		cabRequests := cabRequestMap[elevatorID]
-		cabRequests[flr] = 1
-		cabRequestMap[elevatorID] = cabRequests
-	} else {
-		cabRequests := [io.NumFloors]int{}
-		for i := 0; i < io.NumFloors; i++ {
-			if i == flr {
-				cabRequests[i] = 1
-			} else {
-				cabRequests[i] = 0
-			}
-		}
-		cabRequestMap[elevatorID] = cabRequests
-	}
-}
 
 func BackupTakeover(conn *net.TCPConn) {
 	fmt.Println("Before init:")
