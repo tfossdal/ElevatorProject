@@ -81,7 +81,7 @@ func RecieveTurnOnOffLight() {
 			fmt.Println("Failed to read, recieve turn on/off light")
 		}
 		recievedMessage := string(buf[:n])
-		fmt.Printf("Read " + recievedMessage)
+		fmt.Println("Read button message " + recievedMessage)
 		messageList := strings.Split(recievedMessage, ",")
 		btnInt, err := strconv.Atoi(messageList[2])
 		if err != nil {
