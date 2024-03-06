@@ -47,4 +47,6 @@
     - Only needs to check for time in primary
     - Should current queue be transfered? I think no?
 - Must kill backup when connection to it is lost
+
+NEED TO FIX STUFF WITH BACKUP DYING AND COMING BACK ALIVE
 https://prod.liveshare.vsengsaas.visualstudio.com/join?28D4C7E89CE6DBECA8A29DE076D9C0338B4D
