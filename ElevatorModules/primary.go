@@ -40,7 +40,7 @@ var newlyAliveID = make(chan int)
 var transmittedCabOrderCh = make(chan [2]int, 4)
 
 // var listOfLivingCh = make(chan int)
-var listOfLivingCh = make(chan map[int]time.Time)
+var listOfLivingCh = make(chan map[int]time.Time, 10)
 var reassignCh = make(chan int, 5)
 var otherPrimaryID = 0
 
