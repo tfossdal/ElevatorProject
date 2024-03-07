@@ -52,6 +52,16 @@ func SetAllLights(es el.Elevator) {
 	}
 }
 
+func SetAllCabLights(es el.Elevator) {
+	for floor := 0; floor < io.NumFloors; floor++ {
+		if es.Requests[floor][io.BT_Cab] != 0 {
+			io.SetButtonLamp(io.ButtonType(io.BT_Cab), floor, true)
+		} else {
+			io.SetButtonLamp(io.ButtonType(io.BT_Cab), floor, false)
+		}
+	}
+}
+
 func InitLights() {
 	io.SetDoorOpenLamp(false)
 	SetAllLights(elevator)
@@ -105,9 +115,10 @@ func Fsm_OnRequestButtonPress(btn_Floor int, btn_type io.ButtonType) {
 			break
 		}
 	}
-	if !ConnectedToBackup {
-		SetAllLights(elevator)
-	}
+	SetAllCabLights(elevator)
+	// if !online {
+	// 	SetAllLights(elevator)
+	// }
 }
 
 func Fsm_OnFloorArrival(newFloor int) {
@@ -126,9 +137,10 @@ func Fsm_OnFloorArrival(newFloor int) {
 			elevator = Requests_clearAtCurrentFloor(elevator)
 			fmt.Println("HELLO3")
 			Timer_start(elevator.Config.DoorOpenDuration_s)
-			if !ConnectedToBackup {
-				SetAllLights(elevator)
-			}
+			// if !ConnectedToBackup {
+			// 	SetAllLights(elevator)
+			// }
+			SetAllCabLights(elevator)
 			elevator.State = el.DoorOpen
 		}
 	default:
@@ -157,9 +169,10 @@ func Fsm_OnDoorTimeout() {
 		case el.DoorOpen:
 			Timer_start(elevator.Config.DoorOpenDuration_s)
 			elevator = Requests_clearAtCurrentFloor(elevator)
-			if !ConnectedToBackup {
-				SetAllLights(elevator)
-			}
+			// if !ConnectedToBackup {
+			// 	SetAllLights(elevator)
+			// }
+			SetAllCabLights(elevator)
 		case el.Idle:
 			io.SetDoorOpenLamp(false)
 			io.SetMotorDirection(elevator.Dirn)

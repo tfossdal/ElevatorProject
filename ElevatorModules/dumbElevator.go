@@ -158,3 +158,27 @@ func RecieveOrderMatrix() {
 		UpdateLocalRequestMatrix(newMatrix)
 	}
 }
+
+/* func TransmitCabOrders() {
+	addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29503")
+	if err != nil {
+		fmt.Println("Failed to resolve, send order")
+	}
+	conn, err := net.DialUDP("udp4", nil, addr)
+	if err != nil {
+		fmt.Println("Failed to dial, send order")
+		//conn.Close()
+		return
+	}
+	//defer conn.Close()
+	OrderMtx.Lock()
+	defer OrderMtx.Unlock()
+	for i := 0; i < io.NumFloors; i++ {
+		if elevator.RequestMatrix[i][0] == 1 {
+		_, err = conn.Write([]byte("n," + fmt.Sprint(btn.Floor) + ",2"))
+		if err != nil {
+			fmt.Println(err)
+		}}
+	}
+	conn.Close()
+} */
