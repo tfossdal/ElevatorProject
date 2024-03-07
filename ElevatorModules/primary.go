@@ -622,6 +622,7 @@ func TCPCabOrderListener() {
 				fmt.Println("Failed to read, TCP cab transmit")
 				break
 			}
+			fmt.Println("Recieved transmitted orders: " + string(buf[:n]))
 			recieved_message := strings.Split(string(buf[:n]), ",")
 			remoteIP := conn.RemoteAddr().(*net.TCPAddr).IP
 			btn, _ := strconv.Atoi(recieved_message[2])
