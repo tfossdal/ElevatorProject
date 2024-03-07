@@ -622,14 +622,21 @@ func TCPCabOrderListener() {
 				fmt.Println("Failed to read, TCP cab transmit")
 				break
 			}
+			raw_recieved_message := strings.Split(string(buf[:n]), ":")
 			fmt.Println("Recieved transmitted orders: " + string(buf[:n]))
-			recieved_message := strings.Split(string(buf[:n]), ",")
-			remoteIP := conn.RemoteAddr().(*net.TCPAddr).IP
-			btn, _ := strconv.Atoi(recieved_message[2])
-			flr, _ := strconv.Atoi(recieved_message[1])
-			id := int(remoteIP[3])
-			fmt.Println("Recieved transmitted orders: " + fmt.Sprint([3]int{id, flr, btn}))
-			newOrderCh <- [3]int{id, flr, btn}
+			for i := range raw_recieved_message {
+				if raw_recieved_message[i] == "" {
+					break
+				}
+				fmt.Println("Recieved transmitted orders: " + raw_recieved_message[i])
+				recieved_message := strings.Split(raw_recieved_message[i], ",")
+				remoteIP := conn.RemoteAddr().(*net.TCPAddr).IP
+				btn, _ := strconv.Atoi(recieved_message[1])
+				flr, _ := strconv.Atoi(recieved_message[0])
+				id := int(remoteIP[3])
+				fmt.Println("Recieved transmitted orders: " + fmt.Sprint([3]int{id, flr, btn}))
+				newOrderCh <- [3]int{id, flr, btn}
+			}
 		}
 	}
 }
