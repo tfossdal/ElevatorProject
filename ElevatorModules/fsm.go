@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 var elevator el.Elevator = el.Elevator{Floor: -1, Dirn: io.MD_Stop, Requests: [io.NumFloors][io.NumButtons]int{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, State: el.Idle, ElevatorType: el.None, Config: el.Config{ClearRequestVariant: el.CV_ALL, DoorOpenDuration_s: 3.0}}
@@ -261,6 +262,7 @@ func RecieveCabOrders(primaryID int) {
 	}
 	SetAllCabLights(elevator)
 	OrderMtx.Unlock()
+	time.Sleep(100 * time.Millisecond)
 	Fsm_OnRequestButtonPress(-2, 0)
 	conn.Close()
 }
