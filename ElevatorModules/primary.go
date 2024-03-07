@@ -630,6 +630,7 @@ func TCPCabOrderListener() {
 		conn, err := listener.Accept()
 		if err != nil {
 			fmt.Println("Failed to accept")
+
 		}
 		for {
 			if PingInternet() == 0 {
@@ -639,6 +640,7 @@ func TCPCabOrderListener() {
 			n, err := conn.Read(buf)
 			if err != nil {
 				conn.Close()
+				fmt.Println(err)
 				fmt.Println("Failed to read, TCP cab transmit")
 				break
 			}
