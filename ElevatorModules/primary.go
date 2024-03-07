@@ -284,6 +284,7 @@ func ListenForOtherPrimary() {
 	_, _, _ = conn.ReadFromUDP(buf)
 	fmt.Println("Heard other primary")
 	//DIE AND LIVE
+	RestartProgramme()
 
 }
 
@@ -594,4 +595,10 @@ func ReassignRequests() {
 			fmt.Printf("%6v :  %+v\n", k, v)
 		}
 	}
+}
+
+func RestartProgramme() {
+	cmd := exec.Command("gnome-terminal", "-x", "sh", "-c", "go run main.go")
+	cmd.Run()
+	panic("Dying")
 }
