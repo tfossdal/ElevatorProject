@@ -623,14 +623,13 @@ func TCPCabOrderListener() {
 				break
 			}
 			raw_recieved_message := strings.Split(string(buf[:n]), ":")
-			fmt.Println("Recieved transmitted orders: " + string(buf[:n]))
 			for i := range raw_recieved_message {
 				if raw_recieved_message[i] == "" {
 					break
 				}
-				fmt.Println("Recieved transmitted orders: " + raw_recieved_message[i])
 				recieved_message := strings.Split(raw_recieved_message[i], ",")
 				remoteIP := conn.RemoteAddr().(*net.TCPAddr).IP
+				fmt.Println(remoteIP)
 				btn, _ := strconv.Atoi(recieved_message[1])
 				flr, _ := strconv.Atoi(recieved_message[0])
 				id := int(remoteIP[3])
