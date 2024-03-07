@@ -35,6 +35,7 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh cha
 			newOrderCh <- order
 		}
 		if recieved_message[0] == "s" {
+			fmt.Println("Things are alive")
 			stateInt, _ := strconv.Atoi(recieved_message[1])
 			directionInt, _ := strconv.Atoi(recieved_message[2])
 			floorInt, _ := strconv.Atoi(recieved_message[3])
