@@ -105,7 +105,9 @@ func Fsm_OnRequestButtonPress(btn_Floor int, btn_type io.ButtonType) {
 			break
 		}
 	}
-	//SetAllLights(elevator)
+	if !online {
+		SetAllLights(elevator)
+	}
 }
 
 func Fsm_OnFloorArrival(newFloor int) {
@@ -124,7 +126,9 @@ func Fsm_OnFloorArrival(newFloor int) {
 			elevator = Requests_clearAtCurrentFloor(elevator)
 			fmt.Println("HELLO3")
 			Timer_start(elevator.Config.DoorOpenDuration_s)
-			//SetAllLights(elevator)
+			if PingInternet() == 0 {
+				SetAllLights(elevator)
+			}
 			elevator.State = el.DoorOpen
 		}
 	default:
