@@ -17,15 +17,21 @@ func IAmAlive() {
 	state := strconv.Itoa(int(elevator.State))
 	direction := strconv.Itoa(int(elevator.Dirn))
 	floor := strconv.Itoa(int(elevator.Floor))
-	addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29503")
-	if err != nil {
-		fmt.Println("Failed to resolve, send order")
+	var conn = &net.UDPConn{}
+	for {
+		addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29503")
+		if err != nil {
+			fmt.Println("Failed to resolve, send order")
+			continue
+		}
+		conn, err = net.DialUDP("udp4", nil, addr)
+		if err != nil {
+			fmt.Println("Failed to dial, send order")
+			continue
+		}
+		defer conn.Close()
+		break
 	}
-	conn, err := net.DialUDP("udp4", nil, addr)
-	if err != nil {
-		fmt.Println("Failed to dial, send order")
-	}
-	defer conn.Close()
 	for {
 		//fmt.Println("Sending message")
 		conn.Write([]byte("s," + state + "," + direction + "," + floor))
