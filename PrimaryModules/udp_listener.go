@@ -28,7 +28,7 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh cha
 		recieved_message := strings.Split(string(buf[:n]), ",")
 		//fmt.Println(string(buf[:n]) + "yo") 					// For testing
 		if recieved_message[0] == "n" {
-			fmt.Println("test")
+			fmt.Println("test new order")
 			floor, _ := strconv.Atoi(recieved_message[1])
 			btn, _ := strconv.Atoi(recieved_message[2])
 			order := [3]int{int(senderIP[3]), floor, btn}
@@ -45,7 +45,7 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh cha
 			newStatesCh <- newStates
 		}
 		if recieved_message[0] == "c" {
-			fmt.Println("test")
+			fmt.Println("test clear order")
 			floor, _ := strconv.Atoi(recieved_message[1])
 			btn, _ := strconv.Atoi(recieved_message[2])
 			order := [3]int{int(senderIP[3]), floor, btn}
