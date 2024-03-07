@@ -18,6 +18,8 @@ var hallRequests = make([][]int, io.NumFloors)
 var cabRequestMap = make(map[int][io.NumFloors]int) //Format: {ID: {floor 0, ..., floor N-1}}
 var elevatorStatesMap = make(map[int][3]int)        //Format: {ID: {state, direction, floor}}
 
+var ConnectedToBackup = false
+
 // var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
 var backupTimeoutTime = 3
 
@@ -119,6 +121,7 @@ func DialBackup() {
 		}
 		time.Sleep(1 * time.Second)
 		fmt.Println("Connected to backup")
+		ConnectedToBackup = true
 		go PrimaryAliveTCP(addr, conn)
 		go BackupAliveListener(conn)
 		go SendOrderToBackup(conn)
@@ -181,6 +184,7 @@ func BackupAliveListener(conn *net.TCPConn) {
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("Backup Died")
+			ConnectedToBackup = false
 			conn.Close()
 			terminateBackupConnection <- 1
 			go DialBackup()
