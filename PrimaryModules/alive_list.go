@@ -11,6 +11,13 @@ type Node struct {
 	lastSeen time.Time
 }
 
+/* var livingElevatorMap = make(map[int]time.Time)
+func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList chan int) {
+timeout := 1 * time.Second
+for {
+}
+ */
+
 func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList, numberOfElevators, newlyAliveID, listOfLivingCh chan int) {
 	living := list.New()
 	timeout := 1 * time.Second

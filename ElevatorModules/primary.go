@@ -176,9 +176,19 @@ func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 
 func BackupAliveListener(conn *net.TCPConn) {
 	for {
-		conn.SetReadDeadline(time.Now().Add(time.Duration(backupTimeoutTime) * time.Second))
+		err := conn.SetReadDeadline(time.Now().Add(time.Duration(backupTimeoutTime) * time.Second))
+		if err != nil {
+			fmt.Println("Deadline for backup alive reached")
+			fmt.Println(err)
+			fmt.Println("Backup Died")
+			ConnectedToBackup = false
+			conn.Close()
+			terminateBackupConnection <- 1
+			go DialBackup()
+			return
+		}
 		buf := make([]byte, 1024)
-		_, err := conn.Read(buf)
+		_, err = conn.Read(buf)
 		//n, err := conn.Read(buf)
 		//fmt.Println("Message recieved: " + string(buf[:n]))
 		if err != nil {
