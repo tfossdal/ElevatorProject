@@ -624,6 +624,9 @@ func TCPCabOrderListener() {
 	}
 	buf := make([]byte, 1024)
 	for {
+		if PingInternet() == 0 {
+			return
+		}
 		conn, err := listener.Accept()
 		if err != nil {
 			fmt.Println("Failed to accept")
