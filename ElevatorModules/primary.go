@@ -258,7 +258,6 @@ func BecomePrimary() {
 	conn.SetReadDeadline(time.Now().Add(time.Duration(time.Duration(deadlineTime) * time.Millisecond)))
 	buf := make([]byte, 1024)
 	_, recievedAddr, err := conn.ReadFromUDP(buf)
-	senderID := int(recievedAddr.IP[3])
 	if err != nil {
 		//BECOME PRIMARY
 		fmt.Println("No Primary alive message recieved, Becoming primary")
@@ -267,6 +266,7 @@ func BecomePrimary() {
 		conn.Close()
 		return
 	}
+	senderID := int(recievedAddr.IP[3])
 	go RecieveCabOrders(senderID)
 	fmt.Printf("Recieved message: %s\n", buf[:])
 	go AcceptPrimaryDial()
