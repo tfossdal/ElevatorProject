@@ -37,7 +37,7 @@ var elevatorStates = make(chan map[int][3]int)
 var orderTransferCh = make(chan [3]int)
 var terminateBackupConnection = make(chan int)
 var newlyAliveID = make(chan int)
-var transmittedCabOrderCh = make(chan [2]int)
+var transmittedCabOrderCh = make(chan [2]int, 4)
 
 // var listOfLivingCh = make(chan int)
 var listOfLivingCh = make(chan map[int]time.Time)
