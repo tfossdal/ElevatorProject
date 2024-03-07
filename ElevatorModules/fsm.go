@@ -221,21 +221,19 @@ func TransmitCabOrders(primaryID int) {
 }
 
 func RecieveCabOrders(primaryID int) {
-	var addr = &net.TCPAddr{}
+	var conn = &net.TCPConn{}
 	for {
-		a, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(primaryID)+":29508")
+		addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(primaryID)+":29508")
 		if err != nil {
 			fmt.Println("Failed to resolve, recieve cab order")
 			continue
 		}
-		addr = a
+		conn, err = net.DialTCP("tcp", nil, addr)
+		if err != nil {
+			fmt.Println("Failed to dial, recieve cab order")
+			continue
+		}
 		break
-	}
-	conn, err := net.DialTCP("tcp", nil, addr)
-	if err != nil {
-		fmt.Println("Failed to dial, recieve cab order")
-		conn.Close()
-		return
 	}
 	OrderMtx.Lock()
 	defer OrderMtx.Unlock()
