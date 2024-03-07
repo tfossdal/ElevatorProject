@@ -632,6 +632,10 @@ func TCPCabOrderListener() {
 			fmt.Println("Failed to accept")
 		}
 		for {
+			if PingInternet() == 0 {
+				conn.Close()
+				return
+			}
 			n, err := conn.Read(buf)
 			if err != nil {
 				conn.Close()
