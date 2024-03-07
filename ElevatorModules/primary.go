@@ -35,7 +35,7 @@ var newStatesCh = make(chan [4]int, 30)
 var retrieveElevatorStates = make(chan int)
 var elevatorStates = make(chan map[int][3]int)
 var orderTransferCh = make(chan [3]int)
-var terminateBackupConnection = make(chan int)
+var terminateBackupConnection = make(chan int, 10)
 var newlyAliveID = make(chan int)
 var transmittedCabOrderCh = make(chan [2]int, 4)
 

@@ -115,6 +115,10 @@ func main() {
 		case a := <-drv_floors:
 			fmt.Printf("%+v\n", a)
 			module.Fsm_OnFloorArrival(a)
+		case a := <-drv_obstr:
+			//Obstruction
+			fmt.Printf("%+v\n", a)
+			
 		}
 	}
 
