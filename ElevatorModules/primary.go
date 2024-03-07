@@ -233,6 +233,7 @@ func ListenForOtherPrimary() {
 	}
 	buf := make([]byte, 1024)
 	_, _, _ = conn.ReadFromUDP(buf)
+	fmt.Println("Heard other primary")
 	//DIE AND LIVE
 }
 
