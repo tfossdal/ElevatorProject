@@ -640,17 +640,16 @@ func TCPCabOrderListener() {
 				if raw_recieved_message[i] == "" {
 					break
 				}
-				recieved_message := strings.Split(raw_recieved_message[i], ",")
+				floor, _ := strconv.Atoi(raw_recieved_message[i])
+				fmt.Println("Recieved cab at floor: " + fmt.Sprint(floor))
 				remoteIP := conn.RemoteAddr().(*net.TCPAddr).IP
 				fmt.Println(remoteIP)
-				btn, _ := strconv.Atoi(recieved_message[1])
-				flr, _ := strconv.Atoi(recieved_message[0])
 				IPString := fmt.Sprint(remoteIP)
 				IpPieces := strings.Split(IPString, ".")
 				id, _ := strconv.Atoi(IpPieces[3])
-				fmt.Println("Recieved transmitted orders: " + fmt.Sprint([3]int{id, flr, btn}))
-				transmittedCabOrderCh <- [2]int{id, flr}
-				UpdateCabRequests(id, flr, 1)
+				fmt.Println("Recieved transmitted orders: " + fmt.Sprint([3]int{id, floor, 2}))
+				transmittedCabOrderCh <- [2]int{id, floor}
+				UpdateCabRequests(id, floor, 1)
 			}
 		}
 	}
