@@ -252,7 +252,8 @@ func RecieveCabOrders(primaryID int) {
 	raw_recieved_message := strings.Split(string(buf[:n]), ":")
 	for i := range raw_recieved_message {
 		if raw_recieved_message[i] == "" {
-			break
+			conn.Close()
+			return
 		}
 		floor, _ := strconv.Atoi(raw_recieved_message[i])
 		fmt.Println("Recieved cab at floor: " + fmt.Sprint(floor))
