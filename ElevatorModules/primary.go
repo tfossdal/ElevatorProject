@@ -598,7 +598,7 @@ func ReassignRequests() {
 }
 
 func RestartProgramme() {
-	cmd := exec.Command("gnome-terminal", "-x", "sh", "-c", "go run main.go")
+	cmd := exec.Command("gnome-terminal", "-x", "sh", "-c", "go run restartSelf.go")
 	cmd.Run()
 	panic("Dying")
 }
