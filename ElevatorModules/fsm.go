@@ -190,15 +190,9 @@ func Fsm_OnDoorTimeout() {
 }
 
 func TransmitCabOrders(primaryID int) {
-	var addr = &net.TCPAddr{}
-	for {
-		a, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(primaryID)+":29507")
-		if err != nil {
-			fmt.Println("Failed to resolve, send order")
-			continue
-		}
-		addr = a
-		break
+	addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(primaryID)+":29507")
+	if err != nil {
+		fmt.Println("Failed to resolve, send order")
 	}
 	conn, err := net.DialTCP("tcp", nil, addr)
 	if err != nil {
