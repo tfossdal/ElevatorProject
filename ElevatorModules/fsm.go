@@ -243,7 +243,7 @@ func RecieveCabOrders(primaryID int) {
 	if err != nil {
 		fmt.Println("Failed to read, TCP cab recieve")
 	}
-	fmt.Println("Recieved stuff: " + fmt.Sprint(buf[:n]))
+	fmt.Println("Recieved stuff: " + string(buf[:n]))
 	raw_recieved_message := strings.Split(string(buf[:n]), ":")
 	for i := range raw_recieved_message {
 		if raw_recieved_message[i] == "" {
