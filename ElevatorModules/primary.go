@@ -699,6 +699,7 @@ func TCPCabOrderSender() {
 		if err != nil {
 			fmt.Println("Failed to write, TCP cab transmit")
 		}
+		conn.Close()
 	}
 }
 
