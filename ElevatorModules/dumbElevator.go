@@ -63,12 +63,15 @@ func SendButtonPressUDP(btn io.ButtonEvent) {
 	conn, err := net.DialUDP("udp4", nil, addr)
 	if err != nil {
 		fmt.Println("Failed to dial, send order")
+		conn.Close()
+		return
 	}
-	defer conn.Close()
+	//defer conn.Close()
 	_, err = conn.Write([]byte("n," + fmt.Sprint(btn.Floor) + "," + fmt.Sprint(btn.Button)))
 	if err != nil {
 		fmt.Println(err)
 	}
+	conn.Close()
 }
 
 func ClearRequestUDP(btn io.ButtonEvent) {
