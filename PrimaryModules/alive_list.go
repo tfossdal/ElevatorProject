@@ -12,6 +12,7 @@ import (
 } */
 
 var livingElevatorMap = make(map[int]time.Time)
+
 func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList, newlyAlive chan int, listOfLiving chan map[int]time.Time) {
 	timeout := 1 * time.Second
 	for {
@@ -42,8 +43,9 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 			fmt.Println("Printing list:")
 			fmt.Println(livingElevatorMap)
 
-}}}
-
+		}
+	}
+}
 
 /* func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList, numberOfElevators, newlyAliveID, listOfLivingCh chan int) {
 	living := list.New()

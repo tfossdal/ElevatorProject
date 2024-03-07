@@ -91,6 +91,7 @@ func PrimaryRoutine() {
 	go ReassignRequests()
 	go TCPCabOrderListener()
 	go TCPCabOrderSender()
+	go printLivings()
 
 	for {
 		time.Sleep(500 * time.Millisecond)
@@ -707,4 +708,12 @@ func RestartProgramme() {
 	cmd := exec.Command("gnome-terminal", "-x", "sh", "-c", "go run restartSelf.go")
 	cmd.Run()
 	panic("Dying")
+}
+
+func printLivings(){
+	for{
+
+		time.Sleep(1*time.Second)
+		printList <- 1
+	}
 }
