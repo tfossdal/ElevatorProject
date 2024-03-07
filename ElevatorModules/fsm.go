@@ -242,7 +242,6 @@ func RecieveCabOrders(primaryID int) {
 		break
 	}
 	OrderMtx.Lock()
-	defer OrderMtx.Unlock()
 	buf := make([]byte, 1024)
 	n, err := conn.Read(buf)
 	if err != nil {
@@ -253,6 +252,7 @@ func RecieveCabOrders(primaryID int) {
 	for i := range raw_recieved_message {
 		if raw_recieved_message[i] == "" {
 			conn.Close()
+			OrderMtx.Unlock()
 			return
 		}
 		floor, _ := strconv.Atoi(raw_recieved_message[i])
@@ -260,6 +260,7 @@ func RecieveCabOrders(primaryID int) {
 		elevator.Requests[floor][io.BT_Cab] = 1
 	}
 	SetAllCabLights(elevator)
+	OrderMtx.Unlock()
 	Fsm_OnRequestButtonPress(-2, 0)
 	conn.Close()
 }
