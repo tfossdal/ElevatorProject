@@ -223,6 +223,7 @@ func TransmitCabOrders(primaryID int) {
 func RecieveCabOrders(primaryID int) {
 	var conn = &net.TCPConn{}
 	for {
+		fmt.Println("LOOKING FOR PRIMARY TO SEND ORDERS")
 		addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(primaryID)+":29508")
 		if err != nil {
 			fmt.Println("Failed to resolve, recieve cab order")
@@ -242,12 +243,14 @@ func RecieveCabOrders(primaryID int) {
 	if err != nil {
 		fmt.Println("Failed to read, TCP cab recieve")
 	}
+	fmt.Println("Recieved stuff: " + fmt.Sprint(buf[:n]))
 	raw_recieved_message := strings.Split(string(buf[:n]), ":")
 	for i := range raw_recieved_message {
 		if raw_recieved_message[i] == "" {
 			break
 		}
 		floor, _ := strconv.Atoi(raw_recieved_message[i])
+		fmt.Println("Recieved cab at floor: " + fmt.Sprint(floor))
 		elevator.Requests[floor][io.BT_Cab] = 1
 	}
 	SetAllCabLights(elevator)
