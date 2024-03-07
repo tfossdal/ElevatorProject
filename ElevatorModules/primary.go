@@ -358,6 +358,7 @@ func SendOrderToBackup(conn *net.TCPConn) {
 				}
 			}
 			UpdateCabRequests(transmittedCabOrder[0], transmittedCabOrder[1], 1)
+			fmt.Println("Updated Cab Requests")
 		}
 	}
 }
