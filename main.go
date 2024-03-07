@@ -96,6 +96,7 @@ func main() {
 	go module.IAmAlive()
 	go module.RecieveTurnOnOffLight()
 	go ElevatorModules.RecieveOrderMatrix()
+	go module.Fsm_Obstructed()
 
 	for {
 		select {
@@ -118,7 +119,8 @@ func main() {
 		case a := <-drv_obstr:
 			//Obstruction
 			fmt.Printf("%+v\n", a)
-			
+			fmt.Println("OBSTRUUUUUUUCTING!!!!!!!!!!")
+			module.IsObstructed = a
 		}
 	}
 

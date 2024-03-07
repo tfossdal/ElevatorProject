@@ -260,3 +260,11 @@ func RecieveCabOrders(primaryID int) {
 	Fsm_OnRequestButtonPress(-2, 0)
 	conn.Close()
 }
+
+func Fsm_Obstructed(){
+	for{
+		if IsObstructed && elevator.State == el.DoorOpen {
+			Timer_start(elevator.Config.DoorOpenDuration_s)
+		}
+	}
+}

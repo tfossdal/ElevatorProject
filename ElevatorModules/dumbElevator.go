@@ -12,6 +12,7 @@ import (
 )
 
 //var QueueHasBeenUpdated = make(chan int)
+var IsObstructed = false
 
 func IAmAlive() {
 	state := strconv.Itoa(int(elevator.State))
