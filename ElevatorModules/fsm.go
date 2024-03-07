@@ -5,6 +5,8 @@ import (
 	io "ElevatorProject/elevio"
 	"fmt"
 	"net"
+	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -215,5 +217,41 @@ func TransmitCabOrders(primaryID int) {
 			}
 		}
 	}
+	conn.Close()
+}
+
+func RecieveCabOrders(primaryID int) {
+	var addr = &net.TCPAddr{}
+	for {
+		a, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(primaryID)+":29508")
+		if err != nil {
+			fmt.Println("Failed to resolve, recieve cab order")
+			continue
+		}
+		addr = a
+		break
+	}
+	conn, err := net.DialTCP("tcp", nil, addr)
+	if err != nil {
+		fmt.Println("Failed to dial, recieve cab order")
+		conn.Close()
+		return
+	}
+	OrderMtx.Lock()
+	defer OrderMtx.Unlock()
+	buf := make([]byte, 1024)
+	n, err := conn.Read(buf)
+	if err != nil {
+		fmt.Println("Failed to read, TCP cab recieve")
+	}
+	raw_recieved_message := strings.Split(string(buf[:n]), ":")
+	for i := range raw_recieved_message {
+		if raw_recieved_message[i] == "" {
+			break
+		}
+		floor, _ := strconv.Atoi(raw_recieved_message[i])
+		elevator.Requests[floor][io.BT_Cab] = 1
+	}
+	SetAllCabLights(elevator)
 	conn.Close()
 }

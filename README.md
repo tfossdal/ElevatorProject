@@ -9,7 +9,8 @@
 - 04 - Distribute orders
 - 05 - Light light
 - 06 - Primary/Backup communication
-. 07 - Primary/Primary cab orders
+- 07 - Primary/Primary cab orders transmit
+- 08 - Primary/Primary cab orders retransmit
 
 
 ## Order Format (UDP)

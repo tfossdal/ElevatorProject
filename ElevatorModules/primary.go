@@ -257,7 +257,8 @@ func BecomePrimary() {
 	deadlineTime := rand.Intn(10000)
 	conn.SetReadDeadline(time.Now().Add(time.Duration(time.Duration(deadlineTime) * time.Millisecond)))
 	buf := make([]byte, 1024)
-	_, _, err = conn.ReadFromUDP(buf)
+	_, recievedAddr, err := conn.ReadFromUDP(buf)
+	senderID := int(recievedAddr.IP[3])
 	if err != nil {
 		//BECOME PRIMARY
 		fmt.Println("No Primary alive message recieved, Becoming primary")
@@ -266,6 +267,7 @@ func BecomePrimary() {
 		conn.Close()
 		return
 	}
+	go RecieveCabOrders(senderID)
 	fmt.Printf("Recieved message: %s\n", buf[:])
 	go AcceptPrimaryDial()
 }
@@ -638,6 +640,42 @@ func TCPCabOrderListener() {
 				fmt.Println("Recieved transmitted orders: " + fmt.Sprint([3]int{id, flr, btn}))
 				newOrderCh <- [3]int{id, flr, btn}
 			}
+		}
+	}
+}
+
+func TCPCabOrderSender() {
+	addr, err := net.ResolveTCPAddr("tcp", ":29508")
+	if err != nil {
+		fmt.Println("Failed to resolve")
+	}
+	listener, err := net.ListenTCP("tcp", addr)
+	if err != nil {
+		fmt.Println("Failed to listen")
+	}
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println("Failed to accept")
+		}
+		remoteIP := conn.RemoteAddr().(*net.TCPAddr).IP
+		IPString := fmt.Sprint(remoteIP)
+		IpPieces := strings.Split(IPString, ".")
+		id, _ := strconv.Atoi(IpPieces[3])
+
+		var stringToSend string
+
+		for i := 0; i < io.NumFloors; i++ {
+			if cabRequestMap[id][i] == 1 {
+				stringToSend += fmt.Sprint(cabRequestMap[id][i]) + ":"
+			}
+		}
+		if stringToSend == "" {
+			stringToSend = ":"
+		}
+		_, err = conn.Write([]byte(stringToSend))
+		if err != nil {
+			fmt.Println("Failed to write, TCP cab transmit")
 		}
 	}
 }
