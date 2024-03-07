@@ -49,4 +49,4 @@
 - Must kill backup when connection to it is lost
 
 NEED TO FIX STUFF WITH BACKUP DYING AND COMING BACK ALIVE
-https://prod.liveshare.vsengsaas.visualstudio.com/join?28D4C7E89CE6DBECA8A29DE076D9C0338B4D
+https://prod.liveshare.vsengsaas.visualstudio.com/join?EDD9086DB4D336EB4A00EA80C9EFE18738FE
