@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -28,7 +29,6 @@ var checkLiving = make(chan int)
 var requestId = make(chan int, 5)
 var idOfLivingElev = make(chan int, 5)
 var printList = make(chan int)
-var numberOfElevators = make(chan int, 5)
 var newOrderCh = make(chan [3]int)
 var clearOrderCh = make(chan [3]int)
 var newStatesCh = make(chan [4]int, 30)
@@ -41,6 +41,7 @@ var newlyAliveID = make(chan int)
 // var listOfLivingCh = make(chan int)
 var listOfLivingCh = make(chan map[int]time.Time)
 var reassignCh = make(chan int, 5)
+var otherPrimaryID = 0
 
 type HRAElevState struct {
 	Behavior    string             `json:"behaviour"`
@@ -87,6 +88,7 @@ func PrimaryRoutine() {
 	go UpdateElevatorStates()
 	go DialBackup()
 	go ReassignRequests()
+	go TCPCabOrderListener()
 
 	for {
 		time.Sleep(500 * time.Millisecond)
@@ -281,7 +283,8 @@ func ListenForOtherPrimary() {
 	}
 	fmt.Println("number 3")
 	buf := make([]byte, 1024)
-	_, _, _ = conn.ReadFromUDP(buf)
+	_, recievedAdress, _ := conn.ReadFromUDP(buf)
+	otherPrimaryID = int(recievedAdress.IP[3])
 	fmt.Println("Heard other primary")
 	//DIE AND LIVE
 	RestartProgramme()
@@ -597,8 +600,42 @@ func ReassignRequests() {
 	}
 }
 
+func TCPCabOrderListener() {
+	addr, err := net.ResolveTCPAddr("tcp", ":29507")
+	if err != nil {
+		fmt.Println("Failed to resolve")
+	}
+	listener, err := net.ListenTCP("tcp", addr)
+	if err != nil {
+		fmt.Println("Failed to listen")
+	}
+	buf := make([]byte, 1024)
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println("Failed to accept")
+		}
+		for {
+			n, err := conn.Read(buf)
+			if err != nil {
+				conn.Close()
+				fmt.Println("Failed to read, TCP cab transmit")
+				break
+			}
+			recieved_message := strings.Split(string(buf[:n]), ",")
+			remoteIP := conn.RemoteAddr().(*net.TCPAddr).IP
+			btn, _ := strconv.Atoi(recieved_message[2])
+			flr, _ := strconv.Atoi(recieved_message[1])
+			id := int(remoteIP[3])
+			fmt.Println("Recieved transmitted orders: " + fmt.Sprint([3]int{id, flr, btn}))
+			newOrderCh <- [3]int{id, flr, btn}
+		}
+	}
+}
+
 func RestartProgramme() {
-	//TransmitCabOrders()
+
+	TransmitCabOrders(otherPrimaryID)
 	cmd := exec.Command("gnome-terminal", "-x", "sh", "-c", "go run restartSelf.go")
 	cmd.Run()
 	panic("Dying")

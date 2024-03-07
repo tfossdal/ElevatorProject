@@ -4,6 +4,7 @@ import (
 	el "ElevatorProject/Elevator"
 	io "ElevatorProject/elevio"
 	"fmt"
+	"net"
 	"sync"
 )
 
@@ -183,4 +184,35 @@ func Fsm_OnDoorTimeout() {
 	default:
 		break
 	}
+}
+
+func TransmitCabOrders(primaryID int) {
+	var addr = &net.TCPAddr{}
+	for {
+		a, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(primaryID)+":29507")
+		if err != nil {
+			fmt.Println("Failed to resolve, send order")
+			continue
+		}
+		addr = a
+		break
+	}
+	conn, err := net.DialTCP("tcp", nil, addr)
+	if err != nil {
+		fmt.Println("Failed to dial, send order")
+		conn.Close()
+		return
+	}
+	//defer conn.Close()
+	OrderMtx.Lock()
+	defer OrderMtx.Unlock()
+	for i := 0; i < io.NumFloors; i++ {
+		if elevator.Requests[i][2] == 1 {
+			_, err := conn.Write([]byte("n," + fmt.Sprint(elevator.Requests[i][2]) + ",2"))
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+	conn.Close()
 }
