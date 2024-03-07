@@ -632,7 +632,9 @@ func TCPCabOrderListener() {
 				fmt.Println(remoteIP)
 				btn, _ := strconv.Atoi(recieved_message[1])
 				flr, _ := strconv.Atoi(recieved_message[0])
-				id := int(remoteIP[3])
+				IPString := fmt.Sprint(remoteIP)
+				IpPieces := strings.Split(IPString, ".")
+				id, _ := strconv.Atoi(IpPieces[3])
 				fmt.Println("Recieved transmitted orders: " + fmt.Sprint([3]int{id, flr, btn}))
 				newOrderCh <- [3]int{id, flr, btn}
 			}
