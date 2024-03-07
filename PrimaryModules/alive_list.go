@@ -1,23 +1,28 @@
 package PrimaryModules
 
 import (
-	"container/list"
+	//"container/list"
 	"fmt"
 	"time"
 )
 
-type Node struct {
+/* type Node struct {
 	id       int
 	lastSeen time.Time
-}
+} */
 
-/* var livingElevatorMap = make(map[int]time.Time)
-func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList chan int, listOfLiving chan map[int]time.Time) {
+var livingElevatorMap = make(map[int]time.Time)
+func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList, newlyAlive chan int, listOfLiving chan map[int]time.Time) {
 	timeout := 1 * time.Second
 	for {
 		select {
 		case elevId := <-elevatorLives:
+			duplicate := livingElevatorMap[elevId]
 			livingElevatorMap[elevId] = time.Now()
+			if duplicate.IsZero() {
+				fmt.Println("Newly alive elevator")
+				newlyAlive <- elevId
+			}
 		case <-checkLiving:
 			for k, v := range livingElevatorMap {
 				if v.Add(timeout).Before(time.Now()) {
@@ -25,30 +30,22 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 					delete(livingElevatorMap, k)
 				}
 			}
-		case whatToRetrieve := <-retrieveId:
-			if whatToRetrieve == 3 {
-				ListOfLiving <- livingElevatorMap
-
-			} else if whatToRetrieve == 1 {
-				
-timeout := 1 * time.Second
-for {
-	select {
-	case elevId := <-elevatorLives:
-		livingElevatorMap[elevId] = time.Now()
-	case <-checkLiving:
-		for k, v := range livingElevatorMap {
-			if v.Add(timeout).Before(time.Now()) {
-				fmt.Println("Removing")
-				delete(livingElevatorMap, k)
+		case <-retrieveId:
+			for k, v := range livingElevatorMap {
+				if v.Add(timeout).Before(time.Now()) {
+					fmt.Println("Removing")
+					delete(livingElevatorMap, k)
+				}
 			}
-		}
-	case whatToRetrieve := <-retrieveId:
-		if whatToRetrieve == 3 {
-}
- */
+			listOfLiving <- livingElevatorMap
+		case <-printList:
+			fmt.Println("Printing list:")
+			fmt.Println(livingElevatorMap)
 
-func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList, numberOfElevators, newlyAliveID, listOfLivingCh chan int) {
+}}}
+
+
+/* func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList, numberOfElevators, newlyAliveID, listOfLivingCh chan int) {
 	living := list.New()
 	timeout := 1 * time.Second
 	for {
@@ -135,7 +132,7 @@ func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingEle
 
 	}
 
-}
+} */
 
 // func main() {
 

@@ -124,7 +124,6 @@ func PrimaryAliveListener(conn *net.TCPConn, listener *net.TCPListener) { //nytt
 	}
 }
 
-
 func BackupTakeover(conn *net.TCPConn) {
 	fmt.Println("Before init:")
 	DebugBackupMaps()

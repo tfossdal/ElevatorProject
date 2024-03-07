@@ -37,7 +37,9 @@ var elevatorStates = make(chan map[int][3]int)
 var orderTransferCh = make(chan [3]int)
 var terminateBackupConnection = make(chan int)
 var newlyAliveID = make(chan int)
-var listOfLivingCh = make(chan int)
+
+// var listOfLivingCh = make(chan int)
+var listOfLivingCh = make(chan map[int]time.Time)
 var reassignCh = make(chan int, 5)
 
 type HRAElevState struct {
@@ -79,7 +81,8 @@ func PrimaryRoutine() {
 	go PrimaryAlive()
 	go CheckGoneOffline()
 	go pm.ListenUDP("29503", elevatorLives, newOrderCh, clearOrderCh, newStatesCh)
-	go pm.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, numberOfElevators, newlyAliveID, listOfLivingCh)
+	//go pm.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, numberOfElevators, newlyAliveID, listOfLivingCh)
+	go pm.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, newlyAliveID, listOfLivingCh)
 	go FixNewElevatorLights()
 	go UpdateElevatorStates()
 	go DialBackup()
@@ -99,7 +102,7 @@ func ConvertIDtoIP(id int) string {
 	return "10.100.23." + fmt.Sprint(id)
 }
 
-func DialBackup() {
+/* func DialBackup() {
 	time.Sleep(1500 * time.Millisecond) //WAY TOO LONG
 	printList <- 1
 	num := <-numberOfElevators
@@ -110,6 +113,37 @@ func DialBackup() {
 		for i := 1; i <= num; i++ {
 			requestId <- i
 			addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(<-idOfLivingElev)+":29506")
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			time.Sleep(1500 * time.Millisecond)
+			conn, err := net.DialTCP("tcp", nil, addr)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			time.Sleep(1 * time.Second)
+			fmt.Println("Connected to backup")
+			ConnectedToBackup = true
+			go PrimaryAliveTCP(addr, conn)
+			go BackupAliveListener(conn)
+			go SendOrderToBackup(conn)
+			//go TransferOrdersToBackup(conn)
+			sendDataToNewBackup(conn)
+			return
+		}
+		//defer conn.Close()
+	}
+} */
+
+func DialBackup() {
+	time.Sleep(1500 * time.Millisecond) //WAY TOO LONG
+	for {
+		requestId <- 1
+		livingElevatorsMap := <-listOfLivingCh
+		for id, _ := range livingElevatorsMap {
+			addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(id)+":29506")
 			if err != nil {
 				fmt.Println(err)
 				continue
@@ -235,18 +269,21 @@ func BecomePrimary() {
 }
 
 func ListenForOtherPrimary() {
-	addr, err := net.ResolveUDPAddr("udp4", ":29501")
-	if err != nil {
-		fmt.Println("Failed to resolve")
+	for {
+		addr, err := net.ResolveUDPAddr("udp4", ":29501")
+		if err != nil {
+			fmt.Println("Failed to resolve")
+		}
+		conn, err := net.ListenUDP("udp4", addr)
+		if err != nil {
+			fmt.Println("Failed to listen")
+		}
+		buf := make([]byte, 1024)
+		_, _, _ = conn.ReadFromUDP(buf)
+		fmt.Println("Heard other primary")
+		return
+		//DIE AND LIVE
 	}
-	conn, err := net.ListenUDP("udp4", addr)
-	if err != nil {
-		fmt.Println("Failed to listen")
-	}
-	buf := make([]byte, 1024)
-	_, _, _ = conn.ReadFromUDP(buf)
-	fmt.Println("Heard other primary")
-	//DIE AND LIVE
 }
 
 func PrimaryAlive() {
@@ -457,17 +494,8 @@ func ReassignRequests() {
 
 	for {
 		<-reassignCh
-		fmt.Println("3")
-		requestId <- 3
-		fmt.Println("4")
-		θ := <-numberOfElevators
-		fmt.Println("5")
-		LivingElevators := make([]int, θ)
-		for i := 1; i <= θ; i++ {
-			fmt.Println("6")
-			LivingElevators[i-1] = <-listOfLivingCh
-		}
-		fmt.Println("7")
+		requestId <- 1
+		LivingElevators := <-listOfLivingCh
 		hraExecutable := ""
 		switch runtime.GOOS {
 		case "linux":
@@ -495,8 +523,7 @@ func ReassignRequests() {
 				// },
 			},
 		}
-		for i := range LivingElevators {
-			id := LivingElevators[i]
+		for id, _ := range LivingElevators {
 			s := ""
 			if elevatorStatesMap[id][0] == 0 {
 				s = "idle"
