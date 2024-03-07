@@ -208,6 +208,7 @@ func TransmitCabOrders(primaryID int) {
 	defer OrderMtx.Unlock()
 	for i := 0; i < io.NumFloors; i++ {
 		if elevator.Requests[i][2] == 1 {
+			fmt.Println("Transmitting: " + "n," + fmt.Sprint(elevator.Requests[i][2]) + ",2")
 			_, err := conn.Write([]byte("n," + fmt.Sprint(elevator.Requests[i][2]) + ",2"))
 			if err != nil {
 				fmt.Println(err)
