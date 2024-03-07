@@ -51,7 +51,7 @@ func CheckGoneOffline() {
 		time.Sleep(100 * time.Millisecond)
 	}
 	fmt.Println("Elevator went offline")
-	time.Sleep(1 * time.Second)
+	time.Sleep(5 * time.Second)
 	go ListenForOtherPrimary()
 }
 
