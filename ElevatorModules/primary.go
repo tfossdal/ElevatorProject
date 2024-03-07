@@ -30,7 +30,7 @@ var requestId = make(chan int, 5)
 var idOfLivingElev = make(chan int, 5)
 var printList = make(chan int)
 var newOrderCh = make(chan [3]int)
-var clearOrderCh = make(chan [3]int)
+var clearOrderCh = make(chan [3]int, 30)
 var newStatesCh = make(chan [4]int, 30)
 var retrieveElevatorStates = make(chan int)
 var elevatorStates = make(chan map[int][3]int)
@@ -710,10 +710,10 @@ func RestartProgramme() {
 	panic("Dying")
 }
 
-func printLivings(){
-	for{
+func printLivings() {
+	for {
 
-		time.Sleep(1*time.Second)
+		time.Sleep(1 * time.Second)
 		printList <- 1
 	}
 }
