@@ -106,30 +106,32 @@ func DialBackup() {
 	if num < 2 {
 		num = 2
 	}
-	for i := 1; i <= num; i++ {
-		requestId <- i
-		addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(<-idOfLivingElev)+":29506")
-		if err != nil {
-			fmt.Println(err)
-			continue
+	for {
+		for i := 1; i <= num; i++ {
+			requestId <- i
+			addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(<-idOfLivingElev)+":29506")
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			time.Sleep(1500 * time.Millisecond)
+			conn, err := net.DialTCP("tcp", nil, addr)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			time.Sleep(1 * time.Second)
+			fmt.Println("Connected to backup")
+			ConnectedToBackup = true
+			go PrimaryAliveTCP(addr, conn)
+			go BackupAliveListener(conn)
+			go SendOrderToBackup(conn)
+			//go TransferOrdersToBackup(conn)
+			sendDataToNewBackup(conn)
+			return
 		}
-		time.Sleep(1500 * time.Millisecond)
-		conn, err := net.DialTCP("tcp", nil, addr)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-		time.Sleep(1 * time.Second)
-		fmt.Println("Connected to backup")
-		ConnectedToBackup = true
-		go PrimaryAliveTCP(addr, conn)
-		go BackupAliveListener(conn)
-		go SendOrderToBackup(conn)
-		//go TransferOrdersToBackup(conn)
-		sendDataToNewBackup(conn)
-		break
+		//defer conn.Close()
 	}
-	//defer conn.Close()
 }
 
 func sendDataToNewBackup(conn *net.TCPConn) {

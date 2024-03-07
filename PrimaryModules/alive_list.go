@@ -12,9 +12,39 @@ type Node struct {
 }
 
 /* var livingElevatorMap = make(map[int]time.Time)
-func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList chan int) {
+func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList chan int, listOfLiving chan map[int]time.Time) {
+	timeout := 1 * time.Second
+	for {
+		select {
+		case elevId := <-elevatorLives:
+			livingElevatorMap[elevId] = time.Now()
+		case <-checkLiving:
+			for k, v := range livingElevatorMap {
+				if v.Add(timeout).Before(time.Now()) {
+					fmt.Println("Removing")
+					delete(livingElevatorMap, k)
+				}
+			}
+		case whatToRetrieve := <-retrieveId:
+			if whatToRetrieve == 3 {
+				ListOfLiving <- livingElevatorMap
+
+			} else if whatToRetrieve == 1 {
+				
 timeout := 1 * time.Second
 for {
+	select {
+	case elevId := <-elevatorLives:
+		livingElevatorMap[elevId] = time.Now()
+	case <-checkLiving:
+		for k, v := range livingElevatorMap {
+			if v.Add(timeout).Before(time.Now()) {
+				fmt.Println("Removing")
+				delete(livingElevatorMap, k)
+			}
+		}
+	case whatToRetrieve := <-retrieveId:
+		if whatToRetrieve == 3 {
 }
  */
 
