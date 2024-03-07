@@ -668,7 +668,7 @@ func TCPCabOrderSender() {
 
 		for i := 0; i < io.NumFloors; i++ {
 			if cabRequestMap[id][i] == 1 {
-				stringToSend += fmt.Sprint(cabRequestMap[id][i]) + ":"
+				stringToSend += fmt.Sprint(i) + ":"
 			}
 		}
 		if stringToSend == "" {
