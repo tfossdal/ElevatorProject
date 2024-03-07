@@ -37,6 +37,7 @@ var elevatorStates = make(chan map[int][3]int)
 var orderTransferCh = make(chan [3]int)
 var terminateBackupConnection = make(chan int)
 var newlyAliveID = make(chan int)
+var transmittedCabOrderCh = make(chan [2]int)
 
 // var listOfLivingCh = make(chan int)
 var listOfLivingCh = make(chan map[int]time.Time)
@@ -349,6 +350,14 @@ func SendOrderToBackup(conn *net.TCPConn) {
 			go SendTurnOnOffLight(order, 0)
 		case <-terminateBackupConnection:
 			return
+		case transmittedCabOrder := <-transmittedCabOrderCh:
+			if ConnectedToBackup {
+				_, err := conn.Write([]byte("n," + fmt.Sprint(transmittedCabOrder[0]) + "," + fmt.Sprint(transmittedCabOrder[1]) + "," + fmt.Sprint(2) + ",:"))
+				if err != nil {
+					fmt.Print(err)
+				}
+			}
+			UpdateCabRequests(transmittedCabOrder[0], transmittedCabOrder[1], 1)
 		}
 	}
 }
@@ -639,7 +648,8 @@ func TCPCabOrderListener() {
 				IpPieces := strings.Split(IPString, ".")
 				id, _ := strconv.Atoi(IpPieces[3])
 				fmt.Println("Recieved transmitted orders: " + fmt.Sprint([3]int{id, flr, btn}))
-				newOrderCh <- [3]int{id, flr, btn}
+				transmittedCabOrderCh <- [2]int{id, flr}
+				UpdateCabRequests(id, flr, 1)
 			}
 		}
 	}
