@@ -632,34 +632,32 @@ func TCPCabOrderListener() {
 			fmt.Println("Failed to accept")
 
 		}
-		for {
-			if PingInternet() == 0 {
-				conn.Close()
-				return
-			}
-			n, err := conn.Read(buf)
-			if err != nil {
-				conn.Close()
-				fmt.Println(err)
-				fmt.Println("Failed to read, TCP cab transmit")
+		if PingInternet() == 0 {
+			conn.Close()
+			return
+		}
+		n, err := conn.Read(buf)
+		if err != nil {
+			conn.Close()
+			fmt.Println(err)
+			fmt.Println("Failed to read, TCP cab transmit")
+			break
+		}
+		raw_recieved_message := strings.Split(string(buf[:n]), ":")
+		for i := range raw_recieved_message {
+			if raw_recieved_message[i] == "" {
 				break
 			}
-			raw_recieved_message := strings.Split(string(buf[:n]), ":")
-			for i := range raw_recieved_message {
-				if raw_recieved_message[i] == "" {
-					break
-				}
-				floor, _ := strconv.Atoi(raw_recieved_message[i])
-				fmt.Println("Recieved cab at floor: " + fmt.Sprint(floor))
-				remoteIP := conn.RemoteAddr().(*net.TCPAddr).IP
-				fmt.Println(remoteIP)
-				IPString := fmt.Sprint(remoteIP)
-				IpPieces := strings.Split(IPString, ".")
-				id, _ := strconv.Atoi(IpPieces[3])
-				fmt.Println("Recieved transmitted orders: " + fmt.Sprint([3]int{id, floor, 2}))
-				transmittedCabOrderCh <- [2]int{id, floor}
-				UpdateCabRequests(id, floor, 1)
-			}
+			floor, _ := strconv.Atoi(raw_recieved_message[i])
+			fmt.Println("Recieved cab at floor: " + fmt.Sprint(floor))
+			remoteIP := conn.RemoteAddr().(*net.TCPAddr).IP
+			fmt.Println(remoteIP)
+			IPString := fmt.Sprint(remoteIP)
+			IpPieces := strings.Split(IPString, ".")
+			id, _ := strconv.Atoi(IpPieces[3])
+			fmt.Println("Recieved transmitted orders: " + fmt.Sprint([3]int{id, floor, 2}))
+			transmittedCabOrderCh <- [2]int{id, floor}
+			UpdateCabRequests(id, floor, 1)
 		}
 	}
 }
