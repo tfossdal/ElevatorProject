@@ -1,4 +1,4 @@
-package Restarting
+package main
 
 import (
 	"fmt"
