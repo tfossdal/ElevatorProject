@@ -89,6 +89,7 @@ func PrimaryRoutine() {
 	go DialBackup()
 	go ReassignRequests()
 	go TCPCabOrderListener()
+	go TCPCabOrderSender()
 
 	for {
 		time.Sleep(500 * time.Millisecond)
