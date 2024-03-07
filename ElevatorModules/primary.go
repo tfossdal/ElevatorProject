@@ -269,21 +269,22 @@ func BecomePrimary() {
 }
 
 func ListenForOtherPrimary() {
-	for {
-		addr, err := net.ResolveUDPAddr("udp4", ":29501")
-		if err != nil {
-			fmt.Println("Failed to resolve")
-		}
-		conn, err := net.ListenUDP("udp4", addr)
-		if err != nil {
-			fmt.Println("Failed to listen")
-		}
-		buf := make([]byte, 1024)
-		_, _, _ = conn.ReadFromUDP(buf)
-		fmt.Println("Heard other primary")
-		return
-		//DIE AND LIVE
+	fmt.Println("number 1")
+	addr, err := net.ResolveUDPAddr("udp4", ":29501")
+	if err != nil {
+		fmt.Println("Failed to resolve")
 	}
+	fmt.Println("number 2")
+	conn, err := net.ListenUDP("udp4", addr)
+	if err != nil {
+		fmt.Println("Failed to listen")
+	}
+	fmt.Println("number 3")
+	buf := make([]byte, 1024)
+	_, _, _ = conn.ReadFromUDP(buf)
+	fmt.Println("Heard other primary")
+	//DIE AND LIVE
+
 }
 
 func PrimaryAlive() {
