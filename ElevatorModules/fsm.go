@@ -263,6 +263,8 @@ func RecieveCabOrders(primaryID int) {
 	SetAllCabLights(elevator)
 	OrderMtx.Unlock()
 	time.Sleep(100 * time.Millisecond)
+	fmt.Println("Called FSM_OnRequestButtonPress")
+	fmt.Println("Requests: " + fmt.Sprint(elevator.Requests))
 	Fsm_OnRequestButtonPress(-2, 0)
 	conn.Close()
 }
