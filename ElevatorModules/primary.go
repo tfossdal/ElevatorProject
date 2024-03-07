@@ -664,8 +664,10 @@ func TCPCabOrderSender() {
 		IpPieces := strings.Split(IPString, ".")
 		id, _ := strconv.Atoi(IpPieces[3])
 
-		var stringToSend string
+		var stringToSend = ""
 
+		fmt.Println("ID: " + fmt.Sprint(id))
+		fmt.Println(cabRequestMap[id])
 		for i := 0; i < io.NumFloors; i++ {
 			if cabRequestMap[id][i] == 1 {
 				stringToSend += fmt.Sprint(i) + ":"
