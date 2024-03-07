@@ -259,5 +259,6 @@ func RecieveCabOrders(primaryID int) {
 		elevator.Requests[floor][io.BT_Cab] = 1
 	}
 	SetAllCabLights(elevator)
+	Fsm_OnRequestButtonPress(-2, 0)
 	conn.Close()
 }
