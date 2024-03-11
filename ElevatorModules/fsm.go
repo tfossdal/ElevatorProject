@@ -152,17 +152,7 @@ func Fsm_OnFloorArrival(newFloor int) {
 	}
 }
 
-// func Fsm_OnStopButtonpress() {
-// 	switch elevator.state {
-// 	case Moving:
-// 		elevator.dirn = io.MD_Stop
-// 		elevator.state = Idle
-// 	case Idle:
-// 	}
-// }
-
 func Fsm_OnDoorTimeout() {
-	fmt.Println("Door timed out")
 	switch elevator.State {
 	case el.DoorOpen:
 		var pair DirnBehaviourPair = Requests_chooseDirection(elevator)
@@ -173,9 +163,6 @@ func Fsm_OnDoorTimeout() {
 		case el.DoorOpen:
 			Timer_start(elevator.Config.DoorOpenDuration_s)
 			elevator = Requests_clearAtCurrentFloor(elevator)
-			// if !ConnectedToBackup {
-			// 	SetAllLights(elevator)
-			// }
 			SetAllCabLights(elevator)
 		case el.Idle:
 			io.SetDoorOpenLamp(false)
@@ -200,7 +187,6 @@ func TransmitCabOrders(primaryID int) {
 		conn.Close()
 		return
 	}
-	//defer conn.Close()
 	OrderMtx.Lock()
 	defer OrderMtx.Unlock()
 	stringToSend := ""
@@ -212,7 +198,6 @@ func TransmitCabOrders(primaryID int) {
 	if stringToSend == "" {
 		stringToSend = ":"
 	}
-	fmt.Println("Transmitting: " + stringToSend)
 	_, err = conn.Write([]byte(stringToSend))
 	if err != nil {
 		fmt.Println(err)
@@ -221,51 +206,43 @@ func TransmitCabOrders(primaryID int) {
 }
 
 func RecieveCabOrders(primaryID int) {
+	var conn = &net.TCPConn{}
 	for {
-		var conn = &net.TCPConn{}
-		for {
-			fmt.Println("LOOKING FOR PRIMARY TO SEND ORDERS")
-			addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(primaryID)+":29508")
-			if err != nil {
-				fmt.Println("Failed to resolve, recieve cab order")
-				continue
-			}
-			conn, err = net.DialTCP("tcp", nil, addr)
-			if err != nil {
-				fmt.Println("Failed to dial, recieve cab order")
-				continue
-			}
+		addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(primaryID)+":29508")
+		if err != nil {
+			fmt.Println("Failed to resolve, recieve cab order")
+			continue
+		}
+		conn, err = net.DialTCP("tcp", nil, addr)
+		if err != nil {
+			fmt.Println("Failed to dial, recieve cab order")
+			continue
+		}
+		break
+	}
+	OrderMtx.Lock()
+	buf := make([]byte, 1024)
+	n, err := conn.Read(buf)
+	if err != nil {
+		fmt.Println("Failed to read, TCP cab recieve")
+	}
+	raw_recieved_message := strings.Split(string(buf[:n]), ":")
+	for i := range raw_recieved_message {
+		if raw_recieved_message[i] == "" {
 			break
 		}
-		OrderMtx.Lock()
-		buf := make([]byte, 1024)
-		n, err := conn.Read(buf)
-		if err != nil {
-			fmt.Println("Failed to read, TCP cab recieve")
-		}
-		fmt.Println("Recieved stuff: " + string(buf[:n]))
-		raw_recieved_message := strings.Split(string(buf[:n]), ":")
-		for i := range raw_recieved_message {
-			if raw_recieved_message[i] == "" {
-				break
-			}
-			floor, _ := strconv.Atoi(raw_recieved_message[i])
-			fmt.Println("Recieved cab at floor: " + fmt.Sprint(floor))
-			elevator.Requests[floor][io.BT_Cab] = 1
-		}
-		//SetAllCabLights(elevator)
-		InitLights()
-		OrderMtx.Unlock()
-		time.Sleep(100 * time.Millisecond)
-		fmt.Println("Called FSM_OnRequestButtonPress")
-		fmt.Println("Requests: " + fmt.Sprint(elevator.Requests))
-		Fsm_OnRequestButtonPress(-2, 0)
-		conn.Close()
+		floor, _ := strconv.Atoi(raw_recieved_message[i])
+		elevator.Requests[floor][io.BT_Cab] = 1
 	}
+	SetAllCabLights(elevator)
+	OrderMtx.Unlock()
+	time.Sleep(100 * time.Millisecond)
+	Fsm_OnRequestButtonPress(-2, 0)
+	conn.Close()
 }
 
 func Fsm_Obstructed(){
-	for{
+	for {
 		if IsObstructed && elevator.State == el.DoorOpen {
 			Timer_start(elevator.Config.DoorOpenDuration_s)
 		}

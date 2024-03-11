@@ -67,6 +67,7 @@ func elev_init() {
 func main() {
 
 	numFloors := 4
+	
 
 	io.Init("localhost:15657", numFloors)
 
@@ -83,7 +84,7 @@ func main() {
 	go io.PollObstructionSwitch(drv_obstr)
 	go io.PollStopButton(drv_stop)
 
-	module.BecomePrimary()
+	module.CheckForPrimary()
 
 	go module.CheckForDoorTimeout()
 

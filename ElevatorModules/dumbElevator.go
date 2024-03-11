@@ -7,13 +7,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/go-ping/ping"
 )
 
-//var QueueHasBeenUpdated = make(chan int)
 var IsObstructed = false
-var PrimaryID = 0
 
 func IAmAlive() {
 	state := strconv.Itoa(int(elevator.State))
@@ -35,19 +31,9 @@ func IAmAlive() {
 		break
 	}
 	for {
-		//fmt.Println("Sending message")
 		conn.Write([]byte("s," + state + "," + direction + "," + floor))
-		//fmt.Println("Message sent: Elevator alive")
 		time.Sleep(100 * time.Millisecond)
 	}
-}
-
-func PingInternet() int {
-	_, err := ping.NewPinger("www.google.com")
-	if err != nil {
-		return 0
-	}
-	return 1
 }
 
 func CheckGoneOffline() {
@@ -55,7 +41,6 @@ func CheckGoneOffline() {
 		if PingInternet() == 0 {
 			break
 		}
-		//fmt.Println("Elevator is online")
 		time.Sleep(100 * time.Millisecond)
 	}
 	fmt.Println("Elevator went offline")
@@ -71,10 +56,8 @@ func SendButtonPressUDP(btn io.ButtonEvent) {
 	conn, err := net.DialUDP("udp4", nil, addr)
 	if err != nil {
 		fmt.Println("Failed to dial, send order")
-		//conn.Close()
 		return
 	}
-	//defer conn.Close()
 	_, err = conn.Write([]byte("n," + fmt.Sprint(btn.Floor) + "," + fmt.Sprint(btn.Button)))
 	if err != nil {
 		fmt.Println(err)
@@ -116,7 +99,6 @@ func RecieveTurnOnOffLight() {
 			fmt.Println("Failed to read, recieve turn on/off light")
 		}
 		recievedMessage := string(buf[:n])
-		fmt.Println("Read button message " + recievedMessage)
 		messageList := strings.Split(recievedMessage, ",")
 		btnInt, err := strconv.Atoi(messageList[2])
 		if err != nil {
@@ -140,7 +122,7 @@ func RecieveOrderMatrix() {
 	}
 	conn, err := net.ListenUDP("udp4", addr)
 	if err != nil {
-		fmt.Println("Failed to resolve listen, recieve order matrix")
+		fmt.Println("Failed to listen, recieve order matrix")
 	}
 	defer conn.Close()
 	buf := make([]byte, 1024)

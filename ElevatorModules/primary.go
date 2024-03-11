@@ -6,7 +6,6 @@ import (
 	io "ElevatorProject/elevio"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net"
 	"os/exec"
 	"runtime"
@@ -20,13 +19,11 @@ var cabRequestMap = make(map[int][io.NumFloors]int) //Format: {ID: {floor 0, ...
 var elevatorStatesMap = make(map[int][3]int)        //Format: {ID: {state, direction, floor}}
 
 var ConnectedToBackup = false
-
-// var elevatorAddresses = []string{"10.100.23.28", "10.100.23.34"}
 var backupTimeoutTime = 3
 
 var elevatorLives = make(chan int, 30)
 var checkLiving = make(chan int)
-var requestId = make(chan int, 5)
+var requestLiving = make(chan int, 5)
 var idOfLivingElev = make(chan int, 5)
 var printList = make(chan int)
 var newOrderCh = make(chan [3]int, 30)
@@ -34,12 +31,9 @@ var clearOrderCh = make(chan [3]int, 30)
 var newStatesCh = make(chan [4]int, 30)
 var retrieveElevatorStates = make(chan int)
 var elevatorStates = make(chan map[int][3]int)
-var orderTransferCh = make(chan [3]int)
 var terminateBackupConnection = make(chan int, 10)
 var newlyAliveID = make(chan int)
 var transmittedCabOrderCh = make(chan [2]int, 4)
-
-// var listOfLivingCh = make(chan int)
 var listOfLivingCh = make(chan map[int]time.Time, 10)
 var reassignCh = make(chan int, 5)
 var otherPrimaryID = 0
@@ -72,80 +66,33 @@ func InitPrimaryMatrix() {
 }
 
 func InitPrimary() {
-	//Initialize order matrix
-	//Start GoRoutines
-	go PrimaryRoutine()
-
-	//time.Sleep(10 * time.Second)
-}
-
-func PrimaryRoutine() {
 	go PrimaryAlive()
 	go CheckGoneOffline()
 	go pm.ListenUDP("29503", elevatorLives, newOrderCh, clearOrderCh, newStatesCh)
-	//go pm.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, numberOfElevators, newlyAliveID, listOfLivingCh)
-	go pm.LivingElevatorHandler(elevatorLives, checkLiving, requestId, idOfLivingElev, printList, newlyAliveID, listOfLivingCh)
+	go pm.LivingElevatorHandler(elevatorLives, checkLiving, requestLiving, idOfLivingElev, printList, newlyAliveID, listOfLivingCh)
 	go FixNewElevatorLights()
 	go UpdateElevatorStates()
 	go DialBackup()
 	go ReassignRequests()
 	go TCPCabOrderListener()
 	go TCPCabOrderSender()
-	go printLivings()
+	sendHallLightsTicker := time.NewTicker(5 * time.Second)
+	go SendHallLightUpdate(sendHallLightsTicker)
 
 	for {
 		time.Sleep(500 * time.Millisecond)
-		UpdateLivingElevators()
+		UpdateListOfLivingElevators()
 	}
 }
 
-func UpdateLivingElevators() {
+func UpdateListOfLivingElevators() {
 	checkLiving <- 1
 }
-
-func ConvertIDtoIP(id int) string {
-	return "10.100.23." + fmt.Sprint(id)
-}
-
-/* func DialBackup() {
-	time.Sleep(1500 * time.Millisecond) //WAY TOO LONG
-	printList <- 1
-	num := <-numberOfElevators
-	if num < 2 {
-		num = 2
-	}
-	for {
-		for i := 1; i <= num; i++ {
-			requestId <- i
-			addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(<-idOfLivingElev)+":29506")
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			time.Sleep(1500 * time.Millisecond)
-			conn, err := net.DialTCP("tcp", nil, addr)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			time.Sleep(1 * time.Second)
-			fmt.Println("Connected to backup")
-			ConnectedToBackup = true
-			go PrimaryAliveTCP(addr, conn)
-			go BackupAliveListener(conn)
-			go SendOrderToBackup(conn)
-			//go TransferOrdersToBackup(conn)
-			sendDataToNewBackup(conn)
-			return
-		}
-		//defer conn.Close()
-	}
-} */
 
 func DialBackup() {
 	time.Sleep(1500 * time.Millisecond) //WAY TOO LONG
 	for {
-		requestId <- 1
+		requestLiving <- 1
 		livingElevatorsMap := <-listOfLivingCh
 		for id, _ := range livingElevatorsMap {
 			addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(id)+":29506")
@@ -153,23 +100,21 @@ func DialBackup() {
 				fmt.Println(err)
 				continue
 			}
-			time.Sleep(1500 * time.Millisecond)
+			//time.Sleep(1500 * time.Millisecond)
 			conn, err := net.DialTCP("tcp", nil, addr)
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
-			time.Sleep(1 * time.Second)
 			fmt.Println("Connected to backup")
 			ConnectedToBackup = true
 			go PrimaryAliveTCP(addr, conn)
 			go BackupAliveListener(conn)
 			go SendOrderToBackup(conn)
-			//go TransferOrdersToBackup(conn)
 			sendDataToNewBackup(conn)
+			time.Sleep(1 * time.Second)
 			return
 		}
-		//defer conn.Close()
 	}
 }
 
@@ -230,8 +175,6 @@ func BackupAliveListener(conn *net.TCPConn) {
 		}
 		buf := make([]byte, 1024)
 		_, err = conn.Read(buf)
-		//n, err := conn.Read(buf)
-		//fmt.Println("Message recieved: " + string(buf[:n]))
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("Backup Died")
@@ -244,8 +187,7 @@ func BackupAliveListener(conn *net.TCPConn) {
 	}
 }
 
-func BecomePrimary() {
-	//29501
+func CheckForPrimary() {
 	InitPrimaryMatrix()
 	addr, err := net.ResolveUDPAddr("udp4", ":29501")
 	if err != nil {
@@ -256,16 +198,14 @@ func BecomePrimary() {
 		fmt.Println("Failed to listen")
 	}
 	defer conn.Close()
-	rand.Seed(time.Now().UnixNano())
-	deadlineTime := rand.Intn(10000)
-	conn.SetReadDeadline(time.Now().Add(time.Duration(time.Duration(deadlineTime) * time.Millisecond)))
+	conn.SetReadDeadline(time.Now().Add(time.Duration(time.Duration(1000) * time.Millisecond)))
 	buf := make([]byte, 1024)
 	_, recievedAddr, err := conn.ReadFromUDP(buf)
 	if err != nil {
 		//BECOME PRIMARY
 		fmt.Println("No Primary alive message recieved, Becoming primary")
 		elevator.ElevatorType = el.Primary
-		InitPrimary()
+		go InitPrimary()
 		conn.Close()
 		return
 	}
@@ -276,22 +216,18 @@ func BecomePrimary() {
 }
 
 func ListenForOtherPrimary() {
-	fmt.Println("number 1")
 	addr, err := net.ResolveUDPAddr("udp4", ":29501")
 	if err != nil {
 		fmt.Println("Failed to resolve")
 	}
-	fmt.Println("number 2")
 	conn, err := net.ListenUDP("udp4", addr)
 	if err != nil {
 		fmt.Println("Failed to listen")
 	}
-	fmt.Println("number 3")
 	buf := make([]byte, 1024)
 	_, recievedAdress, _ := conn.ReadFromUDP(buf)
 	otherPrimaryID = int(recievedAdress.IP[3])
 	fmt.Println("Heard other primary")
-	//DIE AND LIVE
 	RestartProgramme()
 
 }
@@ -310,10 +246,19 @@ func PrimaryAlive() {
 	}
 	defer conn.Close()
 	for {
-		//fmt.Println("Sending alive message")
 		conn.Write([]byte("Primary alive"))
-		//fmt.Println("Message sent: Primary alive")
 		time.Sleep(100 * time.Millisecond)
+	}
+}
+
+func SendHallLightUpdate(ticker *time.Ticker){
+	for {
+		<- ticker.C
+		for flr := range hallRequests {
+			for btn := range hallRequests {
+				SendTurnOnOffLight([3]int{255, flr, btn}, hallRequests[flr][btn])
+			}
+		}
 	}
 }
 
@@ -321,9 +266,7 @@ func SendOrderToBackup(conn *net.TCPConn) {
 	for {
 		select {
 		case order := <-newOrderCh:
-			fmt.Println("1")
 			reassignCh <- 1
-			fmt.Println("2")
 			_, err := conn.Write([]byte("n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
 			if err != nil {
 				fmt.Print(err)
@@ -336,8 +279,6 @@ func SendOrderToBackup(conn *net.TCPConn) {
 			}
 			go SendTurnOnOffLight(order, 1)
 		case order := <-clearOrderCh:
-			fmt.Println("1")
-			fmt.Println("2")
 			_, err := conn.Write([]byte("c," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
 			if err != nil {
 				fmt.Print(err)
@@ -359,20 +300,6 @@ func SendOrderToBackup(conn *net.TCPConn) {
 				}
 			}
 			UpdateCabRequests(transmittedCabOrder[0], transmittedCabOrder[1], 1)
-			fmt.Println("Updated Cab Requests")
-		}
-	}
-}
-
-func TransferOrdersToBackup(conn *net.TCPConn) {
-	for {
-		order := <-orderTransferCh
-		fmt.Println("Writing orders to backup" + fmt.Sprint(order))
-		_, err := conn.Write(append([]byte("n,"+fmt.Sprint(order[0])+","+fmt.Sprint(order[1])+","+fmt.Sprint(order[2])+","), 0))
-		fmt.Println("This is what i wrote: n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",")
-		if err != nil {
-			fmt.Println(err)
-			return
 		}
 	}
 }
@@ -398,7 +325,6 @@ func UpdateCabRequests(elevatorID int, flr int, setType int) {
 		}
 		cabRequestMap[elevatorID] = cabRequests
 	}
-	DebugMaps()
 }
 
 func UpdateElevatorStates() {
@@ -408,41 +334,13 @@ func UpdateElevatorStates() {
 			elevatorID := newMessage[0]
 			states := [3]int{newMessage[1], newMessage[2], newMessage[3]}
 
-			elevatorStatesMap[elevatorID] = states //Tror det går, altså at den lager en ny key hvis det ikke finnes
-			//MÅ SENDE VIDERE TIL BACKUP
+			elevatorStatesMap[elevatorID] = states
 		case <-retrieveElevatorStates:
 			elevatorStates <- elevatorStatesMap
 		}
 	}
 }
 
-// func OrderListener() {
-// 	//29503
-// 	addr, err := net.ResolveUDPAddr("udp4", ":29503")
-// 	if err != nil {
-// 		fmt.Println("Could not connect")
-// 	}
-// 	conn, err := net.ListenUDP("udp4", addr)
-// 	if err != nil {
-// 		fmt.Println("Could not listen")
-// 	}
-// 	defer conn.Close()
-
-// 	for {
-// 		fmt.Print("Primary reading UDP ...")
-// 		buf := make([]byte, 1024)
-// 		n, _, err := conn.ReadFromUDP(buf)
-// 		if err != nil {
-// 			fmt.Println("Could not read")
-// 		}
-// 		orderStr := string(buf[:n])
-// 		orderLst := strings.Split(orderStr, ",")
-// 		floorIndex, _ := strconv.Atoi(orderLst[0])
-// 		buttonIndex, _ := strconv.Atoi(orderLst[1])
-// 		requests[floorIndex][buttonIndex] = 1
-// 	}
-
-// }
 
 func FixNewElevatorLights() {
 	for {
@@ -468,7 +366,6 @@ func SendTurnOnOffLight(order [3]int, turnOn int) {
 	if order[2] != 2 {
 		sendToIp = ConvertIDtoIP(255)
 	}
-	fmt.Println("Sending light to: " + sendToIp)
 	addr, err := net.ResolveUDPAddr("udp4", sendToIp+":29505")
 	if err != nil {
 		fmt.Println("Failed to resolve, light light")
@@ -479,7 +376,6 @@ func SendTurnOnOffLight(order [3]int, turnOn int) {
 	}
 	defer conn.Close()
 	conn.Write([]byte(strconv.Itoa(order[0]) + "," + strconv.Itoa(order[1]) + "," + strconv.Itoa(order[2]) + "," + strconv.Itoa(turnOn)))
-	fmt.Println("turnOn is " + strconv.Itoa(turnOn))
 }
 
 func DistributeOrderMatrix(outputMatrix map[string][][2]bool) {
@@ -495,25 +391,18 @@ func DistributeOrderMatrix(outputMatrix map[string][][2]bool) {
 		}
 		messageToSend := ""
 		for flr := range req {
-			messageToSend += fmt.Sprint(boolToInt(req[flr][io.BT_HallUp])) + "," + fmt.Sprint(boolToInt(req[flr][io.BT_HallDown])) + ","
+			messageToSend += fmt.Sprint(BoolToInt(req[flr][io.BT_HallUp])) + "," + fmt.Sprint(BoolToInt(req[flr][io.BT_HallDown])) + ","
 		}
 		conn.Write([]byte(messageToSend))
 		conn.Close()
 	}
 }
 
-func boolToInt(n bool) int {
-	if n {
-		return 1
-	}
-	return 0
-}
-
 func ReassignRequests() {
 
 	for {
 		<-reassignCh
-		requestId <- 1
+		requestLiving <- 1
 		LivingElevators := <-listOfLivingCh
 		hraExecutable := ""
 		switch runtime.GOOS {
@@ -528,18 +417,6 @@ func ReassignRequests() {
 		input := HRAInput{
 			HallRequests: [][2]bool{{false}, {false, false}, {false, false}, {false, false}},
 			States:       map[string]HRAElevState{
-				// "one": HRAElevState{
-				// 	Behavior:    "moving",
-				// 	Floor:       2,
-				// 	Direction:   "up",
-				// 	CabRequests: []bool{false, false, true, true},
-				// },
-				// "two": HRAElevState{
-				// 	Behavior:    "idle",
-				// 	Floor:       0,
-				// 	Direction:   "stop",
-				// 	CabRequests: []bool{false, false, false, false},
-				// },
 			},
 		}
 		for id, _ := range LivingElevators {
@@ -564,8 +441,6 @@ func ReassignRequests() {
 				d = "up"
 			}
 			f := elevatorStatesMap[id][2]
-			fmt.Println("Floor: " + fmt.Sprint(f))
-			f = 1
 			boolCabRequests := [io.NumFloors]bool{}
 			for i := range cabRequestMap[id] {
 				if cabRequestMap[id][i] == 1 {
@@ -708,12 +583,4 @@ func RestartProgramme() {
 	cmd := exec.Command("gnome-terminal", "-x", "sh", "-c", "go run restartSelf.go")
 	cmd.Run()
 	panic("Dying")
-}
-
-func printLivings() {
-	for {
-
-		time.Sleep(1 * time.Second)
-		printList <- 1
-	}
 }
