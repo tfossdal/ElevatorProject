@@ -221,44 +221,47 @@ func TransmitCabOrders(primaryID int) {
 }
 
 func RecieveCabOrders(primaryID int) {
-	var conn = &net.TCPConn{}
 	for {
-		fmt.Println("LOOKING FOR PRIMARY TO SEND ORDERS")
-		addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(primaryID)+":29508")
-		if err != nil {
-			fmt.Println("Failed to resolve, recieve cab order")
-			continue
-		}
-		conn, err = net.DialTCP("tcp", nil, addr)
-		if err != nil {
-			fmt.Println("Failed to dial, recieve cab order")
-			continue
-		}
-		break
-	}
-	OrderMtx.Lock()
-	buf := make([]byte, 1024)
-	n, err := conn.Read(buf)
-	if err != nil {
-		fmt.Println("Failed to read, TCP cab recieve")
-	}
-	fmt.Println("Recieved stuff: " + string(buf[:n]))
-	raw_recieved_message := strings.Split(string(buf[:n]), ":")
-	for i := range raw_recieved_message {
-		if raw_recieved_message[i] == "" {
+		var conn = &net.TCPConn{}
+		for {
+			fmt.Println("LOOKING FOR PRIMARY TO SEND ORDERS")
+			addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(primaryID)+":29508")
+			if err != nil {
+				fmt.Println("Failed to resolve, recieve cab order")
+				continue
+			}
+			conn, err = net.DialTCP("tcp", nil, addr)
+			if err != nil {
+				fmt.Println("Failed to dial, recieve cab order")
+				continue
+			}
 			break
 		}
-		floor, _ := strconv.Atoi(raw_recieved_message[i])
-		fmt.Println("Recieved cab at floor: " + fmt.Sprint(floor))
-		elevator.Requests[floor][io.BT_Cab] = 1
+		OrderMtx.Lock()
+		buf := make([]byte, 1024)
+		n, err := conn.Read(buf)
+		if err != nil {
+			fmt.Println("Failed to read, TCP cab recieve")
+		}
+		fmt.Println("Recieved stuff: " + string(buf[:n]))
+		raw_recieved_message := strings.Split(string(buf[:n]), ":")
+		for i := range raw_recieved_message {
+			if raw_recieved_message[i] == "" {
+				break
+			}
+			floor, _ := strconv.Atoi(raw_recieved_message[i])
+			fmt.Println("Recieved cab at floor: " + fmt.Sprint(floor))
+			elevator.Requests[floor][io.BT_Cab] = 1
+		}
+		//SetAllCabLights(elevator)
+		InitLights()
+		OrderMtx.Unlock()
+		time.Sleep(100 * time.Millisecond)
+		fmt.Println("Called FSM_OnRequestButtonPress")
+		fmt.Println("Requests: " + fmt.Sprint(elevator.Requests))
+		Fsm_OnRequestButtonPress(-2, 0)
+		conn.Close()
 	}
-	SetAllCabLights(elevator)
-	OrderMtx.Unlock()
-	time.Sleep(100 * time.Millisecond)
-	fmt.Println("Called FSM_OnRequestButtonPress")
-	fmt.Println("Requests: " + fmt.Sprint(elevator.Requests))
-	Fsm_OnRequestButtonPress(-2, 0)
-	conn.Close()
 }
 
 func Fsm_Obstructed(){
