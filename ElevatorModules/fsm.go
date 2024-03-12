@@ -90,6 +90,7 @@ func InitLights() {
 }
 
 func Fsm_onInitBetweenFloors() {
+	TimeStartedMoving = time.Now()
 	io.SetMotorDirection(io.MD_Down)
 	elevator.Dirn = io.MD_Down
 	elevator.State = el.Moving

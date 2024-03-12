@@ -7,24 +7,7 @@ import (
 	"strings"
 )
 
-// func sendAckUDP(message string, senderIP net.IP) {
-// 	fmt.Println(senderIP.String())
-// 	fmt.Println("Sending ack")
-// 	addr, err := net.ResolveUDPAddr("udp4", senderIP.String()+":29509")
-// 	if err != nil {
-// 		fmt.Println("Failed to resolve ack")
-// 	}
-// 	conn, err := net.DialUDP("udp4", nil, addr)
-// 	if err != nil {
-// 		fmt.Println("Failed to Dial")
-// 	}
-// 	defer conn.Close()
-// 	_, err = conn.Write([]byte(message))
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		fmt.Println("Failed to write, send ack")
-// 	}
-// }
+
 
 func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh chan [3]int, newStatesCh chan [4]int) {
 
@@ -57,12 +40,9 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh cha
 
 		}
 		if recieved_message[0] == "s" {
-			//fmt.Println("Things are alive")
 			stateInt, _ := strconv.Atoi(recieved_message[1])
 			directionInt, _ := strconv.Atoi(recieved_message[2])
 			floorInt, _ := strconv.Atoi(recieved_message[3])
-			// state := el.State(stateInt)
-			// direction := io.MotorDirection(directionInt)
 			newStates := [4]int{int(senderIP[3]), stateInt, directionInt, floorInt}
 			select {
 			case newStatesCh <- newStates:

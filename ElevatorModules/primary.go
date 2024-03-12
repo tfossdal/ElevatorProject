@@ -113,7 +113,7 @@ func DialBackup() {
 		requestLiving <- 1
 		livingElevatorsMap := <-listOfLivingCh
 		for id := range livingElevatorsMap {
-			time.Sleep(500 * time.Millisecond) //Need sleep here, or else dial will spam too much
+			time.Sleep(100 * time.Millisecond) //Need sleep here, or else dial will spam too much
 			addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(id)+":29506")
 			if err != nil {
 				fmt.Println(err)
@@ -674,6 +674,7 @@ func TCPCabOrderSender() {
 		}
 		go RecieveCabRetransmittAck(conn)
 		for {
+			fmt.Println("Writing old cabs to new elevator")
 			_, err = conn.Write([]byte(stringToSend))
 			if err != nil {
 				fmt.Println("Failed to write, TCP cab transmit")
