@@ -13,9 +13,9 @@ func sendAckUDP(message string, senderIP net.IP, port string) {
 	if err != nil {
 		fmt.Println("Failed to resolve ack")
 	}
-	conn, err := net.ListenUDP("udp4", addr)
+	conn, err := net.DialUDP("udp4", nil, addr)
 	if err != nil {
-		fmt.Println("Failed to listen")
+		fmt.Println("Failed to Dial")
 	}
 	defer conn.Close()
 	_, err = conn.Write([]byte(message))
