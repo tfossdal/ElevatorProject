@@ -99,7 +99,6 @@ func BackupRecieveFromPrimary(conn *net.TCPConn, listener *net.TCPListener) {
 				continue
 			}
 			if recieved_message[0] == "c" {
-				go SendAck(string(buf[:n]), conn)
 				btn, err := strconv.Atoi(recieved_message[3])
 				if err != nil {
 					panic(err)

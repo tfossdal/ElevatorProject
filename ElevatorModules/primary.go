@@ -190,7 +190,7 @@ func BackupAliveListener(conn *net.TCPConn) {
 		}
 		buf := make([]byte, 1024)
 		n, err := conn.Read(buf)
-		if (strings.Split(string(buf[:n]), ","))[0] == "n" || (strings.Split(string(buf[:n]), ","))[0] == "c" {
+		if (strings.Split(string(buf[:n]), ","))[0] == "n" {
 			ackedMessageCh <- string(buf[:n])
 		}
 		if err != nil {
@@ -326,15 +326,10 @@ func SendOrderToBackup(conn *net.TCPConn) {
 			go SendTurnOnOffLight(order, 1)
 		case order := <-clearOrderCh:
 			stringToSend := "c," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"
-			for {
-				_, err := conn.Write([]byte(stringToSend))
-				if err != nil {
-					fmt.Print(err)
-					return
-				}
-				if WaitForAck(stringToSend) {
-					break
-				}
+			_, err := conn.Write([]byte(stringToSend))
+			if err != nil {
+				fmt.Print(err)
+				return
 			}
 			if order[2] == 2 {
 				UpdateCabRequests(order[0], order[1], 0)
