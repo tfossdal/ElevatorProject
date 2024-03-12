@@ -292,7 +292,7 @@ func WaitForAck(message string) bool {
 		case recievedAck := <-ackedMessageCh:
 			return recievedAck == message
 		default:
-			if time.Now().Unix() > startTime+2 {
+			if time.Now().Unix() > startTime+1 {
 				return false
 			}
 			time.Sleep(100 * time.Millisecond)
