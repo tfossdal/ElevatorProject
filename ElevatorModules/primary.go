@@ -679,6 +679,7 @@ func TCPCabOrderSender() {
 			if err != nil {
 				fmt.Println("Failed to write, TCP cab transmit")
 				fmt.Println(err)
+				break
 			}
 			if WaitForCabRetransmittAck(stringToSend) {
 				fmt.Println("RECIEVED CAB RETRANSMITT ACK")
