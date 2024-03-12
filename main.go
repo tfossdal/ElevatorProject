@@ -4,7 +4,6 @@ import (
 	"ElevatorProject/ElevatorModules"
 	module "ElevatorProject/ElevatorModules"
 	io "ElevatorProject/elevio"
-	"fmt"
 )
 
 func main() {
@@ -30,7 +29,7 @@ func main() {
 	if io.GetFloor() == -1 {
 		module.Fsm_onInitBetweenFloors()
 		for {
-			if io.GetFloor() != -1{
+			if io.GetFloor() != -1 {
 				io.SetMotorDirection(io.MD_Stop)
 				break
 			}
