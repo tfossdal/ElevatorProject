@@ -77,8 +77,8 @@ func InitPrimary() {
 	go ReassignRequests()
 	go TCPCabOrderListener()
 	go TCPCabOrderSender()
-	//sendHallLightsTicker := time.NewTicker(5 * time.Second)
-	//go SendHallLightUpdate(sendHallLightsTicker)
+	sendHallLightsTicker := time.NewTicker(5 * time.Second)
+	go SendHallLightUpdate(sendHallLightsTicker)
 
 	for {
 		time.Sleep(500 * time.Millisecond)
