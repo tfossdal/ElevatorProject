@@ -32,12 +32,12 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh cha
 			floor, _ := strconv.Atoi(recieved_message[1])
 			btn, _ := strconv.Atoi(recieved_message[2])
 			order := [3]int{int(senderIP[3]), floor, btn}
-			select{
+			select {
 			case newOrderCh <- order:
 			default:
 				fmt.Println("Order not accepted, buffer full")
 			}
-			
+
 		}
 		if recieved_message[0] == "s" {
 			fmt.Println("Things are alive")
@@ -47,10 +47,11 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh cha
 			// state := el.State(stateInt)
 			// direction := io.MotorDirection(directionInt)
 			newStates := [4]int{int(senderIP[3]), stateInt, directionInt, floorInt}
-			select{
+			select {
 			case newStatesCh <- newStates:
 			default:
 				fmt.Println("New states not accepted, buffer full")
+			}
 		}
 		if recieved_message[0] == "c" {
 			fmt.Println("test clear order")
