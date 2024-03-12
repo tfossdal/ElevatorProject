@@ -51,12 +51,10 @@ func main() {
 				if module.PingInternet() == 0 {
 					module.Fsm_OnRequestButtonPress(a.Floor, a.Button)
 				} else {
-					fmt.Println("sending button press, cab")
 					ElevatorModules.SendButtonPressUDP(a)
 					ElevatorModules.AddCabRequest(a.Floor, a.Button)
 				}
 			} else {
-				fmt.Println("sending button press, hall")
 				ElevatorModules.SendButtonPressUDP(a)
 			}
 		case a := <-drv_floors:
@@ -64,9 +62,6 @@ func main() {
 			module.Fsm_OnFloorArrival(a)
 		case a := <-drv_obstr:
 			fmt.Printf("%+v\n", a)
-			if a {
-				fmt.Println("OBSTRUUUUUUUCTING!!!!!!!!!!")
-			}
 			module.IsObstructed = a
 		}
 	}

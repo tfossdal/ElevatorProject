@@ -95,13 +95,10 @@ func UpdateListOfLivingElevators() {
 func ReassignOrdersPeriodically(ticker *time.Ticker) {
 	for {
 		<-ticker.C
-		fmt.Println("Reassigning orders (periodic)")
 		if PingInternet() == 0 {
-			fmt.Println("No internet, not reassigning")
 			return
 		}
 		reassignCh <- 1
-		fmt.Println("Reassigned orders (periodic)")
 	}
 }
 
@@ -135,15 +132,12 @@ func DialBackup() {
 }
 
 func sendDataToNewBackup(conn *net.TCPConn) {
-	fmt.Println("Sending data to new backup")
 	hallRequestMtx.Lock()
 	for i := range hallRequests {
 		for j := range hallRequests[i] {
 			if hallRequests[i][j] == 1 {
 				order := [3]int{0, i, j}
-				fmt.Println("Writing orders to backup" + fmt.Sprint(order))
 				_, err := conn.Write([]byte("n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
-				fmt.Println("This is what i wrote: n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:")
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -157,9 +151,7 @@ func sendDataToNewBackup(conn *net.TCPConn) {
 		for i := range v {
 			if v[i] == 1 {
 				order := [3]int{k, i, 2}
-				fmt.Println("Writing orders to backup" + fmt.Sprint(order))
 				_, err := conn.Write([]byte("n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
-				fmt.Println("This is what i wrote: n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:")
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -184,7 +176,6 @@ func BackupAliveListener(conn *net.TCPConn) {
 	for {
 		err := conn.SetReadDeadline(time.Now().Add(time.Duration(backupTimeoutTime) * time.Second))
 		if err != nil {
-			fmt.Println("Deadline for backup alive reached")
 			fmt.Println(err)
 			fmt.Println("Backup Died")
 			ConnectedToBackup = false
@@ -226,7 +217,7 @@ func CheckForPrimary() {
 	_, recievedAddr, err := conn.ReadFromUDP(buf)
 	if err != nil {
 		//BECOME PRIMARY
-		fmt.Println("No Primary alive message recieved, Becoming primary")
+		fmt.Println("No Primary alive message recieved, becoming primary")
 		elevator.ElevatorType = el.Primary
 		go InitPrimary()
 		conn.Close()
@@ -280,9 +271,7 @@ func SendHallLightUpdate(ticker *time.Ticker) {
 		if PingInternet() == 0 {
 			return
 		}
-		fmt.Println("Taking mutex, locking")
 		hallRequestMtx.Lock()
-		fmt.Println("Took mutex, locked")
 		for flr := range hallRequests {
 			for btn := range hallRequests[flr] {
 				SendTurnOnOffLight([3]int{255, flr, btn}, hallRequests[flr][btn])
@@ -312,7 +301,6 @@ func SendOrderToBackup(conn *net.TCPConn) {
 	for {
 		select {
 		case order := <-newOrderCh:
-			fmt.Println("Sending to backup")
 			reassignCh <- 1
 			stringToSend := "n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"
 			for {
@@ -546,10 +534,6 @@ func ReassignRequests() {
 		}
 		DistributeOrderMatrix(*output)
 
-		fmt.Printf("output: \n")
-		for k, v := range *output {
-			fmt.Printf("%6v :  %+v\n", k, v)
-		}
 	}
 }
 
@@ -618,13 +602,10 @@ func TCPCabOrderListener() {
 				break
 			}
 			floor, _ := strconv.Atoi(raw_recieved_message[i])
-			fmt.Println("Recieved cab at floor: " + fmt.Sprint(floor))
 			remoteIP := conn.RemoteAddr().(*net.TCPAddr).IP
-			fmt.Println(remoteIP)
 			IPString := fmt.Sprint(remoteIP)
 			IpPieces := strings.Split(IPString, ".")
 			id, _ := strconv.Atoi(IpPieces[3])
-			fmt.Println("Recieved transmitted orders: " + fmt.Sprint([3]int{id, floor, 2}))
 			transmittedCabOrderCh <- [2]int{id, floor}
 			UpdateCabRequests(id, floor, 1)
 		}
@@ -652,9 +633,7 @@ func TCPCabOrderSender() {
 
 		var stringToSend = ""
 
-		fmt.Println("ID: " + fmt.Sprint(id))
 		cabRequestMtx.Lock()
-		fmt.Println(cabRequestMap[id])
 		for i := 0; i < io.NumFloors; i++ {
 			if cabRequestMap[id][i] == 1 {
 				stringToSend += fmt.Sprint(i) + ":"
@@ -667,7 +646,6 @@ func TCPCabOrderSender() {
 		}
 		go RecieveCabRetransmittAck(conn)
 		for {
-			fmt.Println("Writing old cabs to new elevator")
 			_, err = conn.Write([]byte(stringToSend))
 			if err != nil {
 				fmt.Println("Failed to write, TCP cab transmit")
@@ -675,7 +653,6 @@ func TCPCabOrderSender() {
 				break
 			}
 			if WaitForCabRetransmittAck(stringToSend) {
-				fmt.Println("RECIEVED CAB RETRANSMITT ACK")
 				break
 			}
 		}

@@ -73,7 +73,6 @@ func Requests_chooseDirection(e el.Elevator) DirnBehaviourPair {
 		}
 		return DirnBehaviourPair{io.MD_Stop, el.Idle}
 	case io.MD_Stop:
-		fmt.Println("yes")
 		if requests_here(e) != 0 {
 			return DirnBehaviourPair{io.MD_Stop, el.DoorOpen}
 		}

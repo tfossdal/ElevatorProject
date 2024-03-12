@@ -26,15 +26,9 @@ func CheckMoveAvailability() {
 			UanbleToMoveMtx.Lock()
 			IsUnableToMove = true
 			UanbleToMoveMtx.Unlock()
-			fmt.Println("Unable to move, plz send help")
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
-}
-
-func PrintState() {
-	fmt.Println(el.StateToString(elevator.State))
-	fmt.Println("Direction: ", elevator.Dirn)
 }
 
 func AddCabRequest(btn_floor int, btn_type io.ButtonType) {
@@ -47,10 +41,6 @@ func AddCabRequest(btn_floor int, btn_type io.ButtonType) {
 	Fsm_OnRequestButtonPress(-2, 0)
 }
 
-func debugRequestMatrix() {
-	fmt.Println(elevator.Requests)
-}
-
 func UpdateLocalRequestMatrix(newMatrix [io.NumFloors][2]int) {
 	OrderMtx.Lock()
 	for flr := range newMatrix {
@@ -58,7 +48,6 @@ func UpdateLocalRequestMatrix(newMatrix [io.NumFloors][2]int) {
 		elevator.Requests[flr][1] = newMatrix[flr][1]
 	}
 	OrderMtx.Unlock()
-	debugRequestMatrix()
 	Fsm_OnRequestButtonPress(-2, 0)
 }
 
@@ -232,7 +221,6 @@ func TransmitCabOrders(primaryID int) {
 			fmt.Println(err)
 		}
 		if WaitForCabAck(stringToSend) {
-			fmt.Println("RECIEVED CAB ACK")
 			break
 		}
 	}

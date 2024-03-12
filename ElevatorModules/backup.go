@@ -56,9 +56,7 @@ func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr, *net.TCPListener) {
 }
 
 func SendAck(message string, conn *net.TCPConn) {
-	fmt.Println(message)
 	_, err := conn.Write([]byte(message))
-	fmt.Println("Sent ack to primary")
 	if err != nil {
 		fmt.Println(err)
 	}

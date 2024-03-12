@@ -58,17 +58,19 @@ func SendButtonPressUDP(btn io.ButtonEvent) {
 	addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29503")
 	if err != nil {
 		fmt.Println("Failed to resolve, send order")
+		fmt.Println(err)
 	}
 	conn, err := net.DialUDP("udp4", nil, addr)
 	if err != nil {
 		fmt.Println("Failed to dial, send order")
+		fmt.Println(err)
 		return
 	}
 	messageToSend := "n," + fmt.Sprint(btn.Floor) + "," + fmt.Sprint(btn.Button)
 	_, err = conn.Write([]byte(messageToSend))
 	if err != nil {
-		fmt.Println(err)
 		fmt.Println("Failed to write, send order")
+		fmt.Println(err)
 	}
 	conn.Close()
 }
@@ -77,10 +79,12 @@ func ClearRequestUDP(btn io.ButtonEvent) {
 	addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29503")
 	if err != nil {
 		fmt.Println("Failed to resolve, send order")
+		fmt.Println(err)
 	}
 	conn, err := net.DialUDP("udp4", nil, addr)
 	if err != nil {
 		fmt.Println("Failed to dial, send order")
+		fmt.Println(err)
 		return
 	}
 	defer conn.Close()

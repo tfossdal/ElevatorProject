@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Restarting the server")
+	fmt.Println("Restarting the server ...")
 	time.Sleep(5 * time.Second)
 	cmd := exec.Command("gnome-terminal", "-x", "sh", "-c", "go run main.go")
 	cmd.Run()
