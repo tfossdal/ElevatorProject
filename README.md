@@ -54,4 +54,4 @@ sudo ./packetloss -f
 - Must kill backup when connection to it is lost
 
 NEED TO FIX STUFF WITH BACKUP DYING AND COMING BACK ALIVE
-https://prod.liveshare.vsengsaas.visualstudio.com/join?87F7C257C8255F2FDA493D58D88A9BD5476F
+https://prod.liveshare.vsengsaas.visualstudio.com/join?3D6DB5D9A821E969ED256C2B6A810E164A5D

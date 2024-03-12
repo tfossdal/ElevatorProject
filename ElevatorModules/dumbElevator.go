@@ -54,6 +54,11 @@ func waitForAckUDP(message string, conn *net.UDPConn) {
 	recievedMessage := string(buf[:n])
 }
 
+func ackTimer(timeLimit int){
+	startTime := time.Now().Unix()
+	for
+}
+
 func SendButtonPressUDP(btn io.ButtonEvent) {
 	addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29503")
 	if err != nil {
