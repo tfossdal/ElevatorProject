@@ -29,6 +29,12 @@ func main() {
 
 	if io.GetFloor() == -1 {
 		module.Fsm_onInitBetweenFloors()
+		for {
+			if io.GetFloor() != -1{
+				io.SetMotorDirection(io.MD_Stop)
+				break
+			}
+		}
 	}
 
 	module.InitLights()
