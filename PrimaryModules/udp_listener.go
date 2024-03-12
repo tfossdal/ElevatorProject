@@ -61,6 +61,10 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh cha
 		if err != nil {
 			fmt.Println("Failed to listen")
 		}
-		elevatorLives <- int(senderIP[3])
+		select {
+		case elevatorLives <- int(senderIP[3]):
+		default:
+			fmt.Println("New living elevator not accepted, buffer full")
+		}
 	}
 }
