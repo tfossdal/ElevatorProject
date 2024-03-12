@@ -95,12 +95,12 @@ func DialBackup() {
 		requestLiving <- 1
 		livingElevatorsMap := <-listOfLivingCh
 		for id, _ := range livingElevatorsMap {
+			time.Sleep(500 * time.Millisecond)
 			addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(id)+":29506")
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
-			//time.Sleep(1500 * time.Millisecond)
 			conn, err := net.DialTCP("tcp", nil, addr)
 			if err != nil {
 				fmt.Println(err)
@@ -266,6 +266,7 @@ func SendOrderToBackup(conn *net.TCPConn) {
 	for {
 		select {
 		case order := <-newOrderCh:
+			fmt.Println("Sending to backup")
 			reassignCh <- 1
 			_, err := conn.Write([]byte("n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
 			if err != nil {

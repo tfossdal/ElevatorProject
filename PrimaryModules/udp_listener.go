@@ -26,7 +26,7 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh cha
 		}
 		senderIP := recievedAddr.IP
 		recieved_message := strings.Split(string(buf[:n]), ",")
-		//fmt.Println(string(buf[:n]) + "yo") 					// For testing
+		fmt.Println("Read this from udp: ", string(buf[:n])) // For testing
 		if recieved_message[0] == "n" {
 			fmt.Println("test new order")
 			floor, _ := strconv.Atoi(recieved_message[1])
