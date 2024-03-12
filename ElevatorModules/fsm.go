@@ -15,6 +15,17 @@ var elevator el.Elevator = el.Elevator{Floor: -1, Dirn: io.MD_Stop, Requests: [i
 var OrderMtx = sync.Mutex{}
 var TimeStartedMoving time.Time
 
+var isUnableToMove = false
+
+func CheckMoveAvailability(){
+	for {
+		if time.Since(TimeStartedMoving) > 12*time.Second && elevator.State == el.Moving {
+			isUnableToMove = true
+		}
+		time.Sleep(100*time.Millisecond)
+	}
+}
+
 func PrintState() {
 	fmt.Println(el.StateToString(elevator.State))
 	fmt.Println("Direction: ", elevator.Dirn)
@@ -115,6 +126,7 @@ func Fsm_OnRequestButtonPress(btn_Floor int, btn_type io.ButtonType) {
 			elevator = Requests_clearAtCurrentFloor(elevator)
 			OrderMtx.Lock()
 		case el.Moving:
+			TimeStartedMoving = time.Now()
 			io.SetMotorDirection(elevator.Dirn)
 		case el.Idle:
 			break

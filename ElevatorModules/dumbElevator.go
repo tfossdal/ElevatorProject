@@ -30,11 +30,13 @@ func IAmAlive() {
 		break
 	}
 	for {
+		if !isUnableToMove {
 		state := strconv.Itoa(int(elevator.State))
 		direction := strconv.Itoa(int(elevator.Dirn))
 		floor := strconv.Itoa(int(elevator.Floor))
 		conn.Write([]byte("s," + state + "," + direction + "," + floor))
 		time.Sleep(100 * time.Millisecond)
+		}
 	}
 }
 
