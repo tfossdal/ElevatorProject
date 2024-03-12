@@ -285,8 +285,9 @@ func WaitForAck(message string, conn *net.TCPConn) bool {
 	buf := make([]byte, 1024)
 	fmt.Println("Message to ack: " + message)
 	n, err := conn.Read(buf)
+	fmt.Println("Read ack")
 	if err != nil {
-		fmt.Println("Failed to read acc")
+		fmt.Println("Failed to read ack")
 		return false
 	}
 	fmt.Println("Recieved ack message: " + string(buf[:n]))
