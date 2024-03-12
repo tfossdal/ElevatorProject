@@ -92,9 +92,11 @@ func UpdateListOfLivingElevators() {
 	checkLiving <- 1
 }
 
-func ReassignOrdersPeriodically(ticker *time.Ticker){
-	<- ticker.C
-	reassignCh <- 1
+func ReassignOrdersPeriodically(ticker *time.Ticker) {
+	for {
+		<-ticker.C
+		reassignCh <- 1
+	}
 }
 
 func DialBackup() {
