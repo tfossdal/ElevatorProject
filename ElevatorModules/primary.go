@@ -34,8 +34,6 @@ var printList = make(chan int)
 var newOrderCh = make(chan [3]int, 30)
 var clearOrderCh = make(chan [3]int, 100)
 var newStatesCh = make(chan [4]int, 30)
-var retrieveElevatorStates = make(chan int)
-var elevatorStates = make(chan map[int][3]int)
 var terminateBackupConnection = make(chan int, 10)
 var newlyAliveID = make(chan int)
 var transmittedCabOrderCh = make(chan [2]int, 4)
@@ -389,18 +387,13 @@ func UpdateCabRequests(elevatorID int, flr int, setType int) {
 
 func UpdateElevatorStates() {
 	for {
-		select {
-		case newMessage := <-newStatesCh:
-			elevatorID := newMessage[0]
-			states := [3]int{newMessage[1], newMessage[2], newMessage[3]}
-			elevatorStatesMtx.Lock()
-			elevatorStatesMap[elevatorID] = states
-			elevatorStatesMtx.Unlock()
-		case <-retrieveElevatorStates:
-			elevatorStatesMtx.Lock()
-			elevatorStates <- elevatorStatesMap
-			elevatorStatesMtx.Unlock()
-		}
+		newMessage := <-newStatesCh
+		elevatorID := newMessage[0]
+		states := [3]int{newMessage[1], newMessage[2], newMessage[3]}
+		elevatorStatesMtx.Lock()
+		elevatorStatesMap[elevatorID] = states
+		elevatorStatesMtx.Unlock()
+
 	}
 }
 
