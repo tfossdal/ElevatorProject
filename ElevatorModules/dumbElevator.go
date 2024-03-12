@@ -53,27 +53,6 @@ func CheckGoneOffline() {
 	go ListenForOtherPrimary()
 }
 
-// func waitForAckUDP(message string, conn *net.UDPConn) bool {
-// 	go readAckUDP(conn)
-// 	startTime := time.Now().Unix()
-// 	for {
-// 		select {
-// 		case ackMessage := <-ackCh:
-// 			return ackMessage == message
-// 		default:
-// 			if time.Now().Unix() > startTime+1 {
-// 				return false
-// 			}
-// 			time.Sleep(100 * time.Millisecond)
-// 		}
-// 	}
-// }
-
-// func readAckUDP(conn *net.UDPConn) {
-// 	buf := make([]byte, 1024)
-// 	n, _ := conn.Read(buf)
-// 	ackCh <- string(buf[:n])
-// }
 
 func SendButtonPressUDP(btn io.ButtonEvent) {
 	addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29503")

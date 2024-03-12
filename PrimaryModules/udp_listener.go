@@ -45,9 +45,7 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh cha
 		}
 		senderIP := recievedAddr.IP
 		recieved_message := strings.Split(string(buf[:n]), ",")
-		//fmt.Println("Read this from udp: ", string(buf[:n])) // For testing
 		if recieved_message[0] == "n" {
-			fmt.Println("test new order")
 			floor, _ := strconv.Atoi(recieved_message[1])
 			btn, _ := strconv.Atoi(recieved_message[2])
 			order := [3]int{int(senderIP[3]), floor, btn}
@@ -73,7 +71,6 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh cha
 			}
 		}
 		if recieved_message[0] == "c" {
-			fmt.Println("test clear order")
 			floor, _ := strconv.Atoi(recieved_message[1])
 			btn, _ := strconv.Atoi(recieved_message[2])
 			order := [3]int{int(senderIP[3]), floor, btn}
@@ -82,14 +79,7 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh cha
 		if err != nil {
 			fmt.Println("Failed to listen")
 		}
-		//fmt.Println(string(buf[:n])) 						//testing
-		//SenderNumber := fmt.Sprintf("%d", senderIP[3])	//testing
-		//fmt.Println(senderIP.String()) 					//testing
-		//fmt.Println(SenderNumber)
 		elevatorLives <- int(senderIP[3])
 	}
 }
 
-// func main() {
-// 	ListenUDP("29505")
-// }

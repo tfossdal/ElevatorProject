@@ -42,6 +42,7 @@ var transmittedCabOrderCh = make(chan [2]int, 4)
 var listOfLivingCh = make(chan map[int]time.Time, 10)
 var reassignCh = make(chan int, 5)
 var ackedMessageCh = make(chan string, 5)
+var ackedCabRetransmittMessageCh = make(chan string)
 var otherPrimaryID = 0
 
 type HRAElevState struct {
@@ -563,6 +564,30 @@ func sendCabAck(ackMessage string, conn *net.TCPConn) {
 	conn.Write([]byte(ackMessage))
 }
 
+func WaitForCabRetransmittAck(message string) bool {
+	startTime := time.Now().Unix()
+	for {
+		select {
+		case recievedAck := <-ackedCabRetransmittMessageCh:
+			return recievedAck == message
+		default:
+			if time.Now().Unix() > startTime+1 {
+				return false
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+}
+
+func RecieveCabRetransmittAck(conn *net.TCPConn) {
+	buf := make([]byte, 1024)
+	n, err := conn.Read(buf)
+	if err != nil {
+		fmt.Println("Failed to read, TCP cab recieve")
+	}
+	ackedCabMessageCh <- string(buf[:n])
+}
+
 func TCPCabOrderListener() {
 	addr, err := net.ResolveTCPAddr("tcp", ":29507")
 	if err != nil {
@@ -623,7 +648,7 @@ func TCPCabOrderSender() {
 		fmt.Println("Failed to listen")
 	}
 	for {
-		conn, err := listener.Accept()
+		conn, err := listener.AcceptTCP()
 		if err != nil {
 			fmt.Println("Failed to accept")
 		}
@@ -646,9 +671,16 @@ func TCPCabOrderSender() {
 		if stringToSend == "" {
 			stringToSend = ":"
 		}
-		_, err = conn.Write([]byte(stringToSend))
-		if err != nil {
-			fmt.Println("Failed to write, TCP cab transmit")
+		go RecieveCabRetransmittAck(conn)
+		for {
+			_, err = conn.Write([]byte(stringToSend))
+			if err != nil {
+				fmt.Println("Failed to write, TCP cab transmit")
+			}
+			if WaitForCabRetransmittAck(stringToSend) {
+				fmt.Println("RECIEVED CAB RETRANSMITT ACK")
+				break
+			}
 		}
 		conn.Close()
 	}

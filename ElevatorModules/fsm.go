@@ -95,7 +95,6 @@ func Fsm_onInitBetweenFloors() {
 	elevator.State = el.Moving
 }
 
-// func Fsm_OnNewOrder(btn_floor int, btn_type io.ButtonType) {
 func Fsm_OnRequestButtonPress(btn_Floor int, btn_type io.ButtonType) {
 	OrderMtx.Lock()
 	defer OrderMtx.Unlock()
@@ -139,9 +138,6 @@ func Fsm_OnRequestButtonPress(btn_Floor int, btn_type io.ButtonType) {
 		}
 	}
 	SetAllCabLights(elevator)
-	// if !online {
-	// 	SetAllLights(elevator)
-	// }
 }
 
 func Fsm_OnFloorArrival(newFloor int) {
@@ -153,19 +149,11 @@ func Fsm_OnFloorArrival(newFloor int) {
 
 	switch elevator.State {
 	case el.Moving:
-		fmt.Println("test1")
 		if Requests_shouldStop(elevator) != 0 {
-			fmt.Println("test2")
 			io.SetMotorDirection(io.MD_Stop)
-			fmt.Println("HELLO1")
 			io.SetDoorOpenLamp(true)
-			fmt.Println("HELLO2")
 			elevator = Requests_clearAtCurrentFloor(elevator)
-			fmt.Println("HELLO3")
 			Timer_start(elevator.Config.DoorOpenDuration_s)
-			// if !ConnectedToBackup {
-			// 	SetAllLights(elevator)
-			// }
 			SetAllCabLights(elevator)
 			elevator.State = el.DoorOpen
 		}
@@ -243,6 +231,7 @@ func TransmitCabOrders(primaryID int) {
 			fmt.Println(err)
 		}
 		if WaitForCabAck(stringToSend) {
+			fmt.Println("RECIEVED CAB ACK")
 			break
 		}
 	}
@@ -256,6 +245,10 @@ func RecieveAck(conn *net.TCPConn) {
 		fmt.Println("Failed to read, TCP cab recieve")
 	}
 	ackedCabMessageCh <- string(buf[:n])
+}
+
+func sendCabRetransmittAck(ackMessage string, conn *net.TCPConn) {
+	conn.Write([]byte(ackMessage))
 }
 
 func RecieveCabOrders(primaryID int) {
@@ -276,6 +269,7 @@ func RecieveCabOrders(primaryID int) {
 	OrderMtx.Lock()
 	buf := make([]byte, 1024)
 	n, err := conn.Read(buf)
+	go sendCabRetransmittAck(string(buf[:n]), conn)
 	if err != nil {
 		fmt.Println("Failed to read, TCP cab recieve")
 	}

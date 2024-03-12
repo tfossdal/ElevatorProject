@@ -13,9 +13,6 @@ func main() {
 
 	io.Init("localhost:15657", numFloors)
 
-	//var d elevio.MotorDirection = elevio.MD_Up
-	//elevio.SetMotorDirection(d)
-
 	drv_buttons := make(chan io.ButtonEvent)
 	drv_floors := make(chan int)
 	drv_obstr := make(chan bool)
@@ -34,7 +31,6 @@ func main() {
 		module.Fsm_onInitBetweenFloors()
 	}
 
-	//elev_init()
 	module.InitLights()
 	go module.IAmAlive()
 	go module.RecieveTurnOnOffLight()
@@ -49,21 +45,22 @@ func main() {
 				if module.PingInternet() == 0 {
 					module.Fsm_OnRequestButtonPress(a.Floor, a.Button)
 				} else {
-					fmt.Println("sending button press")
+					fmt.Println("sending button press, cab")
 					ElevatorModules.SendButtonPressUDP(a)
 					ElevatorModules.AddCabRequest(a.Floor, a.Button)
 				}
 			} else {
-				fmt.Println("sending button press")
+				fmt.Println("sending button press, hall")
 				ElevatorModules.SendButtonPressUDP(a)
 			}
 		case a := <-drv_floors:
 			fmt.Printf("%+v\n", a)
 			module.Fsm_OnFloorArrival(a)
 		case a := <-drv_obstr:
-			//Obstruction
 			fmt.Printf("%+v\n", a)
-			fmt.Println("OBSTRUUUUUUUCTING!!!!!!!!!!")
+			if a {
+				fmt.Println("OBSTRUUUUUUUCTING!!!!!!!!!!")
+			}
 			module.IsObstructed = a
 		}
 	}
