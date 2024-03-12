@@ -17,13 +17,13 @@ var TimeStartedMoving time.Time
 
 var isUnableToMove = false
 
-func CheckMoveAvailability(){
+func CheckMoveAvailability() {
 	for {
 		if time.Since(TimeStartedMoving) > 3*io.NumFloors*time.Second && elevator.State == el.Moving {
 			isUnableToMove = true
 			fmt.Println("Unable to move, plz send help")
 		}
-		time.Sleep(100*time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 

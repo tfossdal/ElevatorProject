@@ -96,7 +96,9 @@ func UpdateListOfLivingElevators() {
 func ReassignOrdersPeriodically(ticker *time.Ticker) {
 	for {
 		<-ticker.C
+		fmt.Println("Reassigning orders (periodic)")
 		reassignCh <- 1
+		fmt.Println("Reassigned orders (periodic)")
 	}
 }
 
@@ -275,7 +277,9 @@ func SendHallLightUpdate(ticker *time.Ticker) {
 		if PingInternet() == 0 {
 			return
 		}
+		fmt.Println("Taking mutex, locking")
 		hallRequestMtx.Lock()
+		fmt.Println("Took mutex, locked")
 		for flr := range hallRequests {
 			for btn := range hallRequests[flr] {
 				SendTurnOnOffLight([3]int{255, flr, btn}, hallRequests[flr][btn])

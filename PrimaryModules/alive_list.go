@@ -14,7 +14,7 @@ import (
 var livingElevatorMap = make(map[int]time.Time)
 
 func LivingElevatorHandler(elevatorLives, checkLiving, retrieveId, idOfLivingElev, printList, newlyAlive chan int, listOfLiving chan map[int]time.Time) {
-	timeout := 1 * time.Second
+	timeout := 4 * time.Second
 	for {
 		select {
 		case elevId := <-elevatorLives:
