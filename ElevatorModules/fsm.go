@@ -18,6 +18,8 @@ var TimeStartedMoving time.Time
 var IsUnableToMove = false
 var UanbleToMoveMtx = sync.Mutex{}
 
+var ackedCabMessageCh = make(chan string)
+
 func CheckMoveAvailability() {
 	for {
 		if time.Since(TimeStartedMoving) > 3*io.NumFloors*time.Second && elevator.State == el.Moving {
@@ -197,6 +199,21 @@ func Fsm_OnDoorTimeout() {
 	}
 }
 
+func WaitForCabAck(message string) bool {
+	startTime := time.Now().Unix()
+	for {
+		select {
+		case recievedAck := <-ackedCabMessageCh:
+			return recievedAck == message
+		default:
+			if time.Now().Unix() > startTime+1 {
+				return false
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+}
+
 func TransmitCabOrders(primaryID int) {
 	addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(primaryID)+":29507")
 	if err != nil {
@@ -205,8 +222,6 @@ func TransmitCabOrders(primaryID int) {
 	conn, err := net.DialTCP("tcp", nil, addr)
 	if err != nil {
 		fmt.Println("Failed to dial, send order")
-		conn.Close()
-		return
 	}
 	OrderMtx.Lock()
 	defer OrderMtx.Unlock()
@@ -221,11 +236,26 @@ func TransmitCabOrders(primaryID int) {
 		conn.Close()
 		return
 	}
-	_, err = conn.Write([]byte(stringToSend))
-	if err != nil {
-		fmt.Println(err)
+	go RecieveAck(conn)
+	for {
+		_, err = conn.Write([]byte(stringToSend))
+		if err != nil {
+			fmt.Println(err)
+		}
+		if WaitForCabAck(stringToSend) {
+			break
+		}
 	}
 	conn.Close()
+}
+
+func RecieveAck(conn *net.TCPConn) {
+	buf := make([]byte, 1024)
+	n, err := conn.Read(buf)
+	if err != nil {
+		fmt.Println("Failed to read, TCP cab recieve")
+	}
+	ackedCabMessageCh <- string(buf[:n])
 }
 
 func RecieveCabOrders(primaryID int) {

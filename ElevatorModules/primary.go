@@ -555,6 +555,10 @@ func ReassignRequests() {
 	}
 }
 
+func sendCabAck(ackMessage string, conn *net.TCPConn) {
+	conn.Write([]byte(ackMessage))
+}
+
 func TCPCabOrderListener() {
 	addr, err := net.ResolveTCPAddr("tcp", ":29507")
 	if err != nil {
@@ -569,7 +573,7 @@ func TCPCabOrderListener() {
 		if PingInternet() == 0 {
 			return
 		}
-		conn, err := listener.Accept()
+		conn, err := listener.AcceptTCP()
 		if err != nil {
 			fmt.Println("Failed to accept")
 
@@ -585,6 +589,7 @@ func TCPCabOrderListener() {
 			fmt.Println("Failed to read, TCP cab transmit")
 			break
 		}
+		go sendCabAck(string(buf[:n]), conn)
 		raw_recieved_message := strings.Split(string(buf[:n]), ":")
 		for i := range raw_recieved_message {
 			if raw_recieved_message[i] == "" {

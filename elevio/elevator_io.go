@@ -3,9 +3,9 @@ package elevio
 import (
 	"fmt"
 	"net"
+	"os/exec"
 	"sync"
 	"time"
-	"os/exec"
 )
 
 const _pollRate = 20 * time.Millisecond
@@ -50,13 +50,14 @@ func Init(addr string, numFloors int) {
 	var err error
 	_conn, err = net.Dial("tcp", addr)
 	if err != nil {
-		
+
 		cmd := exec.Command("gnome-terminal", "--", "elevatorserver")
 		cmd.Run()
 		time.Sleep(1 * time.Millisecond)
 		_conn, err = net.Dial("tcp", addr)
 		if err != nil {
-		panic(err.Error())}
+			panic(err.Error())
+		}
 	}
 	_initialized = true
 }
