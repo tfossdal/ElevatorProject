@@ -12,10 +12,6 @@ import (
 var IsObstructed = false
 
 func IAmAlive() {
-	fmt.Println(fmt.Sprint(elevator.State) + fmt.Sprint(elevator.Dirn) + fmt.Sprint(elevator.Floor))
-	state := strconv.Itoa(int(elevator.State))
-	direction := strconv.Itoa(int(elevator.Dirn))
-	floor := strconv.Itoa(int(elevator.Floor))
 	var conn = &net.UDPConn{}
 	for {
 		addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29503")
@@ -32,6 +28,9 @@ func IAmAlive() {
 		break
 	}
 	for {
+		state := strconv.Itoa(int(elevator.State))
+		direction := strconv.Itoa(int(elevator.Dirn))
+		floor := strconv.Itoa(int(elevator.Floor))
 		conn.Write([]byte("s," + state + "," + direction + "," + floor))
 		time.Sleep(100 * time.Millisecond)
 	}
