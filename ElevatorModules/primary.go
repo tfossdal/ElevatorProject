@@ -670,12 +670,14 @@ func TCPCabOrderSender() {
 		cabRequestMtx.Unlock()
 		if stringToSend == "" {
 			stringToSend = ":"
+			continue
 		}
 		go RecieveCabRetransmittAck(conn)
 		for {
 			_, err = conn.Write([]byte(stringToSend))
 			if err != nil {
 				fmt.Println("Failed to write, TCP cab transmit")
+				fmt.Println(err)
 			}
 			if WaitForCabRetransmittAck(stringToSend) {
 				fmt.Println("RECIEVED CAB RETRANSMITT ACK")
