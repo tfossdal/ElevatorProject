@@ -89,6 +89,7 @@ func SendButtonPressUDP(btn io.ButtonEvent) {
 	connAck, err := net.ListenUDP("udp4", addrAck)
 	if err != nil {
 		fmt.Println("Failed to listen, send order")
+		fmt.Println(err)
 		return
 	}
 	for {
@@ -102,6 +103,7 @@ func SendButtonPressUDP(btn io.ButtonEvent) {
 		}
 	}
 	conn.Close()
+	connAck.Close()
 }
 
 func ClearRequestUDP(btn io.ButtonEvent) {
