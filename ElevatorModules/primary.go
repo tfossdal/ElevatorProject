@@ -41,6 +41,7 @@ var newlyAliveID = make(chan int)
 var transmittedCabOrderCh = make(chan [2]int, 4)
 var listOfLivingCh = make(chan map[int]time.Time, 10)
 var reassignCh = make(chan int, 5)
+var ackedMessageCh = make(chan string, 5)
 var otherPrimaryID = 0
 
 type HRAElevState struct {
@@ -188,7 +189,10 @@ func BackupAliveListener(conn *net.TCPConn) {
 			return
 		}
 		buf := make([]byte, 1024)
-		_, err = conn.Read(buf)
+		n, err := conn.Read(buf)
+		if (strings.Split(string(buf[:n]), ","))[0] == "n" || (strings.Split(string(buf[:n]), ","))[0] == "c" {
+			ackedMessageCh <- string(buf[:n])
+		}
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("Backup Died")
@@ -281,17 +285,20 @@ func SendHallLightUpdate(ticker *time.Ticker) {
 	}
 }
 
-func WaitForAck(message string, conn *net.TCPConn) bool {
-	buf := make([]byte, 1024)
-	fmt.Println("Message to ack: " + message)
-	n, err := conn.Read(buf)
-	fmt.Println("Read ack")
-	if err != nil {
-		fmt.Println("Failed to read ack")
-		return false
+func WaitForAck(message string) bool {
+	startTime := time.Now().Unix()
+	for {
+		select {
+		case recievedAck := <-ackedMessageCh:
+			return recievedAck == message
+		default:
+			if time.Now().Unix() > startTime+2 {
+				return false
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
 	}
-	fmt.Println("Recieved ack message: " + string(buf[:n]))
-	return string(buf[:n]) == message
+
 }
 
 func SendOrderToBackup(conn *net.TCPConn) {
@@ -307,7 +314,7 @@ func SendOrderToBackup(conn *net.TCPConn) {
 					fmt.Print(err)
 					return
 				}
-				if WaitForAck(stringToSend, conn) {
+				if WaitForAck(stringToSend) {
 					break
 				}
 			}
@@ -325,7 +332,7 @@ func SendOrderToBackup(conn *net.TCPConn) {
 					fmt.Print(err)
 					return
 				}
-				if WaitForAck(stringToSend, conn) {
+				if WaitForAck(stringToSend) {
 					break
 				}
 			}
