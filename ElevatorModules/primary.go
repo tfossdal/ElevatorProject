@@ -97,6 +97,10 @@ func ReassignOrdersPeriodically(ticker *time.Ticker) {
 	for {
 		<-ticker.C
 		fmt.Println("Reassigning orders (periodic)")
+		if PingInternet() == 0 {
+			fmt.Println("No internet, not reassigning")
+			return
+		}
 		reassignCh <- 1
 		fmt.Println("Reassigned orders (periodic)")
 	}
