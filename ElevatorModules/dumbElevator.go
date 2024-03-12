@@ -12,6 +12,7 @@ import (
 var IsObstructed = false
 
 func IAmAlive() {
+	fmt.Println(fmt.Sprint(elevator.State) + fmt.Sprint(elevator.Dirn) + fmt.Sprint(elevator.Floor))
 	state := strconv.Itoa(int(elevator.State))
 	direction := strconv.Itoa(int(elevator.Dirn))
 	floor := strconv.Itoa(int(elevator.Floor))

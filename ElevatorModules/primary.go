@@ -27,7 +27,7 @@ var requestLiving = make(chan int, 5)
 var idOfLivingElev = make(chan int, 5)
 var printList = make(chan int)
 var newOrderCh = make(chan [3]int, 30)
-var clearOrderCh = make(chan [3]int, 30)
+var clearOrderCh = make(chan [3]int, 100)
 var newStatesCh = make(chan [4]int, 30)
 var retrieveElevatorStates = make(chan int)
 var elevatorStates = make(chan map[int][3]int)
@@ -76,8 +76,8 @@ func InitPrimary() {
 	go ReassignRequests()
 	go TCPCabOrderListener()
 	go TCPCabOrderSender()
-	sendHallLightsTicker := time.NewTicker(5 * time.Second)
-	go SendHallLightUpdate(sendHallLightsTicker)
+	//sendHallLightsTicker := time.NewTicker(5 * time.Second)
+	//go SendHallLightUpdate(sendHallLightsTicker)
 
 	for {
 		time.Sleep(500 * time.Millisecond)
@@ -90,12 +90,12 @@ func UpdateListOfLivingElevators() {
 }
 
 func DialBackup() {
-	time.Sleep(1500 * time.Millisecond) //WAY TOO LONG
+	time.Sleep(1500 * time.Millisecond)
 	for {
 		requestLiving <- 1
 		livingElevatorsMap := <-listOfLivingCh
 		for id, _ := range livingElevatorsMap {
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond) //Need sleep here, or else dial will spam too much
 			addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(id)+":29506")
 			if err != nil {
 				fmt.Println(err)
