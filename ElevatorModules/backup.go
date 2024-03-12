@@ -55,6 +55,13 @@ func AcceptPrimaryDial() (*net.TCPConn, *net.TCPAddr, *net.TCPListener) {
 	return conn, addr, listener
 }
 
+func SendAck(message string, conn *net.TCPConn) {
+	_, err := conn.Write([]byte(message))
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 func BackupRecieveFromPrimary(conn *net.TCPConn, listener *net.TCPListener) {
 	for {
 		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
@@ -67,6 +74,7 @@ func BackupRecieveFromPrimary(conn *net.TCPConn, listener *net.TCPListener) {
 			BackupTakeover(conn)
 			return
 		}
+		go SendAck(string(buf[:n]), conn)
 		raw_recieved_message := strings.Split(string(buf[:n]), ":")
 		for i := range raw_recieved_message {
 			if raw_recieved_message[i] == "" {
@@ -120,4 +128,3 @@ func BackupAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
 		time.Sleep(10 * time.Millisecond)
 	}
 }
-
