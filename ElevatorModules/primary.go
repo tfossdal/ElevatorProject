@@ -107,7 +107,7 @@ func DialBackup() {
 	for {
 		requestLiving <- 1
 		livingElevatorsMap := <-listOfLivingCh
-		for id, _ := range livingElevatorsMap {
+		for id := range livingElevatorsMap {
 			time.Sleep(500 * time.Millisecond) //Need sleep here, or else dial will spam too much
 			addr, err := net.ResolveTCPAddr("tcp", ConvertIDtoIP(id)+":29506")
 			if err != nil {
@@ -479,7 +479,7 @@ func ReassignRequests() {
 			HallRequests: [][2]bool{{false}, {false, false}, {false, false}, {false, false}},
 			States:       map[string]HRAElevState{},
 		}
-		for id, _ := range LivingElevators {
+		for id := range LivingElevators {
 			s := ""
 			elevatorStatesMtx.Lock()
 			if elevatorStatesMap[id][0] == 0 {

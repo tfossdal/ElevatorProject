@@ -28,7 +28,10 @@ func IAmAlive() {
 		break
 	}
 	for {
-		if !IsUnableToMove {
+		UanbleToMoveMtx.Lock()
+		localMovabiility := IsUnableToMove
+		UanbleToMoveMtx.Unlock()
+		if !localMovabiility {
 			state := strconv.Itoa(int(elevator.State))
 			direction := strconv.Itoa(int(elevator.Dirn))
 			floor := strconv.Itoa(int(elevator.Floor))

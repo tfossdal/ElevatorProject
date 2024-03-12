@@ -16,11 +16,14 @@ var OrderMtx = sync.Mutex{}
 var TimeStartedMoving time.Time
 
 var IsUnableToMove = false
+var UanbleToMoveMtx = sync.Mutex{}
 
 func CheckMoveAvailability() {
 	for {
 		if time.Since(TimeStartedMoving) > 3*io.NumFloors*time.Second && elevator.State == el.Moving {
+			UanbleToMoveMtx.Lock()
 			IsUnableToMove = true
+			UanbleToMoveMtx.Unlock()
 			fmt.Println("Unable to move, plz send help")
 		}
 		time.Sleep(100 * time.Millisecond)
@@ -142,7 +145,9 @@ func Fsm_OnRequestButtonPress(btn_Floor int, btn_type io.ButtonType) {
 func Fsm_OnFloorArrival(newFloor int) {
 	elevator.Floor = newFloor
 	io.SetFloorIndicator(elevator.Floor)
+	UanbleToMoveMtx.Lock()
 	IsUnableToMove = false
+	UanbleToMoveMtx.Unlock()
 
 	switch elevator.State {
 	case el.Moving:
