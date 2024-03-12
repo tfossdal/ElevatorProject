@@ -52,64 +52,45 @@ func CheckGoneOffline() {
 	go ListenForOtherPrimary()
 }
 
-func waitForAckUDP(message string, conn *net.UDPConn) bool {
-	go readAckUDP(conn)
-	startTime := time.Now().Unix()
-	for {
-		select {
-		case ackMessage := <-ackCh:
-			return ackMessage == message
-		default:
-			if time.Now().Unix() > startTime+1 {
-				return false
-			}
-			time.Sleep(100 * time.Millisecond)
-		}
-	}
-}
+// func waitForAckUDP(message string, conn *net.UDPConn) bool {
+// 	go readAckUDP(conn)
+// 	startTime := time.Now().Unix()
+// 	for {
+// 		select {
+// 		case ackMessage := <-ackCh:
+// 			return ackMessage == message
+// 		default:
+// 			if time.Now().Unix() > startTime+1 {
+// 				return false
+// 			}
+// 			time.Sleep(100 * time.Millisecond)
+// 		}
+// 	}
+// }
 
-func readAckUDP(conn *net.UDPConn) {
-	buf := make([]byte, 1024)
-	n, _ := conn.Read(buf)
-	ackCh <- string(buf[:n])
-}
+// func readAckUDP(conn *net.UDPConn) {
+// 	buf := make([]byte, 1024)
+// 	n, _ := conn.Read(buf)
+// 	ackCh <- string(buf[:n])
+// }
 
-func SendButtonPressUDP(btnCh chan io.ButtonEvent) {
-	for {
-		btn := <-btnCh
-		addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29503")
-		if err != nil {
-			fmt.Println("Failed to resolve, send order")
-		}
-		conn, err := net.DialUDP("udp4", nil, addr)
-		if err != nil {
-			fmt.Println("Failed to dial, send order")
-			return
-		}
-		addrAck, err := net.ResolveUDPAddr("udp4", ":29509")
-		if err != nil {
-			fmt.Println("Failed to resolve, ack order")
-		}
-		connAck, err := net.ListenUDP("udp4", addrAck)
-		if err != nil {
-			fmt.Println("Failed to listen, ack order")
-			fmt.Println(err)
-			return
-		}
-		for {
-			messageToSend := "n," + fmt.Sprint(btn.Floor) + "," + fmt.Sprint(btn.Button)
-			_, err = conn.Write([]byte(messageToSend))
-			if err != nil {
-				fmt.Println(err)
-				fmt.Println("Failed to write, send order")
-			}
-			if waitForAckUDP(messageToSend, connAck) {
-				break
-			}
-		}
-		conn.Close()
-		connAck.Close()
+func SendButtonPressUDP(btn io.ButtonEvent) {
+	addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29503")
+	if err != nil {
+		fmt.Println("Failed to resolve, send order")
 	}
+	conn, err := net.DialUDP("udp4", nil, addr)
+	if err != nil {
+		fmt.Println("Failed to dial, send order")
+		return
+	}
+	messageToSend := "n," + fmt.Sprint(btn.Floor) + "," + fmt.Sprint(btn.Button)
+	_, err = conn.Write([]byte(messageToSend))
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("Failed to write, send order")
+	}
+	conn.Close()
 }
 
 func ClearRequestUDP(btn io.ButtonEvent) {

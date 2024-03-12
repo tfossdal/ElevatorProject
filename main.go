@@ -7,8 +7,6 @@ import (
 	"fmt"
 )
 
-var ButtonUDPCh = make(chan io.ButtonEvent, 200)
-
 func main() {
 
 	numFloors := 4
@@ -43,7 +41,6 @@ func main() {
 	go ElevatorModules.RecieveOrderMatrix()
 	go module.Fsm_Obstructed()
 	go module.CheckMoveAvailability()
-	go module.SendButtonPressUDP(ButtonUDPCh)
 
 	for {
 		select {
@@ -53,23 +50,12 @@ func main() {
 					module.Fsm_OnRequestButtonPress(a.Floor, a.Button)
 				} else {
 					fmt.Println("sending button press")
-					select {
-					case ButtonUDPCh <- a:
-					default:
-						fmt.Println("ButtonUDPCh is full")
-					}
-
-					//ElevatorModules.SendButtonPressUDP(a)
+					ElevatorModules.SendButtonPressUDP(a)
 					ElevatorModules.AddCabRequest(a.Floor, a.Button)
 				}
 			} else {
 				fmt.Println("sending button press")
-				//ElevatorModules.SendButtonPressUDP(a)
-				select {
-				case ButtonUDPCh <- a:
-				default:
-					fmt.Println("ButtonUDPCh is full")
-				}
+				ElevatorModules.SendButtonPressUDP(a)
 			}
 		case a := <-drv_floors:
 			fmt.Printf("%+v\n", a)
