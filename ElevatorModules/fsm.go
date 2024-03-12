@@ -189,6 +189,7 @@ func Fsm_OnDoorTimeout() {
 			io.SetMotorDirection(elevator.Dirn)
 		case el.Moving:
 			io.SetDoorOpenLamp(false)
+			TimeStartedMoving = time.Now()
 			io.SetMotorDirection(elevator.Dirn)
 		}
 	default:
