@@ -242,7 +242,7 @@ func RecieveCabOrders(primaryID int) {
 	conn.Close()
 }
 
-func Fsm_Obstructed(){
+func Fsm_Obstructed() {
 	for {
 		if IsObstructed && elevator.State == el.DoorOpen {
 			Timer_start(elevator.Config.DoorOpenDuration_s)
