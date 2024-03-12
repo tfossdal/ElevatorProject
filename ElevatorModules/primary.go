@@ -11,12 +11,17 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
 var hallRequests = make([][]int, io.NumFloors)
 var cabRequestMap = make(map[int][io.NumFloors]int) //Format: {ID: {floor 0, ..., floor N-1}}
 var elevatorStatesMap = make(map[int][3]int)        //Format: {ID: {state, direction, floor}}
+
+var hallRequestMtx = sync.Mutex{}
+var cabRequestMtx = sync.Mutex{}
+var elevatorStatesMtx = sync.Mutex{}
 
 var ConnectedToBackup = false
 var backupTimeoutTime = 3
@@ -50,19 +55,15 @@ type HRAInput struct {
 	States       map[string]HRAElevState `json:"states"`
 }
 
-func DebugMaps() {
-	for key, value := range cabRequestMap {
-		fmt.Println(fmt.Sprint(key) + ":" + fmt.Sprint(value[0]) + "," + fmt.Sprint(value[1]) + "," + fmt.Sprint(value[2]) + "," + fmt.Sprint(value[3]))
-	}
-}
-
 func InitPrimaryMatrix() {
+	hallRequestMtx.Lock()
 	for i := 0; i < io.NumFloors; i++ {
 		hallRequests[i] = make([]int, io.NumButtons-1)
 		for j := 0; j < io.NumButtons-1; j++ {
 			hallRequests[i][j] = 0
 		}
 	}
+	hallRequestMtx.Unlock()
 }
 
 func InitPrimary() {
@@ -120,6 +121,7 @@ func DialBackup() {
 
 func sendDataToNewBackup(conn *net.TCPConn) {
 	fmt.Println("Sending data to new backup")
+	hallRequestMtx.Lock()
 	for i := range hallRequests {
 		for j := range hallRequests[i] {
 			if hallRequests[i][j] == 1 {
@@ -134,6 +136,8 @@ func sendDataToNewBackup(conn *net.TCPConn) {
 			}
 		}
 	}
+	hallRequestMtx.Unlock()
+	cabRequestMtx.Lock()
 	for k, v := range cabRequestMap {
 		for i := range v {
 			if v[i] == 1 {
@@ -148,6 +152,7 @@ func sendDataToNewBackup(conn *net.TCPConn) {
 			}
 		}
 	}
+	cabRequestMtx.Unlock()
 }
 
 func PrimaryAliveTCP(addr *net.TCPAddr, conn *net.TCPConn) {
@@ -254,11 +259,13 @@ func PrimaryAlive() {
 func SendHallLightUpdate(ticker *time.Ticker) {
 	for {
 		<-ticker.C
+		hallRequestMtx.Lock()
 		for flr := range hallRequests {
 			for btn := range hallRequests[flr] {
 				SendTurnOnOffLight([3]int{255, flr, btn}, hallRequests[flr][btn])
 			}
 		}
+		hallRequestMtx.Unlock()
 	}
 }
 
@@ -306,10 +313,13 @@ func SendOrderToBackup(conn *net.TCPConn) {
 }
 
 func UpdateHallRequests(btnType int, flr int, setType int) {
+	hallRequestMtx.Lock()
 	hallRequests[flr][btnType] = setType
+	hallRequestMtx.Unlock()
 }
 
 func UpdateCabRequests(elevatorID int, flr int, setType int) {
+	cabRequestMtx.Lock()
 	_, hasKey := cabRequestMap[elevatorID]
 	if hasKey {
 		cabRequests := cabRequestMap[elevatorID]
@@ -326,6 +336,7 @@ func UpdateCabRequests(elevatorID int, flr int, setType int) {
 		}
 		cabRequestMap[elevatorID] = cabRequests
 	}
+	cabRequestMtx.Unlock()
 }
 
 func UpdateElevatorStates() {
@@ -334,10 +345,13 @@ func UpdateElevatorStates() {
 		case newMessage := <-newStatesCh:
 			elevatorID := newMessage[0]
 			states := [3]int{newMessage[1], newMessage[2], newMessage[3]}
-
+			elevatorStatesMtx.Lock()
 			elevatorStatesMap[elevatorID] = states
+			elevatorStatesMtx.Unlock()
 		case <-retrieveElevatorStates:
+			elevatorStatesMtx.Lock()
 			elevatorStates <- elevatorStatesMap
+			elevatorStatesMtx.Unlock()
 		}
 	}
 }
@@ -345,6 +359,7 @@ func UpdateElevatorStates() {
 func FixNewElevatorLights() {
 	for {
 		id := <-newlyAliveID
+		hallRequestMtx.Lock()
 		for i := range hallRequests {
 			for j := range hallRequests[i] {
 				if hallRequests[i][j] == 1 {
@@ -353,11 +368,14 @@ func FixNewElevatorLights() {
 				}
 			}
 		}
+		hallRequestMtx.Unlock()
+		cabRequestMtx.Lock()
 		for i := range cabRequestMap[id] {
 			if cabRequestMap[id][i] == 1 {
 				SendTurnOnOffLight([3]int{id, i, 2}, 1)
 			}
 		}
+		cabRequestMtx.Unlock()
 	}
 }
 
@@ -420,6 +438,7 @@ func ReassignRequests() {
 		}
 		for id, _ := range LivingElevators {
 			s := ""
+			elevatorStatesMtx.Lock()
 			if elevatorStatesMap[id][0] == 0 {
 				s = "idle"
 			}
@@ -440,7 +459,9 @@ func ReassignRequests() {
 				d = "up"
 			}
 			f := elevatorStatesMap[id][2]
+			elevatorStatesMtx.Unlock()
 			boolCabRequests := [io.NumFloors]bool{}
+			cabRequestMtx.Lock()
 			for i := range cabRequestMap[id] {
 				if cabRequestMap[id][i] == 1 {
 					boolCabRequests[i] = true
@@ -448,8 +469,10 @@ func ReassignRequests() {
 					boolCabRequests[i] = false
 				}
 			}
+			cabRequestMtx.Unlock()
 			input.States[fmt.Sprint(id)] = HRAElevState{s, f, d, boolCabRequests}
 		}
+		hallRequestMtx.Lock()
 		for i := range hallRequests {
 			for j := range hallRequests[i] {
 				if hallRequests[i][j] == 1 {
@@ -459,6 +482,7 @@ func ReassignRequests() {
 				}
 			}
 		}
+		hallRequestMtx.Unlock()
 
 		jsonBytes, err := json.Marshal(input)
 		if err != nil {
@@ -559,12 +583,14 @@ func TCPCabOrderSender() {
 		var stringToSend = ""
 
 		fmt.Println("ID: " + fmt.Sprint(id))
+		cabRequestMtx.Lock()
 		fmt.Println(cabRequestMap[id])
 		for i := 0; i < io.NumFloors; i++ {
 			if cabRequestMap[id][i] == 1 {
 				stringToSend += fmt.Sprint(i) + ":"
 			}
 		}
+		cabRequestMtx.Unlock()
 		if stringToSend == "" {
 			stringToSend = ":"
 		}

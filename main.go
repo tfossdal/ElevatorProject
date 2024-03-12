@@ -67,7 +67,6 @@ func elev_init() {
 func main() {
 
 	numFloors := 4
-	
 
 	io.Init("localhost:15657", numFloors)
 
