@@ -7,6 +7,23 @@ import (
 	"strings"
 )
 
+func sendAckUDP(message string, senderIP net.IP, port string) {
+	fmt.Println(senderIP.String())
+	addr, err := net.ResolveUDPAddr("udp4", senderIP.String()+":29509")
+	if err != nil {
+		fmt.Println("Failed to resolve ack")
+	}
+	conn, err := net.DialUDP("udp4", nil, addr)
+	if err != nil {
+		fmt.Println("Failed to Dial")
+	}
+	defer conn.Close()
+	_, err = conn.Write([]byte(message))
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh chan [3]int, newStatesCh chan [4]int) {
 
 	addr, err := net.ResolveUDPAddr("udp4", ":"+port)
@@ -28,6 +45,7 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh cha
 		recieved_message := strings.Split(string(buf[:n]), ",")
 		//fmt.Println("Read this from udp: ", string(buf[:n])) // For testing
 		if recieved_message[0] == "n" {
+			go sendAckUDP(string(buf[:n]), senderIP, port)
 			fmt.Println("test new order")
 			floor, _ := strconv.Atoi(recieved_message[1])
 			btn, _ := strconv.Atoi(recieved_message[2])

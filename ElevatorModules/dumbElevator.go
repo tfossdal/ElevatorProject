@@ -84,17 +84,28 @@ func SendButtonPressUDP(btn io.ButtonEvent) {
 		fmt.Println("Failed to dial, send order")
 		return
 	}
+	addrAck, err := net.ResolveUDPAddr("udp4", ":29509")
+	if err != nil {
+		fmt.Println("Failed to resolve, send order")
+	}
+	connAck, err := net.ListenUDP("udp4", addrAck)
+	if err != nil {
+		fmt.Println("Failed to listen, send order")
+		fmt.Println(err)
+		return
+	}
 	for {
 		messageToSend := "n," + fmt.Sprint(btn.Floor) + "," + fmt.Sprint(btn.Button)
 		_, err = conn.Write([]byte(messageToSend))
 		if err != nil {
 			fmt.Println(err)
 		}
-		if waitForAckUDP(messageToSend, conn) {
+		if waitForAckUDP(messageToSend, connAck) {
 			break
 		}
 	}
 	conn.Close()
+	connAck.Close()
 }
 
 func ClearRequestUDP(btn io.ButtonEvent) {
