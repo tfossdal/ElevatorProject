@@ -268,7 +268,7 @@ func PrimaryAlive() {
 func SendHallLightUpdate(ticker *time.Ticker) {
 	for {
 		<-ticker.C
-		if PingInternet()==0{
+		if PingInternet() == 0 {
 			return
 		}
 		hallRequestMtx.Lock()
@@ -298,7 +298,8 @@ func SendOrderToBackup(conn *net.TCPConn) {
 				UpdateHallRequests(order[2], order[1], 1)
 			}
 			go SendTurnOnOffLight(order, 1)
-		case order := <-clearOrSendTurnOnOffLight.Write([]byte("c," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
+		case order := <-clearOrderCh:
+			_, err := conn.Write([]byte("c," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
 			if err != nil {
 				fmt.Print(err)
 				return
