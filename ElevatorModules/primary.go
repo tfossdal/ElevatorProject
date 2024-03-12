@@ -281,16 +281,33 @@ func SendHallLightUpdate(ticker *time.Ticker) {
 	}
 }
 
+func WaitForAck(message string, conn *net.TCPConn) bool {
+	buf := make([]byte, 1024)
+	n, err := conn.Read(buf)
+	if err != nil {
+		return false
+	}
+	fmt.Println("Message to ack: " + message)
+	fmt.Println("Recieved ack message: " + string(buf[:n]))
+	return string(buf[:n]) == message
+}
+
 func SendOrderToBackup(conn *net.TCPConn) {
 	for {
 		select {
 		case order := <-newOrderCh:
 			fmt.Println("Sending to backup")
 			reassignCh <- 1
-			_, err := conn.Write([]byte("n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
-			if err != nil {
-				fmt.Print(err)
-				return
+			stringToSend := "n," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"
+			for {
+				_, err := conn.Write([]byte(stringToSend))
+				if err != nil {
+					fmt.Print(err)
+					return
+				}
+				if WaitForAck(stringToSend, conn) {
+					break
+				}
 			}
 			if order[2] == 2 {
 				UpdateCabRequests(order[0], order[1], 1)
@@ -299,10 +316,16 @@ func SendOrderToBackup(conn *net.TCPConn) {
 			}
 			go SendTurnOnOffLight(order, 1)
 		case order := <-clearOrderCh:
-			_, err := conn.Write([]byte("c," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"))
-			if err != nil {
-				fmt.Print(err)
-				return
+			stringToSend := "c," + fmt.Sprint(order[0]) + "," + fmt.Sprint(order[1]) + "," + fmt.Sprint(order[2]) + ",:"
+			for {
+				_, err := conn.Write([]byte(stringToSend))
+				if err != nil {
+					fmt.Print(err)
+					return
+				}
+				if WaitForAck(stringToSend, conn) {
+					break
+				}
 			}
 			if order[2] == 2 {
 				UpdateCabRequests(order[0], order[1], 0)
