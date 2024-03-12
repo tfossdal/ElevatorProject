@@ -79,6 +79,8 @@ func InitPrimary() {
 	go TCPCabOrderSender()
 	sendHallLightsTicker := time.NewTicker(5 * time.Second)
 	go SendHallLightUpdate(sendHallLightsTicker)
+	reassignOrdersPeriodicallyTicker := time.NewTicker(5 * time.Second)
+	go ReassignOrdersPeriodically(reassignOrdersPeriodicallyTicker)
 
 	for {
 		time.Sleep(500 * time.Millisecond)
@@ -88,6 +90,11 @@ func InitPrimary() {
 
 func UpdateListOfLivingElevators() {
 	checkLiving <- 1
+}
+
+func ReassignOrdersPeriodically(ticker *time.Ticker){
+	<- ticker.C
+	reassignCh <- 1
 }
 
 func DialBackup() {
