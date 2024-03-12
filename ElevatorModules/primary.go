@@ -251,11 +251,11 @@ func PrimaryAlive() {
 	}
 }
 
-func SendHallLightUpdate(ticker *time.Ticker){
+func SendHallLightUpdate(ticker *time.Ticker) {
 	for {
-		<- ticker.C
+		<-ticker.C
 		for flr := range hallRequests {
-			for btn := range hallRequests {
+			for btn := range hallRequests[flr] {
 				SendTurnOnOffLight([3]int{255, flr, btn}, hallRequests[flr][btn])
 			}
 		}
@@ -341,7 +341,6 @@ func UpdateElevatorStates() {
 	}
 }
 
-
 func FixNewElevatorLights() {
 	for {
 		id := <-newlyAliveID
@@ -416,8 +415,7 @@ func ReassignRequests() {
 
 		input := HRAInput{
 			HallRequests: [][2]bool{{false}, {false, false}, {false, false}, {false, false}},
-			States:       map[string]HRAElevState{
-			},
+			States:       map[string]HRAElevState{},
 		}
 		for id, _ := range LivingElevators {
 			s := ""
