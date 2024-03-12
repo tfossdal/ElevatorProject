@@ -48,6 +48,12 @@ func CheckGoneOffline() {
 	go ListenForOtherPrimary()
 }
 
+func waitForAckUDP(message string, conn *net.UDPConn) {
+	buf := make([]byte, 1024)
+	n, _ := conn.Read(buf)
+	recievedMessage := string(buf[:n])
+}
+
 func SendButtonPressUDP(btn io.ButtonEvent) {
 	addr, err := net.ResolveUDPAddr("udp4", "10.100.23.255:29503")
 	if err != nil {
