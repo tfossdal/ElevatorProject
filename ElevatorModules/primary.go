@@ -283,11 +283,12 @@ func SendHallLightUpdate(ticker *time.Ticker) {
 
 func WaitForAck(message string, conn *net.TCPConn) bool {
 	buf := make([]byte, 1024)
+	fmt.Println("Message to ack: " + message)
 	n, err := conn.Read(buf)
 	if err != nil {
+		fmt.Println("Failed to read acc")
 		return false
 	}
-	fmt.Println("Message to ack: " + message)
 	fmt.Println("Recieved ack message: " + string(buf[:n]))
 	return string(buf[:n]) == message
 }

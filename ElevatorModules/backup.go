@@ -74,7 +74,6 @@ func BackupRecieveFromPrimary(conn *net.TCPConn, listener *net.TCPListener) {
 			BackupTakeover(conn)
 			return
 		}
-		go SendAck(string(buf[:n]), conn)
 		raw_recieved_message := strings.Split(string(buf[:n]), ":")
 		for i := range raw_recieved_message {
 			if raw_recieved_message[i] == "" {
@@ -83,6 +82,7 @@ func BackupRecieveFromPrimary(conn *net.TCPConn, listener *net.TCPListener) {
 			recieved_message := strings.Split(raw_recieved_message[i], ",")
 
 			if recieved_message[0] == "n" {
+				go SendAck(string(buf[:n]), conn)
 				btn, err := strconv.Atoi(recieved_message[3])
 				if err != nil {
 					panic(err)
@@ -97,6 +97,7 @@ func BackupRecieveFromPrimary(conn *net.TCPConn, listener *net.TCPListener) {
 				continue
 			}
 			if recieved_message[0] == "c" {
+				go SendAck(string(buf[:n]), conn)
 				btn, err := strconv.Atoi(recieved_message[3])
 				if err != nil {
 					panic(err)
