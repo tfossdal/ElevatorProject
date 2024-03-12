@@ -58,10 +58,8 @@ func main() {
 				ElevatorModules.SendButtonPressUDP(a)
 			}
 		case a := <-drv_floors:
-			fmt.Printf("%+v\n", a)
 			module.Fsm_OnFloorArrival(a)
 		case a := <-drv_obstr:
-			fmt.Printf("%+v\n", a)
 			module.IsObstructed = a
 		}
 	}
