@@ -32,7 +32,7 @@
     - floor (0 - m-1)
     - button (0=up, 1=down, 2=cab)
 ## Packetloss command
-sudo ./packetloss -p 29501,29502,29503,29504,29505.29506,29507,29508 -r 0.25
+sudo ./packetloss -p 29501,29502,29503,29504,29505,29506,29507,29508 -r 0.25
 sudo ./packetloss -f
 
 ## TODO

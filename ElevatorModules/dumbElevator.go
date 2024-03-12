@@ -35,8 +35,6 @@ func IAmAlive() {
 			state := strconv.Itoa(int(elevator.State))
 			direction := strconv.Itoa(int(elevator.Dirn))
 			floor := strconv.Itoa(int(elevator.Floor))
-			fmt.Print("I am alive")
-			fmt.Println("Sending: s," + state + "," + direction + "," + floor)
 			conn.Write([]byte("s," + state + "," + direction + "," + floor))
 			time.Sleep(20 * time.Millisecond)
 		}

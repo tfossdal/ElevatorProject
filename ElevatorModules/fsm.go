@@ -217,6 +217,8 @@ func TransmitCabOrders(primaryID int) {
 	}
 	if stringToSend == "" {
 		stringToSend = ":"
+		conn.Close()
+		return
 	}
 	_, err = conn.Write([]byte(stringToSend))
 	if err != nil {
