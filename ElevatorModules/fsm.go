@@ -20,7 +20,8 @@ var isUnableToMove = false
 func CheckMoveAvailability(){
 	for {
 		if time.Since(TimeStartedMoving) > 3*io.NumFloors*time.Second && elevator.State == el.Moving {
-			isUnableToMove = true 
+			isUnableToMove = true
+			fmt.Println("Unable to move, plz send help")
 		}
 		time.Sleep(100*time.Millisecond)
 	}

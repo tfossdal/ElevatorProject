@@ -7,6 +7,8 @@ import (
 	"fmt"
 )
 
+var ButtonUDPCh = make(chan io.ButtonEvent, 200)
+
 func main() {
 
 	numFloors := 4
@@ -50,12 +52,14 @@ func main() {
 					module.Fsm_OnRequestButtonPress(a.Floor, a.Button)
 				} else {
 					fmt.Println("sending button press")
-					ElevatorModules.SendButtonPressUDP(a)
+					ButtonUDPCh <- a
+					//ElevatorModules.SendButtonPressUDP(a)
 					ElevatorModules.AddCabRequest(a.Floor, a.Button)
 				}
 			} else {
 				fmt.Println("sending button press")
-				ElevatorModules.SendButtonPressUDP(a)
+				//ElevatorModules.SendButtonPressUDP(a)
+				ButtonUDPCh <- a
 			}
 		case a := <-drv_floors:
 			fmt.Printf("%+v\n", a)
