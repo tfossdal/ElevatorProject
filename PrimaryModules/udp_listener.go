@@ -9,7 +9,7 @@ import (
 
 func sendAckUDP(message string, senderIP net.IP, port string) {
 	fmt.Println(senderIP.String())
-	addr, err := net.ResolveUDPAddr("udp4", senderIP.String()+":"+port)
+	addr, err := net.ResolveUDPAddr("udp4", senderIP.String()+":29509")
 	if err != nil {
 		fmt.Println("Failed to resolve ack")
 	}

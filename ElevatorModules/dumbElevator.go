@@ -50,8 +50,8 @@ func CheckGoneOffline() {
 	go ListenForOtherPrimary()
 }
 
-func waitForAckUDP(message string, conn *net.UDPConn) bool {
-	go readAckUDP(conn)
+func waitForAckUDP(message string) bool {
+	go readAckUDP()
 	startTime := time.Now().Unix()
 	for {
 		select {
@@ -66,7 +66,16 @@ func waitForAckUDP(message string, conn *net.UDPConn) bool {
 	}
 }
 
-func readAckUDP(conn *net.UDPConn) {
+func readAckUDP() {
+	addr, err := net.ResolveUDPAddr("udp4", ":29509")
+	if err != nil {
+		fmt.Println("Failed to resolve, send order")
+	}
+	conn, err := net.ListenUDP("udp4", addr)
+	if err != nil {
+		fmt.Println("Failed to listen, send order")
+		return
+	}
 	buf := make([]byte, 1024)
 	n, _ := conn.Read(buf)
 	ackCh <- string(buf[:n])
@@ -88,7 +97,7 @@ func SendButtonPressUDP(btn io.ButtonEvent) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		if waitForAckUDP(messageToSend, conn) {
+		if waitForAckUDP(messageToSend) {
 			break
 		}
 	}
