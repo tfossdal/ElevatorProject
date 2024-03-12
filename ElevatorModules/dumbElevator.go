@@ -10,6 +10,8 @@ import (
 )
 
 var IsObstructed = false
+var ackTimerCh = make(chan int)
+var ackCh = make(chan string)
 
 func IAmAlive() {
 	var conn = &net.UDPConn{}
@@ -48,15 +50,26 @@ func CheckGoneOffline() {
 	go ListenForOtherPrimary()
 }
 
-func waitForAckUDP(message string, conn *net.UDPConn) {
-	buf := make([]byte, 1024)
-	n, _ := conn.Read(buf)
-	recievedMessage := string(buf[:n])
+func waitForAckUDP(message string, conn *net.UDPConn) bool {
+	go readAckUDP(conn)
+	startTime := time.Now().Unix()
+	for {
+		select {
+		case ackMessage := <-ackCh:
+			return ackMessage == message
+		default:
+			if time.Now().Unix() > startTime+1 {
+				return false
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
 }
 
-func ackTimer(timeLimit int){
-	startTime := time.Now().Unix()
-	for
+func readAckUDP(conn *net.UDPConn) {
+	buf := make([]byte, 1024)
+	n, _ := conn.Read(buf)
+	ackCh <- string(buf[:n])
 }
 
 func SendButtonPressUDP(btn io.ButtonEvent) {
@@ -69,9 +82,15 @@ func SendButtonPressUDP(btn io.ButtonEvent) {
 		fmt.Println("Failed to dial, send order")
 		return
 	}
-	_, err = conn.Write([]byte("n," + fmt.Sprint(btn.Floor) + "," + fmt.Sprint(btn.Button)))
-	if err != nil {
-		fmt.Println(err)
+	for {
+		messageToSend := "n," + fmt.Sprint(btn.Floor) + "," + fmt.Sprint(btn.Button)
+		_, err = conn.Write([]byte(messageToSend))
+		if err != nil {
+			fmt.Println(err)
+		}
+		if waitForAckUDP(messageToSend, conn) {
+			break
+		}
 	}
 	conn.Close()
 }
