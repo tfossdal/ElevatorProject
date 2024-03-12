@@ -7,8 +7,6 @@ import (
 	"strings"
 )
 
-
-
 func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh chan [3]int, newStatesCh chan [4]int) {
 
 	addr, err := net.ResolveUDPAddr("udp4", ":"+port)
@@ -54,7 +52,11 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh cha
 			floor, _ := strconv.Atoi(recieved_message[1])
 			btn, _ := strconv.Atoi(recieved_message[2])
 			order := [3]int{int(senderIP[3]), floor, btn}
-			clearOrderCh <- order
+			select {
+			case clearOrderCh <- order:
+			default:
+				fmt.Println("New clear not accepted, buffer full")
+			}
 		}
 		if err != nil {
 			fmt.Println("Failed to listen")
@@ -62,4 +64,3 @@ func ListenUDP(port string, elevatorLives chan int, newOrderCh, clearOrderCh cha
 		elevatorLives <- int(senderIP[3])
 	}
 }
-
