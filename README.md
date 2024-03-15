@@ -1,7 +1,5 @@
 # Elevator Project for TTK4145
 
-
-
 ## Port list (starts with 295##)
 - 01 - Primary alive
 - 02 - Backup alive
@@ -34,3 +32,6 @@
 ## Packetloss command
 sudo ./packetloss -p 29501,29502,29503,29504,29505,29506,29507,29508 -r 0.25
 sudo ./packetloss -f
+
+## How to run programme
+- Use command 'go run main.go' in terminal to run
